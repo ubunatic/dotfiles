@@ -31,8 +31,8 @@ $HOMEBREW_PREFIX/opt/libpq/bin
 $APPS/wrapped/bin
 "
 
-for p in $PATH_PATHS; do
-    if test -d
+for p in $(echo $PATH_PATHS); do
+    if test -d "$p"
     then export PATH="$p:$PATH"
     fi
 done
