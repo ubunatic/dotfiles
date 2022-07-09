@@ -1,4 +1,8 @@
 # Dotfiles
 
-These are my [Dotfiles](https://wiki.archlinux.org/title/Dotfiles).
-Feel free to copy.
+These are my personal [Dotfiles](https://wiki.archlinux.org/title/Dotfiles).
+
+No warranties!
+
+## License
+GPL-v3.0 and later. See the [LICENSE](LICENSE) for you rights and obligations.
