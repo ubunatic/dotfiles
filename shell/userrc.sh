@@ -12,4 +12,5 @@ source $DOTFILES/shell/py.sh
 source $DOTFILES/shell/go.sh
 source $DOTFILES/shell/gcloud.sh
 source $DOTFILES/shell/multipass.sh
+source $DOTFILES/shell/prompt.sh
 source $DOTFILES/shell/test.sh         # test.sh should be last to allow for autotesting

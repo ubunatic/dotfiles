@@ -20,11 +20,20 @@ if test -e "$DOTFILES"
 then source $DOTFILES/shell/userrc.sh
 fi
 
-# add private vars here (anywhere outside of the public dotfiles)
+# add private vars here (outside of the system or default dotfiles)
 PRIVATE_SERVER="my-server.com"
 PRIVATE_ACCOUNT="my-account@my-server.com"
-
 ```
+
+Source this `.userrc` in your `.profile`.
+
+## Features
+* `starship` prompt auto-setup
+* `gcloud` wrappers to simplify managing GCP resources
+* `git` wrappers to simplify complex tasks
+* detect and activate default Python `.venv`
+* logging functions (used by other features)
+* ZSH and BASH compatibility
 
 ## Development
 
@@ -42,4 +51,4 @@ Desktop environment startup scripts do not like if sourced scripts behave badly.
 * Do not `echo` (or `log`, `err`, `dbg`) anything during the `source` phase.
 * Do not fail during the `source` phase.
 * Do not use DOTFILES_AUTOTEST=1 in your `$HOME/.userrc`.
-* Running the tests always yields exit code `0` for now (in case missed hint #3).
+* Running the tests always yields exit code `0` for now; check output for errors!

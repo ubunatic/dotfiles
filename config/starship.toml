@@ -1,0 +1,11 @@
+# config for https://starship.rs
+# also see ../shell/prompt.sh
+
+[python]
+# only using one venv, no need to tag versions, etc.
+# see here for more format options https://starship.rs/config/#python
+format = 'via $symbol'
+
+[gcloud]
+symbol = '⬣'
+format = 'on [$symbol:$account]($style)'
