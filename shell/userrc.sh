@@ -7,6 +7,7 @@
 source $DOTFILES/shell/environment.sh  # load this first, to setup basic file location info
 source $DOTFILES/shell/common.sh       # load this second to load logging funcs needed by other scripts
 source $DOTFILES/shell/aliases.sh
+source $DOTFILES/shell/system.sh
 source $DOTFILES/shell/git.sh
 source $DOTFILES/shell/py.sh
 source $DOTFILES/shell/go.sh
