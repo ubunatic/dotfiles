@@ -6,6 +6,10 @@ export APPS_UTILS="${APPS_UTILS:-$APPS}"
 export SYSTEM_APPS="${SYSTEM_APPS:-$HOME/Apps}"
 export SYSTEM_APPS_UTILS="${SYSTEM_APPS_UTILS:-$SYSTEM_APPS}"
 
+if test -z "$SYSTEM_UNAME"
+then export SYSTEM_UNAME="$(uname 2> /dev/null || true)"
+fi
+
 test_env() {
     log "ensuring that APPS dirs are defined"
     local err=
