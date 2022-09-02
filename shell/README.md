@@ -16,7 +16,7 @@ Here is an example `.userrc`.
 ```bash
 # import public dotfiles
 export DOTFILES=$HOME/dotfiles
-if test -e "$DOTFILES"
+if test -e "$DOTFILES/shell//userrc.sh"
 then source $DOTFILES/shell/userrc.sh
 fi
 
