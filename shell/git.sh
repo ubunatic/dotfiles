@@ -46,3 +46,36 @@ for line in sys.stdin:
     print(header)
 '
 }
+
+export GIT_PRIVATE_EMAIL=""
+export GIT_CORPORATE_EMAIL=""
+gitmail_indicator() {
+    local mail="$(git config user.email)"
+    case "$mail" in
+        "")                     echo "∅" ;;
+        "$GIT_CORPORATE_EMAIL") echo "corp" ;;
+        "$GIT_PRIVATE_EMAIL")   echo "priv" ;;
+        *gmail.com)             echo "gmail" ;;
+        *github.com)            echo "ghub" ;;
+        *codeberg.org)          echo "berg" ;;
+        *)                      echo "$mail" ;;
+    esac
+}
+
+gitmail_domain() {
+    git config user.email | grep -o '[a-z0-9_-]*\.[a-z0-1]*$'
+}
+
+gitmail() {
+    echo -n "local:  "; git config user.email
+    echo -n "global: "; git config --global user.email
+}
+
+gitmail_switch() {
+    case "$(git config --global user.email)" in
+    "$GIT_CORPORATE_EMAIL") git config --global user.email "$GIT_PRIVATE_EMAIL" ;;
+    "$GIT_PRIVATE_EMAIL")   git config --global user.email "$GIT_CORPORATE_EMAIL" ;;
+    *) error "failed to change gitmail" ;;
+    esac
+    gitmail
+}

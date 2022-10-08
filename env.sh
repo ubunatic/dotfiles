@@ -29,6 +29,10 @@ PATH_PATHS="
 $HOMEBREW_PREFIX/opt/swift/bin
 $HOMEBREW_PREFIX/opt/libpq/bin
 $APPS/wrapped/bin
+$APPS/bin
+$HOME/bin
+$APPS/platform-tools
+$HOME/platform-tools
 "
 
 for p in $(echo $PATH_PATHS); do
