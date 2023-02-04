@@ -1,7 +1,7 @@
 # Go Setup
 # ========
 
-if test -z "$GOPATH" && test -d ~/go/bin
+if test -z "$GOPATH" && test -d $HOME/go/bin
 then
     export GOPATH=$HOME/go
     export PATH=$PATH:$GOPATH/bin

@@ -19,9 +19,9 @@ test_shells
 
 test_shells() {
     log "testing bash"
-    DOTFILES_AUTOTEST= bash -c "source $HOME/.userrc"
+    DOTFILES_AUTOTEST= bash -c "source '$DOTFILES/shell/userrc.sh'"
     log "testing zsh"
-    DOTFILES_AUTOTEST= zsh -c "source $HOME/.userrc"
+    DOTFILES_AUTOTEST= zsh -c "source '$DOTFILES/shell/userrc.sh'"
 }
 
 test_dotfiles() {

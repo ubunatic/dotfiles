@@ -1,5 +1,6 @@
 # Multipass Experiments
 # =====================
+# last played with in Q1/2022
 
 # Allow to connect to multipass with X support.
 # You must copy the multipass rsa key from Application Support or similar
