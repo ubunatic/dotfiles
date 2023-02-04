@@ -186,7 +186,7 @@
             }
         ],
         "target_uinput": "keyboard",
-        "output_symbol": "key_up(Control_L)\n.hold_keys(Control_L, x)\n.hold()\n.key_down(Control_L)",
+        "output_symbol": "Control_L + x",
         "mapping_type": "key_macro"
     },
     {
@@ -932,7 +932,7 @@
             }
         ],
         "target_uinput": "keyboard",
-        "output_symbol": "KEY_EURO",
+        "output_symbol": "ISO_Level3_Shift + e",
         "mapping_type": "key_macro"
     },
     {
