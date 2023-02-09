@@ -12,6 +12,12 @@ dbg() { echo -n "DBG: " 1>&2; echo "$@" 1>&2; }
 ff() { find . -name "$@"; }
 fz() { find . -name "*$@*"; }
 
+ask() {
+  echo -n "$@"
+  echo -n " (y/N): "
+  read answer && test "$answer" = "y"
+}
+
 alias error=err
 alias debug=dbg
 alias log=inf

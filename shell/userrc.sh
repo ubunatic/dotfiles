@@ -8,12 +8,14 @@ if test -e "$DOTFILES"; then
 source "$DOTFILES/shell/environment.sh"  # load this first, to setup basic file location info
 source "$DOTFILES/shell/common.sh"       # load this second to load logging funcs needed by other scripts
 source "$DOTFILES/shell/aliases.sh"
+source "$DOTFILES/shell/editor.sh"
 source "$DOTFILES/shell/system.sh"
 source "$DOTFILES/shell/git.sh"
 source "$DOTFILES/shell/py.sh"
 source "$DOTFILES/shell/go.sh"
 source "$DOTFILES/shell/gcloud.sh"
 source "$DOTFILES/shell/starship.sh"
+source "$DOTFILES/shell/efi.sh"
 source "$DOTFILES/shell/test.sh"         # test.sh should be last to allow for autotesting
 fi
 
