@@ -7,7 +7,11 @@
 
 err() { echo -n "ERR: " 1>&2; echo "$@" 1>&2; }
 inf() { echo -n "INF: " 1>&2; echo "$@" 1>&2; }
-dbg() { echo -n "DBG: " 1>&2; echo "$@" 1>&2; }
+dbg() {
+  if test -n "$DEBUG"
+  then echo -n "DBG: " 1>&2; echo "$@" 1>&2;
+  fi
+}
 
 ff() { find . -name "$@"; }
 fz() { find . -name "*$@*"; }

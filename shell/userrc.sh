@@ -7,6 +7,7 @@
 if test -e "$DOTFILES"; then
 source "$DOTFILES/shell/environment.sh"  # load this first, to setup basic file location info
 source "$DOTFILES/shell/common.sh"       # load this second to load logging funcs needed by other scripts
+source "$DOTFILES/shell/config.sh"
 source "$DOTFILES/shell/aliases.sh"
 source "$DOTFILES/shell/editor.sh"
 source "$DOTFILES/shell/system.sh"
