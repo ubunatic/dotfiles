@@ -675,29 +675,6 @@
             },
             {
                 "type": 1,
-                "code": 125,
-                "origin_hash": "adecd042929586693ad913af04d3997d"
-            },
-            {
-                "type": 1,
-                "code": 16,
-                "origin_hash": "adecd042929586693ad913af04d3997d"
-            }
-        ],
-        "target_uinput": "keyboard",
-        "output_symbol": "key_up(Control_L)\n.hold(KEY_SLEEP)",
-        "name": "Alt L + Super L + q -> Sleep",
-        "mapping_type": "key_macro"
-    },
-    {
-        "input_combination": [
-            {
-                "type": 1,
-                "code": 56,
-                "origin_hash": "adecd042929586693ad913af04d3997d"
-            },
-            {
-                "type": 1,
                 "code": 42,
                 "origin_hash": "adecd042929586693ad913af04d3997d"
             },
@@ -966,6 +943,63 @@
         "target_uinput": "keyboard",
         "output_symbol": "Super_L + KEY_F11",
         "name": "Super L + Control L + f (Super + F11, fullscreen toggle)",
+        "mapping_type": "key_macro"
+    },
+    {
+        "input_combination": [
+            {
+                "type": 1,
+                "code": 125,
+                "origin_hash": "adecd042929586693ad913af04d3997d"
+            },
+            {
+                "type": 1,
+                "code": 56,
+                "origin_hash": "adecd042929586693ad913af04d3997d"
+            },
+            {
+                "type": 1,
+                "code": 16,
+                "origin_hash": "adecd042929586693ad913af04d3997d"
+            }
+        ],
+        "target_uinput": "keyboard",
+        "output_symbol": "key_up(Control_L)\n.key_up(ISO_Level3_Shift)\n.key_up(Alt_L)\n.k(KEY_SLEEP)",
+        "name": "Super L + Alt L + q -> Sleep (disable all modifiers)",
+        "mapping_type": "key_macro"
+    },
+    {
+        "input_combination": [
+            {
+                "type": 1,
+                "code": 56,
+                "origin_hash": "adecd042929586693ad913af04d3997d"
+            },
+            {
+                "type": 1,
+                "code": 105,
+                "origin_hash": "adecd042929586693ad913af04d3997d"
+            }
+        ],
+        "target_uinput": "keyboard",
+        "output_symbol": "key_up(Super_L)\n.key_up(Control_L)\n.hold_keys(Alt_L, Left)",
+        "mapping_type": "key_macro"
+    },
+    {
+        "input_combination": [
+            {
+                "type": 1,
+                "code": 56,
+                "origin_hash": "adecd042929586693ad913af04d3997d"
+            },
+            {
+                "type": 1,
+                "code": 106,
+                "origin_hash": "adecd042929586693ad913af04d3997d"
+            }
+        ],
+        "target_uinput": "keyboard",
+        "output_symbol": "key_up(Super_L)\n.key_up(Control_L)\n.hold_keys(Alt_L, Right)",
         "mapping_type": "key_macro"
     }
 ]
