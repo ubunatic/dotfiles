@@ -15,6 +15,7 @@ test_logging
 test_env
 test_go
 test_shells
+test_gomake
 "
 
 test_shells() {

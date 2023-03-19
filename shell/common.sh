@@ -28,7 +28,7 @@ alias log=inf
 
 test_logging() {
     log "testing log command via their aliases"
-    error "ERROR Test" &&
+    error "ERROR Test (this ERR log is expected)" &&
     debug "DEBUG Test" &&
     log "LOG Test"
 }

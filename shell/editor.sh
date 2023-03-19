@@ -1,3 +1,3 @@
-if type -w nvim > /dev/null;
+if type -a nvim > /dev/null;
 then alias vim=nvim
 fi
