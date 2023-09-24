@@ -14,21 +14,28 @@ test_find
 test_logging
 test_env
 test_go
-test_shells
 test_gomake
+test_boot
+test_grub
 "
 
 test_shells() {
     log "testing bash"
-    DOTFILES_AUTOTEST= bash -c "source '$DOTFILES/shell/userrc.sh'"
+    DOTFILES_AUTOTEST=1 bash -c "source '$DOTFILES/shell/userrc.sh'"
     log "testing zsh"
-    DOTFILES_AUTOTEST= zsh -c "source '$DOTFILES/shell/userrc.sh'"
+    DOTFILES_AUTOTEST=1 zsh -c "source '$DOTFILES/shell/userrc.sh'"
 }
 
-test_dotfiles() {
+test_functions() {
     test_runner $DOTFILES_TESTS &&
-    log "$0: testing successful" ||
-    err "$0: testing failed"
+    log "$0: function testing successful" ||
+    err "$0: functions testing failed"
+}
+
+# manually start all tests, incl zsh and bash test
+test_dotfiles() {
+    test_functions &&
+    test_shells
 }
 
 test_runner() {
@@ -45,5 +52,5 @@ test_runner() {
 }
 
 if test -n "$DOTFILES_AUTOTEST"
-then test_dotfiles
+then test_functions
 fi

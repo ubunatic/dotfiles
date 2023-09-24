@@ -5,16 +5,33 @@
 # Please `source` this file first before using the other scripts.
 #
 
-err() { echo -n "ERR: " 1>&2; echo "$@" 1>&2; }
-inf() { echo -n "INF: " 1>&2; echo "$@" 1>&2; }
+err() {
+  local code=$?
+  echo -n "ERR: " 1>&2; echo "$@" 1>&2;
+  return $code
+}
+inf() {
+  local code=$?
+  echo -n "INF: " 1>&2; echo "$@" 1>&2;
+  return $code
+}
 dbg() {
+  local code=$?
   if test -n "$DEBUG"
   then echo -n "DBG: " 1>&2; echo "$@" 1>&2;
   fi
+  return $code
 }
+
+fail() { err "$@"; false; }
 
 ff() { find . -name "$@"; }
 fz() { find . -name "*$@*"; }
+
+prompt() {
+  echo -n "$@"
+  echo -n ":"
+}
 
 ask() {
   echo -n "$@"
@@ -22,9 +39,9 @@ ask() {
   read answer && test "$answer" = "y"
 }
 
-alias error=err
-alias debug=dbg
-alias log=inf
+error() { err "$@"; }
+debug() { dbg "$@"; }
+log()   { inf "$@"; }
 
 test_logging() {
     log "testing log command via their aliases"
