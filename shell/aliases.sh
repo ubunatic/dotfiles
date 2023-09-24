@@ -16,3 +16,7 @@ alias gp="git push"
 alias gpsup='git push --set-upstream origin $(git branch --show-current)'
 alias gpsupu='git push --set-upstream "$USER" "$(git branch --show-current)"'
 alias ll="ls -la"
+
+if test "$SYSTEM_UNAME" = "Darwin"
+then alias apt="brew"
+fi
