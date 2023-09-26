@@ -6,7 +6,7 @@ grub_boot_entry() {
 }
 
 grub_boot_entries() {
-    sudo awk -F\' '/menuentry / {count++; print count-1 " " $2}' /boot/grub/grub.cfg
+    sudo awk -v count=1 -F\' '/menuentry / {count++; print count-1 " " $2}' /boot/grub/grub.cfg
 }
 
 boot_to_grub_entry() {
