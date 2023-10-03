@@ -13,7 +13,7 @@ boot_to_windows_warning() {
     echo "WARNING"
     echo "======="
     echo "If fastboot is enabled and you boot to Windows,"
-    echo "Windows may change your boot order to always start Windows frist."
+    echo "Windows may change your boot order to always start Windows first."
     echo
 }
 
