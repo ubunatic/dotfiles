@@ -10,19 +10,20 @@
 #
 
 export DOTFILES_TESTS="
+test_common
 test_find
 test_logging
 test_env
 test_go
 test_gomake
-test_boot
-test_grub
+test_gruboot
+test_efiboot
 "
 
 test_shells() {
     log "testing bash"
-    DOTFILES_AUTOTEST=1 bash -c "source '$DOTFILES/shell/userrc.sh'"
-    log "testing zsh"
+    DOTFILES_AUTOTEST=1 bash -c "source '$DOTFILES/shell/userrc.sh'" &&
+    log "testing zsh" &&
     DOTFILES_AUTOTEST=1 zsh -c "source '$DOTFILES/shell/userrc.sh'"
 }
 

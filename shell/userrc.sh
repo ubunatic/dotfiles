@@ -17,7 +17,7 @@ source "$DOTFILES/shell/go.sh"
 source "$DOTFILES/shell/gomake.sh"
 source "$DOTFILES/shell/gcloud.sh"
 source "$DOTFILES/shell/starship.sh"
-source "$DOTFILES/shell/boot.sh"
+source "$DOTFILES/shell/efiboot.sh"
 source "$DOTFILES/shell/grub.sh"
 source "$DOTFILES/shell/path.sh"
 source "$DOTFILES/shell/test.sh"         # test.sh should be last to allow for autotesting

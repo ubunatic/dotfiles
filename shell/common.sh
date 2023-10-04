@@ -58,3 +58,8 @@ test_find() {(
   ! ff "hell"   | grep -q '.*'  &&
   ! fz "R4ND0M" | grep -q '.*'
 )}
+
+test_common() {
+  (echo "y" | ask "test" && echo "OK" || echo "NO") | grep -q "OK"
+  (echo "N" | ask "test" && echo "OK" || echo "NO") | grep -q "NO"
+}
