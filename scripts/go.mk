@@ -6,10 +6,12 @@
 
 # Sources and Binaries
 # --------------------
-project := $(notdir $(shell pwd))
+project := $(notdir $(CURDIR))
 main = $(project).go
 binary = bin/$(project)
-sources = $(shell find . -name '*.go') $(wildcard go.*) $(main)
+source_patterns = *.go go.* *.mk Makefile
+source_cmd = find . -name $(main) $(foreach p,$(source_patterns),-o -name "$(p)")
+sources = $(shell $(source_cmd))
 
 # Default Build Target
 # --------------------
@@ -23,9 +25,26 @@ $(binary): $(sources); go build -o $@ $(main)
 .PHONY: test debug install run clean
 test:    build; go test -race ./...
 debug:   build; go test -v -race ./...
-install: build; go install .
 run:     build; $(binary)
 clean:        ; rm -f $(binary)
+
+# Advanced Go Targets
+# -------------------
+.PHONY: generate install update docs tag precommit
+generate:     ; go generate .
+install: build; go install .
+update:       ; go get -u
+tag:          ; # not implemented
+docs:         ; # not implemented
+precommit:    ; # not implemented
+
+# Advanced Go Testing Targets
+# ---------------------------
+.PHONY: lint cover vet bench
+lint:   ; # not implemented
+cover:  ; # not implemented
+vet:    ; # not implemented
+bench:  ; # not implemented
 
 # Help and Debug Targets
 # ----------------------
@@ -35,6 +54,9 @@ vars:
 	# main:    $(main)
 	# binary:  $(binary)
 	# sources: $(sources)
+	#
+	# source_patterns: $(source_patterns)
+	# source_cmd:      $(source_cmd)
 
 usage:
 	# Usage: make TARGET [-n|-B]
