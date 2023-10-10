@@ -11,6 +11,15 @@ then
     export CPPFLAGS="-I$HOMEBREW_PREFIX/opt/openjdk@11/include"
 fi
 
+gh-last-service-push() {
+    if test -z "$1"
+    then err "no service name defined as arg1"; return 1
+    fi
+    local service="$1"; shift
+    log "using arg1 as service name: '$service', remaining gh-args: '$*'"
+    gh-last-build-logs -w "Build services" "$@" | grep -o "docker push.*$service.*"
+}
+
 export CONFLUENT_HOME=$APPS/confluent/confluent-7.0.1
 if test -e "$CONFLUENT_HOME" && test -n "$ZSH_VERSION"
 then

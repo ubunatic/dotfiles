@@ -25,8 +25,8 @@ dbg() {
 
 fail() { err "$@"; false; }
 
-ff() { find . -name "$@"; }
-fz() { find . -name "*$@*"; }
+ff() { find . -name "$*@"; }
+fz() { find . -name "*$**"; }
 
 prompt() {
   echo -n "$@"
@@ -56,6 +56,12 @@ find_up() {
     dir="$(dirname "$dir")"
   done
 }
+
+{
+  unalias error
+  unalias debug
+  unalias log
+} 2> /dev/null
 
 error() { err "$@"; }
 debug() { dbg "$@"; }
