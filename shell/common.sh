@@ -36,7 +36,25 @@ prompt() {
 ask() {
   echo -n "$@"
   echo -n " (y/N): "
-  read answer && test "$answer" = "y"
+  read -r answer && test "$answer" = "y"
+}
+
+# finds a real command on the path
+find_command() {
+  if cmd=$(type -p "$1" | grep -o '/.*')
+  then echo "$cmd" && return 0  # return the path to the command
+  else echo "$1"   && return 1  # return the command name as is
+  fi
+}
+
+# upwards file search
+find_up() {
+  dir="$(pwd)"
+  while true; do
+    test -e "$dir/$1" && echo "$dir/$1" && return 0 ||
+    test "$dir" = "/"                   && return 1 ||
+    dir="$(dirname "$dir")"
+  done
 }
 
 error() { err "$@"; }
