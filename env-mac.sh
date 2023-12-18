@@ -20,6 +20,47 @@ gh-last-service-push() {
     gh-last-build-logs -w "Build services" "$@" | grep -o "docker push.*$service.*"
 }
 
+find-in-files() {
+    local pattern="$1"; shift
+    local grep_pattern="${pattern//./\\.}" match="" f="" found=0
+    for f in "$@"; do
+        match="$(grep -E "$grep_pattern" "$f")"
+        if test $? -eq 0; then
+            (( found++ ))
+            echo -n "$(tput setaf 2)$f$(tput sgr0): "
+            echo "$match" | grep --color -E "$grep_pattern";
+        fi
+    done > /dev/stderr
+    echo "$found"
+    test "$found" -gt 0
+}
+
+replace-in-files() {
+    local search="$1" replace="$2"
+    if test -z "$search";  then err "search must be set";  return 1; fi
+    if test -z "$replace"; then err "replace must be set"; return 1; fi
+    if test $# -lt 3;      then err "no files given";      return 1; fi
+    shift 2;
+
+    log "finding matches"
+    found="$(find-in-files "$search" "$@")"
+    log "found search value in $found files"
+
+    local sed_pattern="s/${search//./\\.}/$replace/g" found=0
+    if ask "run sed -i -E \"$sed_pattern\" on all the given the files: $*?"
+    then
+        log OK
+        log "edit files in-place with sed using 's/$sed_pattern/$replace/g'"
+        local ok=0
+        sed -i "" -E -e "$sed_pattern" "$@" || ok=1
+        log "validating results"
+        found="$(find-in-files "$replace" "$@")"
+        log "found replace value in $found files"
+        return $ok
+    else log aborted; return 1
+    fi
+}
+
 export CONFLUENT_HOME=$APPS/confluent/confluent-7.0.1
 if test -e "$CONFLUENT_HOME" && test -n "$ZSH_VERSION"
 then
