@@ -79,3 +79,11 @@ gitmail_switch() {
     esac
     gitmail
 }
+
+gitfiles_changed() {
+    local pattern="$1"
+    if test -z "$pattern"
+    then pattern='.*'
+    fi
+    git status --short | grep -o -E "[^ ]+\.$pattern$" | xargs echo
+}
