@@ -6,6 +6,10 @@ cluster(){
    gcloud container clusters get-credentials "$1" --zone "$zone"
 }
 
+gconfig() { gcloud config "$@"; }
+gcfg()    { gcloud config "$@"; }
+gauth()   { gcloud auth   "$@"; }
+
 reauth() {
    gcloud auth login --update-adc
 }
@@ -22,9 +26,9 @@ impersonate() {
 }
 
 # Add gcloud completion and PATH if not present.
-if test -e $APPS/google-cloud-sdk && test -n "$ZSH_VERSION" && ! type gcloud > /dev/null
+if test -e "$APPS/google-cloud-sdk" && test -n "$ZSH_VERSION" && ! type gcloud > /dev/null
 then
     # The next line updates PATH for the Google Cloud SDK.
-    source $APPS/google-cloud-sdk/path.zsh.inc
-    source $APPS/google-cloud-sdk/completion.zsh.inc
+    source "$APPS/google-cloud-sdk/path.zsh.inc"
+    source "$APPS/google-cloud-sdk/completion.zsh.inc"
 fi

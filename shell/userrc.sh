@@ -21,6 +21,8 @@ source "$DOTFILES/shell/starship.sh"
 source "$DOTFILES/shell/efiboot.sh"
 source "$DOTFILES/shell/grub.sh"
 source "$DOTFILES/shell/path.sh"
+source "$DOTFILES/shell/prompt.sh"
+source "$DOTFILES/shell/clamshell.sh"
 source "$DOTFILES/shell/test.sh"         # test.sh should be last to allow for autotesting
 fi
 
