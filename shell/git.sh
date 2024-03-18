@@ -50,7 +50,8 @@ for line in sys.stdin:
 export GIT_PRIVATE_EMAIL=""
 export GIT_CORPORATE_EMAIL=""
 gitmail_indicator() {
-    local mail="$(git config user.email)"
+    local mail=""
+    mail="$(git config user.email)" 2> /dev/null
     case "$mail" in
         "")                     echo "∅" ;;
         "$GIT_CORPORATE_EMAIL") echo "corp" ;;
@@ -86,4 +87,28 @@ gitfiles_changed() {
     then pattern='.*'
     fi
     git status --short | grep -o -E "[^ ]+\.$pattern$" | xargs echo
+}
+
+git-prebase() {
+    local main="$1"
+    main="${main:-main}"
+    git checkout "$main" && git pull && git checkout - &&
+    printf "Prepared rebase from $_BOLD${_RED}%s$_RESET. To rebase run: ${_CYAN}git rebase %s$_RESET\n" "$main" "$main"
+}
+
+git-log-short() {
+    local from="${1:-"origin/main"}" to="${2:-"origin/prod"}"
+    git log "$to..$from" --pretty=format:"- %s" |
+        grep -ivE "^- Merge branch '(main|prod|$from)' into" |
+        sed 's/ pull request / /g' |
+        sort -u
+}
+
+git-log-summary() {
+    echo "----" > /dev/tty
+    git-log-short "$@" > /dev/tty
+    echo "----" > /dev/tty
+    echo "Please write a one-line summary of the changes above:" > /dev/tty
+    read -r summary
+    echo "$summary"
 }

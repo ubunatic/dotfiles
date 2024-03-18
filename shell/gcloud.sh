@@ -2,8 +2,8 @@
 # ================
 
 cluster(){
-   local zone="${2:-europe-west3-c}"
-   gcloud container clusters get-credentials "$1" --zone "$zone"
+   local zone="${2:-europe-west3}"
+   gcloud container clusters get-credentials --zone "$zone" "$@"
 }
 
 gconfig() { gcloud config "$@"; }

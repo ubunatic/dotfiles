@@ -17,22 +17,12 @@ alias ccd="cd"
 alias cdd="cd"
 alias cd..="cd .."
 
-gh-prw()     { gh pr view --web "$@"; }
-gh-prc()     { gh pr create --web --title "$(git branch --show-current)" "$@"; }
-gh-release() { gh pr create -H main -B prod --title "release: $(git branch --show-current)" --body "" --web "$@"; }
-prebase()    {
-    local main="$1"
-    main="${main:-main}"
-    git checkout "$main" && git pull && git checkout - &&
-    printf "Prepared rebase from $_BOLD${_RED}%s$_RESET. To rebase run: ${_CYAN}git rebase %s$_RESET\n" "$main" "$main"
-}
-
 # Github cli aliases
 alias prw='gh-prw'
 alias prv='gh-prw'
 alias prc='gh-prc'
 alias pr='gh-prw 2> /dev/null || gh-prc'
-alias release='gh-release'
+alias release='gh-release-main'
 
 # Git aliases
 alias pull="git pull"

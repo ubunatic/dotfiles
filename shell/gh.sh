@@ -24,3 +24,15 @@ gh-last-build-logs() {
     log "No runs found."
   fi
 }
+
+gh-release-main() {
+    local main="${1:-"main"}" prod="${2:-"prod"}" title="" body=""
+    # git fetch origin "$main" &&
+    # git fetch origin "$prod" &&
+    body="$(git-log-short "origin/$main" "origin/$prod")" &&
+    title="$(git-log-summary "origin/$main" "origin/$prod")" &&
+    gh pr create -H "$main" -B "$prod" --web --title "release: $title" --body "$body"
+}
+
+gh-prw() { gh pr view --web "$@"; }
+gh-prc() { gh pr create --web --title "$(git branch --show-current)" "$@"; }
