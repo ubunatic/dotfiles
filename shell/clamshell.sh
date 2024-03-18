@@ -41,6 +41,8 @@ Commands:
     has-legacy-display  ldisp    Check if the legacy display is awake (returns 0 if yes)
     device-proxy        dp       Check the number of DCPDPDeviceProxy
     sleep               sl       Force sleep if clamshell mode is active
+    sleeping            sln      Check if the system is sleeping (returns 0 if yes)
+    awake               aw       Check if the system is awake (returns 0 if yes)
     summary             sm       Display a summary of all checks
     complete            co       Print the bash/zsh completion function
 
@@ -51,6 +53,10 @@ Daemon Commands:
     status     st    Check the status of the launchd service
     load       ld    Start the launchd service (alias: start)
     unload     ul    Stop the launchd service (alias: stop)
+
+Developer Commands:
+    selftest   self  Run a selftest to check if all commands work as expected
+    log        log   Tail the clamshelld log file
 
 EOF
 }
@@ -80,13 +86,16 @@ EOF
             di*|has-d*)    clamshell-has-display ;;
             ldi*|has-l*)   clamshell-has-legacy ;;
             dp|de*)        clamshell-proxy-num ;;
+            sleepi*|sln)   clamshell-sleeping ;;
             sl*)           clamshell-sleep ;;
+            aw*)           ! clamshell-sleeping ;;
             su*)           clamshell-summary ;;
             da*)           exec -a clamshelld clamshell-daemon | tee -i -a "$clamshelld_log" ;;
             co*)           clamshell-complete ;;
             in*)           clamshell-install ;;
             un|uni*)       clamshell-uninstall ;;
             st|stat*)      clamshell-status ;;
+            log*)          clamshell-log ;;
             ld|lo*|start)  clamshell-ctl load ;;
             ul|unl*|stop)  clamshell-ctl unload ;;
             self*)         clamshell-selftest ;;
@@ -97,12 +106,60 @@ EOF
     # clamshell-daemon runs a loop to detect clamshell mode and initiate sleep
     # shellcheck disable=SC2317
     clamshell-daemon() {
+        local t0=0 elapsed=0 n=0 sleeping_since=0 sleeping_for=0 awake_since=0 awake_for=0
+        t0="$(date +%s)"
         logger "Starting clamshell daemon"
         trap "logger 'Clamshell daemon stopped'; exit 0" INT TERM
         while sleep 1; do
+            # Log Rotation
+            # ============
+            (( n++ ))
+            (( elapsed = $(date +%s) - t0 ))
+            if (( elapsed > 86400 )); then
+                t0="$(date +%s)"
+                logger "clamshell daemon running for 24h, saving log as $clamshelld_log.old"
+                cp -f "$clamshelld_log" "$clamshelld_log.old"
+                echo -n > "$clamshelld_log"
+                logger "log rotated after 24h, see $clamshelld_log.old for previous log"
+            fi
+
+            # Keep Sleeping
+            # =============
+            if clamshell-sleeping; then
+                (( sleeping_for = $(date +%s) - sleeping_since ))
+                if (( n % 600 == 0 )); then
+                    # log every 10 minutes
+                    logger "clamshell is sleeping for $sleeping_for Seconds"
+                fi
+                sleep 10
+                continue
+            fi
+
+            # Try to Sleep
+            # ============
             if clamshell-sleep; then
-                logger "sleep initated, waiting 5s for sleep"
-                sleep 5
+                sleeping_since="$(date +%s)"
+                awake_since=0
+                logger "clamshell sleep initated, waiting 3s to reach sleep state"
+                sleep 3
+                continue
+            fi
+
+            # Awaking
+            # =======
+            if (( awake_since == 0 )); then
+                awake_since="$(date +%s)"
+                logger "clamshell became awake"
+                continue
+            fi
+
+            # Stay Awake
+            # ==========
+            (( awake_for = $(date +%s) - awake_since ))
+            if (( n % 600 == 0 )); then
+                # log every 10 minutes
+                logger "clamshell is awake for $awake_for Seconds"
+                continue
             fi
         done
     }
@@ -118,6 +175,8 @@ EOF
     clamshell-complete()    { type -f _clamshell && echo "complete -F _clamshell clamshell"; }
     clamshell-yes()         { ioreg -r -k AppleClamshellState | grep AppleClamshellState | grep -q "Yes"; }
     clamshell-no()          { ! clamshell-yes; }
+    clamshell-log()         { tail -F "$clamshelld_log"; }
+    clamshell-sleeping()    { pmset -g assertions | grep -qE '^\s*PreventUserIdleSystemSleep\s*0'; }
     clamshell-proxy-num()   { pmset -g powerstate | grep -c DCPDPDeviceProxy; }
     clamshell-has-display() { test "$(clamshell-proxy-num)" -lt 4; }
     clamshell-has-legacy() {
@@ -128,9 +187,10 @@ EOF
     # clamshell-summary displays a summary of all checks
     clamshell-summary() {
         echo "ARCH: $(uname -m)"
-        echo "clamshell-yes:         $(clamshell-yes        && echo Yes || echo No)"
-        echo "clamshell-has-display: $(clamshell-has-display    && echo Yes || echo No)"
-        echo "clamshell-has-legacy:  $(clamshell-has-legacy && echo Yes || echo No)"
+        echo "clamshell-yes:         $(clamshell-yes         && echo Yes || echo No)"
+        echo "clamshell-has-display: $(clamshell-has-display && echo Yes || echo No)"
+        echo "clamshell-has-legacy:  $(clamshell-has-legacy  && echo Yes || echo No)"
+        echo "clamshell-sleeping:    $(clamshell-sleeping    && echo Yes || echo No)"
         echo "clamshell-proxy-num:   $(clamshell-proxy-num)"
         echo "clamshell-sleep:       $(CLAMSHELL_DEBUG=1 clamshell-sleep)"
     }
@@ -138,13 +198,16 @@ EOF
     logger-n() { echo -n -e "\r$(date '+%Y-%m-%d %H:%M:%S'): $*, output="; }  # log without newline
     logger()   { echo    -e "\r$(date '+%Y-%m-%d %H:%M:%S'): $*"; }           # log with newline
 
+    # shellcheck disable=SC2317
+    echo-pmset() { echo "/usr/bin/pmset $*"; }
+
     # clamshell-sleep initiates sleep if clamshell mode is active and returns 0 on success.
     # It does not wait for sleep to complete or for clamshell mode to change. Use clamshell-daemon for that.
     clamshell-sleep() {
         local pmset code
         if test -n "$CLAMSHELL_DEBUG"
-        then pmset="echo pmset"
-        else pmset="pmset"
+        then pmset="echo-pmset"
+        else pmset="/usr/bin/pmset"
         fi
 
         if clamshell-yes; then
