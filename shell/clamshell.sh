@@ -57,12 +57,14 @@ Daemon Commands:
 Developer Commands:
     selftest   self  Run a selftest to check if all commands work as expected
     log        log   Tail the clamshelld log file
+    binary     bin   Compile the clamshell script to a clamshelld binary
 
 EOF
 }
 
     # Launchd service variables
-    clamshelld_cmd="source $DOTFILES/shell/macos.sh; clamshell daemon"
+    clamshelld_cmd="source $DOTFILES/shell/clamshell.sh && clamshell daemon"
+    clamshelld_bin="$DOTFILES/bin/clamshelld"
     clamshelld_service="com.github.ubunatic.clamshell.plist"
     clamshelld_plist="$HOME/Library/LaunchAgents/$clamshelld_service"
     clamshelld_log="$HOME/Library/Logs/clamshell.log"
@@ -99,6 +101,7 @@ EOF
             ld|lo*|start)  clamshell-ctl load ;;
             ul|unl*|stop)  clamshell-ctl unload ;;
             self*)         clamshell-selftest ;;
+            bin*)          clamshell-binary ;;
             *)             echo "Unknown command: $1"; return 1 ;;
         esac; done
     }
@@ -172,11 +175,25 @@ EOF
         COMPREPLY=($(compgen -W "$commands" -- "${COMP_WORDS[COMP_CWORD]}"))
     }
 
-    clamshell-complete()    {
-        if type -f _clamshell > /dev/null 2>&1
-        then echo "complete -F _clamshell clamshell"
-        else echo "# no completion function found"
-        fi
+    clamshell-complete() {
+        case $- in *i*)
+            type -f _clamshell > /dev/null &&
+            echo "complete -F _clamshell clamshell"
+            return 0
+        esac
+        echo "# no completion function found"
+    }
+
+    clamshell-binary() {
+        mkdir -p "$DOTFILES/bin"
+        echo "Compiling clamshell script to clamshelld binary"
+        (
+            echo "#!/usr/bin/env zsh" &&
+            which clamshell &&
+            echo 'clamshell daemon'
+        ) > "$clamshelld_bin" &&
+        chmod +x "$clamshelld_bin" &&
+        echo "clamshelld binary created at $clamshelld_bin"
     }
 
     clamshell-yes()         { ioreg -r -k AppleClamshellState | grep AppleClamshellState | grep -q "Yes"; }
@@ -245,6 +262,10 @@ EOF
     clamshell-install() {
         local svc="$clamshelld_service" dst="$clamshelld_plist" cmd="$clamshelld_cmd"
 
+        if ! clamshell-binary
+        then echo "Failed to create clamshelld binary"; return 1
+        fi
+
         # request permission to create the launchd service
         if touch "$dst" 2> /dev/null; then
             echo "Created empty plist file $dst"
@@ -266,9 +287,7 @@ EOF
     <string>$svc</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/bin/bash</string>
-        <string>-c</string>
-        <string>$cmd</string>
+        <string>$clamshelld_bin</string>
     </array>
     <key>RunAtLoad</key>
     <true/>

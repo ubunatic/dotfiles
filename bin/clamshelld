@@ -1,0 +1,361 @@
+#!/usr/bin/env zsh
+clamshell () {
+	(
+		clamshell-help () {
+			cat <<EOF
+Usage: clamshell [OPTION] [COMMAND]
+
+Options:
+    --debug  -d    Enable debug mode
+    --help   -h    Display this help
+
+Commands:
+    help                h        Display this help
+    check               c        Check if clamshell mode is active (alias: yes|y, returns 0 if yes)
+    has-display         disp     Check if the external display is connected (returns 0 if yes)
+    has-legacy-display  ldisp    Check if the legacy display is awake (returns 0 if yes)
+    device-proxy        dp       Check the number of DCPDPDeviceProxy
+    sleep               sl       Force sleep if clamshell mode is active
+    sleeping            sln      Check if the system is sleeping (returns 0 if yes)
+    awake               aw       Check if the system is awake (returns 0 if yes)
+    summary             sm       Display a summary of all checks
+    complete            co       Print the bash/zsh completion function
+
+Daemon Commands:
+    daemon     dm    Runs the sleep command every second (also see clamshelld)
+    install    in    Install a launchd service to run clamshelld
+    uninstall  un    Uninstall the launchd service
+    status     st    Check the status of the launchd service
+    load       ld    Start the launchd service (alias: start)
+    unload     ul    Stop the launchd service (alias: stop)
+
+Developer Commands:
+    selftest   self  Run a selftest to check if all commands work as expected
+    log        log   Tail the clamshelld log file
+    binary     bin   Compile the clamshell script to a clamshelld binary
+
+EOF
+		}
+		clamshelld_cmd="source $DOTFILES/shell/clamshell.sh && clamshell daemon" 
+		clamshelld_bin="$DOTFILES/bin/clamshelld" 
+		clamshelld_service="com.github.ubunatic.clamshell.plist" 
+		clamshelld_plist="$HOME/Library/LaunchAgents/$clamshelld_service" 
+		clamshelld_log="$HOME/Library/Logs/clamshell.log" 
+		clamshell-main () {
+			local flag
+			for flag in "$@"
+			do
+				case "$flag" in
+					(-d | --debug) export CLAMSHELL_DEBUG=1  ;;
+					(-h | --help | h*) clamshell-help
+						return 0 ;;
+					(-*) echo "Unknown option: $1"
+						return 1 ;;
+				esac
+			done
+			local cmd
+			for cmd in "$@"
+			do
+				case "$cmd" in
+					(-*)  ;;
+					(y* | c | ch*) clamshell-yes ;;
+					(n | no*) clamshell-no ;;
+					(di* | has-d*) clamshell-has-display ;;
+					(ldi* | has-l*) clamshell-has-legacy ;;
+					(dp | de*) clamshell-proxy-num ;;
+					(sleepi* | sln) clamshell-sleeping ;;
+					(sl*) clamshell-sleep ;;
+					(aw*) ! clamshell-sleeping ;;
+					(su*) clamshell-summary ;;
+					(da*) exec -a clamshelld clamshell-daemon | tee -i -a "$clamshelld_log" ;;
+					(co*) clamshell-complete ;;
+					(in*) clamshell-install ;;
+					(un | uni*) clamshell-uninstall ;;
+					(st | stat*) clamshell-status ;;
+					(log*) clamshell-log ;;
+					(ld | lo* | start) clamshell-ctl load ;;
+					(ul | unl* | stop) clamshell-ctl unload ;;
+					(self*) clamshell-selftest ;;
+					(bin*) clamshell-binary ;;
+					(*) echo "Unknown command: $1"
+						return 1 ;;
+				esac
+			done
+		}
+		clamshell-daemon () {
+			local t0=0 elapsed=0 n=0 sleeping_since=0 sleeping_for=0 awake_since=0 awake_for=0 
+			t0="$(date +%s)" 
+			logger "Starting clamshell daemon"
+			trap "logger 'Clamshell daemon stopped'; exit 0" INT TERM
+			while sleep 1
+			do
+				(( n++ ))
+				(( elapsed = $(date +%s) - t0 ))
+				if (( elapsed > 86400 ))
+				then
+					t0="$(date +%s)" 
+					logger "clamshell daemon running for 24h, saving log as $clamshelld_log.old"
+					cp -f "$clamshelld_log" "$clamshelld_log.old"
+					echo -n > "$clamshelld_log"
+					logger "log rotated after 24h, see $clamshelld_log.old for previous log"
+				fi
+				if clamshell-sleeping
+				then
+					(( sleeping_for = $(date +%s) - sleeping_since ))
+					if (( n % 600 == 0 ))
+					then
+						logger "clamshell is sleeping for $sleeping_for Seconds"
+					fi
+					sleep 10
+					continue
+				fi
+				if clamshell-sleep
+				then
+					sleeping_since="$(date +%s)" 
+					awake_since=0 
+					logger "clamshell sleep initated, waiting 3s to reach sleep state"
+					sleep 3
+					continue
+				fi
+				if (( awake_since == 0 ))
+				then
+					awake_since="$(date +%s)" 
+					logger "clamshell became awake"
+					continue
+				fi
+				(( awake_for = $(date +%s) - awake_since ))
+				if (( n % 600 == 0 ))
+				then
+					logger "clamshell is awake for $awake_for Seconds"
+					continue
+				fi
+			done
+		}
+		_clamshell () {
+			local commands
+			commands="$(clamshell help | grep '^    .*' | tr -s ' ' | cut -d' ' -f2 | sort -u)" 
+			COMPREPLY=($(compgen -W "$commands" -- "${COMP_WORDS[COMP_CWORD]}")) 
+		}
+		clamshell-complete () {
+			case $- in
+				(*i*) type -f _clamshell > /dev/null && echo "complete -F _clamshell clamshell"
+					return 0 ;;
+			esac
+			echo "# no completion function found"
+		}
+		clamshell-binary () {
+			mkdir -p "$DOTFILES/bin"
+			echo "Compiling clamshell script to clamshelld binary"
+			(
+				echo "#!/usr/bin/env zsh" && which clamshell && echo 'clamshell daemon'
+			) > "$clamshelld_bin" && chmod +x "$clamshelld_bin" && echo "clamshelld binary created at $clamshelld_bin"
+		}
+		clamshell-yes () {
+			ioreg -r -k AppleClamshellState | grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox} AppleClamshellState | grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox} -q "Yes"
+		}
+		clamshell-no () {
+			! clamshell-yes
+		}
+		clamshell-log () {
+			tail -F "$clamshelld_log"
+		}
+		clamshell-sleeping () {
+			pmset -g assertions | grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox} -qE '^\s*PreventUserIdleSystemSleep\s*0'
+		}
+		clamshell-proxy-num () {
+			pmset -g powerstate | grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox} -c DCPDPDeviceProxy
+		}
+		clamshell-has-display () {
+			test "$(clamshell-proxy-num)" -lt 4
+		}
+		clamshell-has-legacy () {
+			pmset -g powerstate | grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox} AppleDisplay | grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox} -q USEABLE && pmset -g powerstate | grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox} IODisplayWrangler | grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox} -q USEABLE
+		}
+		clamshell-summary () {
+			echo "ARCH: $(uname -m)"
+			echo "clamshell-yes:         $(clamshell-yes         && echo Yes || echo No)"
+			echo "clamshell-has-display: $(clamshell-has-display && echo Yes || echo No)"
+			echo "clamshell-has-legacy:  $(clamshell-has-legacy  && echo Yes || echo No)"
+			echo "clamshell-sleeping:    $(clamshell-sleeping    && echo Yes || echo No)"
+			echo "clamshell-proxy-num:   $(clamshell-proxy-num)"
+			echo "clamshell-sleep:       $(CLAMSHELL_DEBUG=1 clamshell-sleep)"
+		}
+		logger-n () {
+			echo -n -e "\r$(date '+%Y-%m-%d %H:%M:%S'): $*, output="
+		}
+		logger () {
+			echo -e "\r$(date '+%Y-%m-%d %H:%M:%S'): $*"
+		}
+		echo-pmset () {
+			echo "/usr/bin/pmset $*"
+		}
+		clamshell-sleep () {
+			local pmset code
+			if test -n "$CLAMSHELL_DEBUG"
+			then
+				pmset="echo-pmset" 
+			else
+				pmset="/usr/bin/pmset" 
+			fi
+			if clamshell-yes
+			then
+				code=0 
+				if clamshell-has-display
+				then
+					logger-n "clamshell detected, display found"
+					$pmset sleepnow
+					code=$? 
+				elif clamshell-has-legacy
+				then
+					logger-n "clamshell detected, legacy display found"
+					$pmset sleepnow
+					code=$? 
+				elif test -n "$CLAMSHELL_DEBUG"
+				then
+					echo noop "(lid open or display asleep)"
+				fi
+				if test $code -gt 0
+				then
+					logger "Failed to sleep, $pmset sleepnow exited with code=$code"
+				fi
+				return $code
+			elif test -n "$CLAMSHELL_DEBUG"
+			then
+				echo noop "(no clamshell)"
+			fi
+			return 1
+		}
+		clamshell-install () {
+			local svc="$clamshelld_service" dst="$clamshelld_plist" cmd="$clamshelld_cmd" 
+			if ! clamshell-binary
+			then
+				echo "Failed to create clamshelld binary"
+				return 1
+			fi
+			if touch "$dst" 2> /dev/null
+			then
+				echo "Created empty plist file $dst"
+			else
+				echo "Requesting permission to create launchd service $svc at $dst"
+				if sudo touch "$dst" && sudo chown "$USER" "$dst"
+				then
+					echo "Created empty plist file $dst"
+				else
+					echo "Failed to create empty plist file $dst"
+					return 1
+				fi
+			fi
+			cat > "$dst" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>$svc</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>$clamshelld_bin</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+</dict>
+</plist>
+EOF
+			local code=$? 
+			if test "$code" -gt 0
+			then
+				echo "Failed to install launchd service $svc at $dst err=$code"
+				return 1
+			fi
+			echo "Launchd service $svc installed at $dst using cmd='$cmd'"
+			echo "Stopping clamshelld instances and reloading clamshelld service"
+			if pkill clamshelld 2> /dev/null
+			then
+				echo "clamshelld process stopped"
+			else
+				echo "no clamshelld instances running"
+			fi
+			clamshell-ctl unload
+			clamshell-ctl load
+		}
+		clamshell-uninstall () {
+			local svc="$clamshelld_service" dst="$clamshelld_plist" 
+			if test -e "$dst"
+			then
+				clamshell-ctl unload
+				rm -f "$dst" 2> /dev/null || sudo rm -f "$dst" 2> /dev/null
+				echo "Launchd service $svc uninstalled from $dst"
+			else
+				echo "Launchd service $svc not installed from $dst"
+			fi
+		}
+		clamshell-ctl () {
+			local code=1 svc="$clamshelld_service" dst="$clamshelld_plist" 
+			if test -e "$dst"
+			then
+				launchctl "$1" -w "$dst"
+				code=$? 
+				if test "$code" -eq 0
+				then
+					echo "Launchd service $1: OK"
+				else
+					echo "Launchd service $1: FAILED"
+				fi
+			else
+				echo "Launchd service $svc not installed"
+			fi
+			return $code
+		}
+		clamshell-status () {
+			local code svc="$clamshelld_service" dst="$clamshelld_plist" 
+			printf "\nLaunchd Status:\n"
+			launchctl list "$svc"
+			code=$? 
+			printf "\nLogfile:\n"
+			tail -n 10 "$clamshelld_log"
+			printf "\nLaunchd PList File:\n"
+			test -e "$dst" && echo "found at $dst" || echo "not found at $dst"
+			printf "\nPgrep clamshelld:\n"
+			pgrep clamshelld || echo "no clamshelld process found (try sudo pgrep)"
+			printf "\nLaunchd Status Code: %s\n" $code
+			return $code
+		}
+		clamshell-selftest () {
+			(
+				exec 2>&1
+				local err="" 
+				err () {
+					err="$err\n$*" 
+				}
+				noerr () {
+					wc -l | grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox} -q -E '^ *0' || err "$@"
+				}
+				nobasherr () {
+					grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox} -E '^(bash:|clamshell*:)' && err "$@"
+				}
+				clamshell-yes || clamshell-no || err "clamshell yes/no failed"
+				clamshell-complete > /dev/null || err "clamshell complete failed"
+				clamshell-proxy-num > /dev/null || err "clamshell proxy-num failed"
+				clamshell-has-display | noerr "clamshell has-display failed"
+				clamshell-has-legacy | noerr "clamshell has-legacy failed"
+				clamshell-sleep | noerr "clamshell sleep failed"
+				clamshell-summary | nobasherr "clamshell summary failed"
+				clamshell-help | nobasherr "clamshell help failed"
+				clamshell-status | nobasherr "clamshell status failed"
+				clamshell-ctl load | nobasherr "clamshell ctl load failed"
+				clamshell-ctl unload | nobasherr "clamshell ctl unload failed"
+				if test -z "$err"
+				then
+					echo "clamshell selftest: OK"
+				else
+					echo -e "$err"
+					echo "clamshell selftest: FAILED"
+				fi
+			)
+		}
+		clamshell-main "$@"
+	)
+}
+clamshell daemon
