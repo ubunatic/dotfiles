@@ -172,7 +172,13 @@ EOF
         COMPREPLY=($(compgen -W "$commands" -- "${COMP_WORDS[COMP_CWORD]}"))
     }
 
-    clamshell-complete()    { type -f _clamshell && echo "complete -F _clamshell clamshell"; }
+    clamshell-complete()    {
+        if type -f _clamshell > /dev/null 2>&1
+        then echo "complete -F _clamshell clamshell"
+        else echo "# no completion function found"
+        fi
+    }
+
     clamshell-yes()         { ioreg -r -k AppleClamshellState | grep AppleClamshellState | grep -q "Yes"; }
     clamshell-no()          { ! clamshell-yes; }
     clamshell-log()         { tail -F "$clamshelld_log"; }
