@@ -62,15 +62,12 @@ EOF
 }
 
 # Launchd service variables
-local clamshell_script_dir="$0"
-clamshell_script_dir="$(dirname "$(realpath "$0")")"
-clamshell_md="$clamshell_script_dir/clamshell.md"
-
 clamshelld_prefix="$HOME/Library/Clamshell/1.0.0"
 clamshelld_bin="$clamshelld_prefix/bin/clamshelld"
 clamshelld_service="com.github.ubunatic.clamshell.plist"
 clamshelld_plist="$HOME/Library/LaunchAgents/$clamshelld_service"
 clamshelld_log="$HOME/Library/Logs/clamshell.log"
+clamshell_md="$clamshelld_prefix/share/clamshell.md"
 
 # main function to parse flags and run commands
 clamshell-main() {
@@ -235,7 +232,12 @@ clamshell-binary() {
 #   womp                 0                                           #   womp                 0
 # -------------------------------------------------------------------------------------------------
 
-clamshell-manual()      { test -e "$clamshell_md" && cat "$clamshell_md"; }
+clamshell-manual() {
+    for f in "$clamshell_md" "$DOTFILES/shell/clamshell.md" "$(dirname "$0")/clamshell.md"; do
+        test -e "$f" && cat "$f" && break
+    done
+}
+
 clamshell-complete()    { echo "complete -F _clamshell clamshell"; }
 clamshell-log()         { tail -F "$clamshelld_log"; }
 clamshell-yes()         { ioreg -r -k AppleClamshellState | grep AppleClamshellState | grep -q "Yes"; }
@@ -305,7 +307,7 @@ clamshell-sleep() {
 
 # clamshell-install installs a Launchd service to run clamshelld in the background.
 clamshell-install() {
-    local svc="$clamshelld_service" dst="$clamshelld_plist"
+    local svc="$clamshelld_service" dst="$clamshelld_plist" md="$clamshell_md"
 
     if ! clamshell-binary
     then echo "Failed to create clamshelld binary"; return 1
@@ -320,6 +322,14 @@ clamshell-install() {
         then echo "Created empty plist file $dst"
         else echo "Failed to create empty plist file $dst"; return 1
         fi
+    fi
+
+    mkdir -p "$clamshelld_prefix/share"
+    local manual
+    manual="$(clamshell-manual)"
+    if echo "$manual" > "$md"
+    then echo "Saved manual to $md"
+    else echo "Failed to save manual to $md"
     fi
 
     # create a launchd plist file

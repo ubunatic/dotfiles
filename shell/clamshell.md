@@ -1,3 +1,8 @@
+Clamshell CLI
+=============
+The `clamshell` CLI helps you put your MacBook to sleep and keep it asleep when the lid is closed. \
+See `clamshell help` to learn how to use it.
+
 Clamshell Mode
 ==============
 A MacBook is in "clamshell mode" when the lid is closed and an external display is connected.
@@ -16,17 +21,17 @@ the lid is closed. This is a long-standing issue that Apple has not addressed.
 How it works
 ============
 MacBooks can detect if the lid is closed or not and will exposed this in the IORegistry.
-Using the 'ioreg' command you can check the 'AppleClamshellState' key in the IORegistry.
-If the key is set to 'Yes', the MacBook is in clamshell mode. The key is set to 'No' otherwise.
+Using the `ioreg` command you can check the `AppleClamshellState` key in the IORegistry.
+If the key is set to `Yes`, the MacBook is in clamshell mode. The key is set to `No` otherwise.
 
-This tool run this check and then uses the 'pmset' power management CLI to initiate sleep.
-See 'man pmset' for more details. Also try running 'pmset sleepnow' yourself.
+This tool run this check and then uses the `pmset` power management CLI to initiate sleep.
+See `man pmset` for more details. Also try running `pmset sleepnow` yourself.
 
-The 'clamshell' CLI can be run manually or as 'clamshelld' daemon.
-Run 'clamshell sleep' to check for clamshell mode and initiate sleep.
+The `clamshell` CLI can be run manually or as `clamshelld` daemon.
+Run `clamshell sleep` to check for clamshell mode and initiate sleep.
 
 Since you do not want to run this command everytime after closing the lid, you can install
-'clamshelld' as a launchd service. This will run the 'clamshell sleep' in the background
+`clamshelld` as a launchd service. This will run the `clamshell sleep` in the background
 continuously as needed.
 
 This way, any accidental wake-ups are immediately countered and the MacBook stays asleep.
@@ -34,16 +39,16 @@ To wake up the MacBook, you must open the lid then.
 
 Installation
 ============
-Run 'clamshell install' to install the launchd service.
-Run 'clamshell uninstall' to uninstall the launchd service.
-To check the status of the service, run 'clamshell status'.
-You can temporarily start and stop the service using 'clamshell load' and 'clamshell unload'.
+Run `clamshell install` to install the launchd service.
+Run `clamshell uninstall` to uninstall the launchd service.
+To check the status of the service, run `clamshell status`.
+You can temporarily start and stop the service using `clamshell load` and `clamshell unload`.
 
 The launchd service installation requires sudo permissions to create the service file
 and will prompt you for your password. The service will be installed in your user's
 Library/LaunchAgents folder and will be started automatically.
 
-Also  see 'clamshell help' for more commands and options.
+Also  see `clamshell help` for more commands and options.
 
 Caveats
 =======
