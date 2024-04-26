@@ -112,3 +112,11 @@ git-log-summary() {
     read -r summary
     echo "$summary"
 }
+
+gitroot() {
+    local gitroot
+    gitroot="$(git rev-parse --show-toplevel)" &&
+    if test "$(pwd)" != "$gitroot"
+    then cd "$gitroot"
+    fi
+}

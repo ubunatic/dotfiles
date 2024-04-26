@@ -40,6 +40,8 @@ alias gp="git push"
 alias push="git push"
 alias gpsup='git push --set-upstream origin $(git branch --show-current)'
 alias gpsupu='git push --set-upstream "$USER" "$(git branch --show-current)"'
+alias gr="gitroot"
+alias cg="gitroot"
 
 # Other aliases
 alias compose=docker-compose
