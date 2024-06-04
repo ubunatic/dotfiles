@@ -68,14 +68,21 @@ gitmail_domain() {
 }
 
 gitmail() {
-    echo -n "local:  "; git config user.email
-    echo -n "global: "; git config --global user.email
+    echo -n "local:   "; git config --local  user.email
+    echo -n "global:  "; git config --global user.email
+    echo -n "gpgsign: "; git config commit.gpgsign
 }
 
 gitmail_switch() {
-    case "$(git config --global user.email)" in
-    "$GIT_CORPORATE_EMAIL") git config --global user.email "$GIT_PRIVATE_EMAIL" ;;
-    "$GIT_PRIVATE_EMAIL")   git config --global user.email "$GIT_CORPORATE_EMAIL" ;;
+    local where="--local"
+    case "$1" in
+    local)  where="--local" ;;
+    global) where="--global" ;;
+    esac
+    echo "switching gitmail $where"
+    case "$(git config user.email)" in
+    "$GIT_CORPORATE_EMAIL") git config "$where" user.email "$GIT_PRIVATE_EMAIL" ;;
+    "$GIT_PRIVATE_EMAIL")   git config "$where" user.email "$GIT_CORPORATE_EMAIL" ;;
     *) error "failed to change gitmail" ;;
     esac
     gitmail

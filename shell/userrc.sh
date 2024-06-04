@@ -4,6 +4,7 @@
 # Add some utility functions to be used in micro libs for daily work.
 # Load all desired dotfiles here by `source`ing them, as shown below.
 
+#shellcheck disable=SC1091
 if test -e "$DOTFILES"; then
 source "$DOTFILES/shell/environment.sh"  # load this first, to setup basic file location info
 source "$DOTFILES/shell/common.sh"       # load this second to load logging funcs needed by other scripts
@@ -16,6 +17,7 @@ source "$DOTFILES/shell/gh.sh"
 source "$DOTFILES/shell/py.sh"
 source "$DOTFILES/shell/go.sh"
 source "$DOTFILES/shell/gomake.sh"
+source "$DOTFILES/shell/swift.sh"
 source "$DOTFILES/shell/gcloud.sh"
 source "$DOTFILES/shell/starship.sh"
 source "$DOTFILES/shell/efiboot.sh"
