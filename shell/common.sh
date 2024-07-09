@@ -57,6 +57,9 @@ find_up() {
   done
 }
 
+# emulate make $(shell ...) command
+shell () { bash -c "$*"; }
+
 {
   unalias error
   unalias debug
