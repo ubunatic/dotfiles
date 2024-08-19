@@ -124,6 +124,9 @@ gitroot() {
     local gitroot
     gitroot="$(git rev-parse --show-toplevel)" &&
     if test "$(pwd)" != "$gitroot"
-    then cd "$gitroot"
+    then cd "$gitroot" || return $?
+    fi
+    if test $# -gt 0
+    then cd "$@" || return $?
     fi
 }
