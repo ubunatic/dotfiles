@@ -32,9 +32,9 @@ func ConvertCsv(src, dst string, opts ...Opt) error {
 	}
 
 	slog.Debug("Read csv file", "records", len(records), "nlMode", nlMode)
-	for _, rec := range records {
-		slog.Debug("Record", "record", rec)
-	}
+	// for _, rec := range records {
+	// 	slog.Debug("Record", "record", rec)
+	// }
 
 	for _, converter := range o.converters {
 		records, err = converter(records)

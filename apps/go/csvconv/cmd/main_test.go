@@ -1,4 +1,4 @@
-package csvconv_test
+package main_test
 
 import (
 	"log/slog"
@@ -17,11 +17,11 @@ func TestCli(t *testing.T) {
 	defer os.Remove(f2)
 
 	err := os.WriteFile(f1, []byte(strings.Join([]string{
-		"a,b,c", "1,2", "4,5,6,7",
+		`a,b,c`, `1.1,2.123`, `"1,454,345.12",5,6,7,0,-1.0,"-19,123,345.00"`, "",
 	}, "\n")), 0o644)
 
 	app := csvconv.App()
-	args := []string{"csvconv", "-v", "-d", ",", "-D", ";", "-H", "1", "convert", f1, f2}
+	args := []string{"csvconv", "-v", "-d", ",", "-D", ";", "-H", "1", "-S", ",", "-c", "numsep,numclean", "convert", f1, f2}
 	err = app.Run(args)
 	slog.Debug("Error", "error", err)
 	require.NoError(t, err)
@@ -29,6 +29,13 @@ func TestCli(t *testing.T) {
 	data, err := os.ReadFile(f2)
 	require.NoError(t, err)
 	require.Equal(t, strings.Join([]string{
-		"1;2", "4;5;6;7\n",
+		"1,1;2.123", "1.454.345,12;5;6;7;0;-1,0;-19.123.345,00", "",
 	}, "\n"), string(data))
+}
+
+func TestHelp(t *testing.T) {
+	app := csvconv.App()
+	args := []string{"csvconv", "--help"}
+	err := app.Run(args)
+	require.NoError(t, err)
 }

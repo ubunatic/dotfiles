@@ -32,21 +32,39 @@ func App() *cli.App {
 				Usage:   "Verbose output",
 				Value:   false,
 			},
+			&cli.StringSliceFlag{
+				Name:    "converters",
+				Aliases: []string{"c"},
+				Usage:   "One or more Converters: numclean, numsep",
+				Value:   cli.NewStringSlice(),
+			},
 			&cli.StringFlag{
-				Name:    "delimiter",
+				Name:    "numsep",
+				Aliases: []string{"s"},
+				Usage:   "Number separator",
+				Value:   ".",
+			},
+			&cli.StringFlag{
+				Name:    "dst-numsep",
+				Aliases: []string{"S"},
+				Usage:   "Destination number separator",
+				Value:   "",
+			},
+			&cli.StringFlag{
+				Name:    "delim",
 				Aliases: []string{"d"},
 				Usage:   "Delimiter",
 				Value:   ",",
 			},
 			&cli.StringFlag{
-				Name:    "dst-delimiter",
+				Name:    "dst-delim",
 				Aliases: []string{"D"},
 				Usage:   "Destination delimiter (default is source delimiter)",
 			},
 			&cli.StringFlag{
 				Name:    "dst-newline",
 				Aliases: []string{"n"},
-				Usage:   "Output mode: auto, nl, crlf",
+				Usage:   "Destination newline mode: auto, nl, crlf",
 				Value:   "auto",
 			},
 			&cli.BoolFlag{
@@ -82,12 +100,14 @@ func App() *cli.App {
 					src := ctx.Args().Get(0)
 					dst := ctx.Args().Get(1)
 					inline := ctx.Bool("inline")
-					delim := ctx.String("delimiter")
-					dstDelim := ctx.String("dst-delimiter")
+					delim := ctx.String("delim")
+					dstDelim := ctx.String("dst-delim")
 					if dstDelim == "" {
 						dstDelim = delim
 					}
 					headers := ctx.Int64("cut-headers")
+					numSep := ctx.String("numsep")
+					dstNumSep := ctx.String("dst-numsep")
 
 					errs := []string{}
 
@@ -119,12 +139,42 @@ func App() *cli.App {
 						return errors.New("invalid arguments")
 					}
 
+					if dstNumSep == "" {
+						dstNumSep = numSep
+					}
+
+					convs := []converters.Converter{}
+					if headers > 0 {
+						convs = append(convs, converters.CutHeadersConverter(headers))
+					}
+					for _, name := range ctx.StringSlice("converters") {
+						switch name {
+						case "numclean":
+							srcSep := rune(numSep[0])
+							dstSep := rune(dstNumSep[0])
+							conv := converters.CleanNumbersConverter(srcSep)
+							if dstSep != 0 {
+								conv = converters.NumberSeparatorsConverter(srcSep, dstSep)
+							}
+							slog.Debug("Adding converter", "converter", name)
+							convs = append(convs, conv)
+						case "numsep":
+							srcSep := rune(numSep[0])
+							dstSep := rune(dstNumSep[0])
+							conv := converters.NumberSeparatorsConverter(srcSep, dstSep)
+							slog.Debug("Adding converter", "converter", name)
+							convs = append(convs, conv)
+						default:
+							slog.Error("Unknown converter", "converter", name)
+						}
+					}
+
 					err := ConvertCsv(
 						src, dst,
 						WithDelimiters(rune(delim[0]), rune(dstDelim[0])),
 						WithOutputMode(mode),
 						WithInline(inline),
-						With(converters.CutHeadersConverter(headers)),
+						With(convs...),
 					)
 					if err != nil {
 						slog.Error("Conversion Error", "error", err)
