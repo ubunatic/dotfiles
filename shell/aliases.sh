@@ -50,6 +50,9 @@ alias main="git checkout main && git pull"
 # Other aliases
 alias compose=docker-compose
 
+# CSV Converter app
+alias cvsconv=csvconv
+
 if test "$SYSTEM_UNAME" = "Darwin"
 then alias apt="brew"
 fi

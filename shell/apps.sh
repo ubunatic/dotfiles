@@ -1,11 +1,41 @@
 
+# set to a non-empty value to force building all go apps
+DOTFILES_MUST_BUILD_APPS=
+
+dotapp-build-go-app() {
+    local dir="$1"                  # app directory, including the app name
+    local app=$(basename $dir)      # app name is the last part of the path
+    local dst="$DOTFILES/bin/$app"  # destination binary
+
+    if test -e "$DOTFILES/bin/$app" && test -z "$DOTFILES_MUST_BUILD_APPS"
+    then return 0  # already built
+    fi
+
+    (
+      cd "$dir" || return 1  # cannot cd to the app directory
+
+      for f in ./main.go ./cmd/main.go ./$app.go ./cmd/$app.go; do
+          if   test -e "$f"
+          then go build -o "$dst" "$f" && return 0
+          fi
+      done
+
+      return 1  # no buildable file found
+    )
+}
+
+dotapp-rebuild-all() {
+    for app in $DOTFILES/apps/go/*; do
+        DOTFILES_MUST_BUILD_APPS=1 dotapp-build-go-app $app
+    done
+}
+
 if test -e $DOTFILES/apps/go && type go >/dev/null; then
   # TODO: add a step to build them once
+  mkdir -p $DOTFILES/bin
   for app in $DOTFILES/apps/go/*; do
-    if   test -e "$app/main.go"
-    then alias $(basename $app)="go run $app/main.go"
-    elif test -e "$app/cmd/main.go"
-    then alias $(basename $app)="go run $app/cmd/main.go"
+    if   dotapp-build-go-app $app
+    then alias $(basename $app)="$DOTFILES/bin/$(basename $app)"
     fi
   done
 fi
