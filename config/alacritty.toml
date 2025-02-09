@@ -1,0 +1,54 @@
+# See here https://alacritty.org/config-alacritty.html
+
+[general]
+
+[env]
+
+[window]
+dimensions = { columns = 120, lines = 50 }
+
+[font]
+size = 15
+bold = { style = "Bold" }
+offset = { x = 1, y = 1 }
+
+[scrolling]
+
+[colors]
+[colors.primary]
+[colors.search]
+[colors.hints]
+[colors.normal]
+[colors.bright]
+[colors.dim]
+
+[bell]
+
+[selection]
+
+[cursor]
+
+[terminal]
+
+[mouse]
+
+[hints]
+
+[keyboard]
+bindings = [
+  # Commands
+  { key = "N", mods = "Shift",   action = "CreateNewWindow" },
+  { key = "O", mods = "Command", action = "Open" },
+
+  # Umlaut Umleitung
+  { key = "ö",                            chars = "[" },
+  { key = "ä",                            chars = "]" },
+  { key = "ö", mods = "Shift",            chars = "{" },
+  { key = "ä", mods = "Shift",            chars = "}" },
+  { key = "ö", mods = "Alt|Option",       chars = "ö" },
+  { key = "ä", mods = "Alt|Option",       chars = "ä" },
+  { key = "ö", mods = "Alt|Option|Shift", chars = "Ö" },
+  { key = "ä", mods = "Alt|Option|Shift", chars = "Ä" },
+]
+
+[debug]
