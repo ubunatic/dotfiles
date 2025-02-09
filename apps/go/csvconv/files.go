@@ -6,6 +6,8 @@ import (
 	"errors"
 	"os"
 	"strings"
+
+	"ubunatic.com/dotapps/go/csvconv/converters"
 )
 
 type NLMode string
@@ -25,13 +27,15 @@ func (nl NLMode) Delim() string {
 
 var ErrInvalidNLMode = errors.New("invalid newline mode")
 
+func MustParseNLMode(s string) NLMode { return converters.MustParse(s, ParseNLMode) }
 func ParseNLMode(s string) (NLMode, error) {
+	s = strings.ToUpper(s)
 	switch s {
-	case "nl":
+	case "NL", "\n":
 		return NoUseCRLF, nil
-	case "crlf":
+	case "CRLF", "\r\n":
 		return UseCRLF, nil
-	case "auto", "":
+	case "AUTO", "ANY", "":
 		return AutoCRLF, nil
 	default:
 		return AutoCRLF, ErrInvalidNLMode
