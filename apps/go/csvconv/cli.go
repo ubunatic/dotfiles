@@ -7,6 +7,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 	"ubunatic.com/dotapps/go/csvconv/converters"
+	"ubunatic.com/dotapps/go/csvconv/csvlang"
 )
 
 func join(lines ...string) string {
@@ -32,157 +33,120 @@ func App() *cli.App {
 				Usage:   "Verbose output",
 				Value:   false,
 			},
-			&cli.StringSliceFlag{
-				Name:    "converters",
-				Aliases: []string{"c"},
-				Usage:   "One or more Converters: numclean, numsep",
-				Value:   cli.NewStringSlice(),
-			},
-			&cli.StringFlag{
-				Name:    "numsep",
-				Aliases: []string{"s"},
-				Usage:   "Number separator",
-				Value:   ".",
-			},
-			&cli.StringFlag{
-				Name:    "dst-numsep",
-				Aliases: []string{"S"},
-				Usage:   "Destination number separator",
-				Value:   "",
-			},
-			&cli.StringFlag{
-				Name:    "delim",
-				Aliases: []string{"d"},
-				Usage:   "Delimiter",
-				Value:   ",",
-			},
-			&cli.StringFlag{
-				Name:    "dst-delim",
-				Aliases: []string{"D"},
-				Usage:   "Destination delimiter (default is source delimiter)",
-			},
-			&cli.StringFlag{
-				Name:    "dst-newline",
-				Aliases: []string{"n"},
-				Usage:   "Destination newline mode: auto, nl, crlf",
-				Value:   "auto",
-			},
 			&cli.BoolFlag{
 				Name:    "inline",
 				Aliases: []string{"i"},
 				Usage:   "Inline edit (overwrite src, dst must be empty)",
 				Value:   false,
 			},
-			&cli.Int64Flag{
-				Name:    "cut-headers",
-				Aliases: []string{"H"},
-				Usage:   "Remove headers lines (first N lines)",
-				Value:   0,
+			&cli.StringFlag{
+				Name:     "input",
+				Aliases:  []string{"f"},
+				Usage:    "Input file",
+				Value:    "",
+				Required: true,
+			},
+			&cli.StringFlag{
+				Name:    "output",
+				Aliases: []string{"o"},
+				Usage:   "Output file",
+				Value:   "",
+			},
+			&cli.StringFlag{
+				Name:    "newline",
+				Aliases: []string{"n"},
+				Usage:   "Output newline mode (auto, nl, crlf)",
+				Value:   "auto",
+			},
+			&cli.StringFlag{
+				Name:    "delim",
+				Aliases: []string{"d"},
+				Usage:   "Delimiter for src/dst (can be set separately or together, e.g. -d ',;' | -d ',')",
+				Value:   ",",
 			},
 		},
 		Args:      true,
 		ArgsUsage: "src [dst]  # no more flags after this",
 		Description: join(
-			"src    Source CSV file (required, use - for stdin)",
-			"dst    Destination CSV file (optional, default is stdout)",
+			"query...  # CSV transformation language",
+			"Examples:",
+			"   'select a,b,c | numbers dot'",
+			"   'select 1,2,3 | dates iso'",
+			"   'select a,b,c | numbers dot:comma'",
+			"   'select a,b,c | numbers dot:comma'",
+			"   'select a,b,c | numbers dot:comma'",
 		),
-		DefaultCommand:       "convert",
 		Suggest:              true,
 		EnableBashCompletion: true,
 		HideVersion:          true,
-		Commands: []*cli.Command{
-			{
-				Name:  "convert",
-				Usage: "Convert CSV files",
-				Action: func(ctx *cli.Context) error {
-					setupLevel(ctx.Bool("verbose"))
+		Action: func(ctx *cli.Context) error {
+			setupLevel(ctx.Bool("verbose"))
+			query := ctx.Args().Slice()
+			inline := ctx.Bool("inline")
+			src := ctx.String("input")
+			dst := ctx.String("output")
+			delim := ctx.String("delim")
+			dstDelim := delim
 
-					src := ctx.Args().Get(0)
-					dst := ctx.Args().Get(1)
-					inline := ctx.Bool("inline")
-					delim := ctx.String("delim")
-					dstDelim := ctx.String("dst-delim")
-					if dstDelim == "" {
-						dstDelim = delim
-					}
-					headers := ctx.Int64("cut-headers")
-					numSep := ctx.String("numsep")
-					dstNumSep := ctx.String("dst-numsep")
+			errs := []string{}
 
-					errs := []string{}
+			if len(delim) > 1 {
+				delims := strings.Split(delim, "")
+				delim = delims[0]
+				if len(delims) != 2 {
+					errs = append(errs, "delimiter must be a single character or a pair of characters")
+				} else {
+					dstDelim = delims[1]
+				}
+			}
 
-					if src == "-" && inline {
-						errs = append(errs, "stdin cannot be used with inline")
-					}
-					if src == "" {
-						errs = append(errs, "src is required")
-					}
-					if inline && dst != "" {
-						errs = append(errs, "dst cannot be used with inline")
-					}
-					if len(delim) != 1 {
-						errs = append(errs, "delimiter must be a single character")
-					}
-					if len(dstDelim) != 1 {
-						errs = append(errs, "destination delimiter must be a single character")
-					}
+			if src == "-" && inline {
+				errs = append(errs, "stdin cannot be used with inline")
+			}
+			if src == "" {
+				errs = append(errs, "src is required")
+			}
+			if inline && dst != "" {
+				errs = append(errs, "dst cannot be used with inline")
+			}
+			if len(delim) != 1 {
+				errs = append(errs, "delimiter must be a single character")
+			}
+			if len(dstDelim) != 1 {
+				errs = append(errs, "destination delimiter must be a single character")
+			}
 
-					mode, modeErr := ParseNLMode(ctx.String("dst-newline"))
-					if modeErr != nil {
-						errs = append(errs, "invalid output mode")
-					}
+			mode, modeErr := ParseNLMode(ctx.String("nl"))
+			if modeErr != nil {
+				errs = append(errs, "invalid output mode")
+			}
 
-					if len(errs) > 0 {
-						for _, err := range errs {
-							slog.Error("Argument Error", "error", err)
-						}
-						return errors.New("invalid arguments")
-					}
+			if len(errs) > 0 {
+				for _, err := range errs {
+					slog.Error("Argument Error", "error", err)
+				}
+				return errors.New("invalid arguments")
+			}
 
-					if dstNumSep == "" {
-						dstNumSep = numSep
-					}
+			statements := csvlang.Parse(query...)
 
-					convs := []converters.Converter{}
-					if headers > 0 {
-						convs = append(convs, converters.CutHeadersConverter(headers))
-					}
-					for _, name := range ctx.StringSlice("converters") {
-						switch name {
-						case "numclean":
-							srcSep := rune(numSep[0])
-							dstSep := rune(dstNumSep[0])
-							conv := converters.CleanNumbersConverter(srcSep)
-							if dstSep != 0 {
-								conv = converters.NumberSeparatorsConverter(srcSep, dstSep)
-							}
-							slog.Debug("Adding converter", "converter", name)
-							convs = append(convs, conv)
-						case "numsep":
-							srcSep := rune(numSep[0])
-							dstSep := rune(dstNumSep[0])
-							conv := converters.NumberSeparatorsConverter(srcSep, dstSep)
-							slog.Debug("Adding converter", "converter", name)
-							convs = append(convs, conv)
-						default:
-							slog.Error("Unknown converter", "converter", name)
-						}
-					}
+			convs := []converters.Converter{}
+			for _, stmt := range statements {
+				convs = append(convs, stmt.Converter())
+			}
 
-					err := ConvertCsv(
-						src, dst,
-						WithDelimiters(rune(delim[0]), rune(dstDelim[0])),
-						WithOutputMode(mode),
-						WithInline(inline),
-						With(convs...),
-					)
-					if err != nil {
-						slog.Error("Conversion Error", "error", err)
-						return cli.Exit("Conversion failed", 1)
-					}
-					return nil
-				},
-			},
+			err := ConvertCsv(
+				src, dst,
+				WithDelimiters(rune(delim[0]), rune(dstDelim[0])),
+				WithOutputMode(mode),
+				WithInline(inline),
+				With(convs...),
+			)
+			if err != nil {
+				slog.Error("Conversion Error", "error", err)
+				return cli.Exit("Conversion failed", 1)
+			}
+			return nil
 		},
 	}
 }
