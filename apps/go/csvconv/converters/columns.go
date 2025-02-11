@@ -10,6 +10,11 @@ func ColumnIndex(header []string, columns ...string) ([]int, error) {
 	indices := []int{}
 	notFound := []string{}
 
+	if len(header) == 0 {
+		slog.Error("Empty header")
+		return nil, ErrColumnNotFound
+	}
+
 	for _, col := range columns {
 		// special case for selecting all columns
 		if col == "*" {

@@ -11,7 +11,7 @@ import (
 var ErrInvalidColumnIndex = errors.New("invalid column indices")
 
 func Filter(records Records, column, op, value string) (Records, error) {
-	indices, err := ColumnIndex(records[0], column)
+	indices, err := records.Columns(column)
 	if err != nil {
 		return nil, err
 	}

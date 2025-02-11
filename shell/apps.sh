@@ -15,10 +15,12 @@ dotapp-build-go-app() {
       cd "$dir" || return 1  # cannot cd to the app directory
 
       for f in ./main.go ./cmd/main.go ./$app.go ./cmd/$app.go; do
-          if   test -e "$f"
-          then go build -o "$dst" "$f" && return 0
+          test -e "$f" || continue
+          if test -n "$DOTFILES_RUN_APP_TESTS"
+          then go test ./... && go build -o "$dst" "$f" && return 0
+          else                  go build -o "$dst" "$f" && return 0
           fi
-      done
+      done >/dev/stderr
 
       return 1  # no buildable file found
     )
@@ -26,7 +28,7 @@ dotapp-build-go-app() {
 
 dotapp-rebuild-all() {
     for app in $DOTFILES/apps/go/*; do
-        DOTFILES_MUST_BUILD_APPS=1 dotapp-build-go-app $app
+        DOTFILES_MUST_BUILD_APPS=1 DOTFILES_RUN_APP_TESTS=1 dotapp-build-go-app $app
     done
 }
 
