@@ -25,6 +25,8 @@ func Parse(program ...string) []Statement {
 			stmt = NewDatesStatement(tup.args...)
 		case "filter", "and", "where", "if":
 			stmt = NewFilterStatement(tup.args)
+		case "sort", "order":
+			stmt = NewSortStatement(tup.args, tup.options...)
 		default:
 			panic("unknown statement: " + tup.keyword)
 		}

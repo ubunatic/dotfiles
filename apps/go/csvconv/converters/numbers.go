@@ -108,7 +108,7 @@ func ReplaceSeparator(value string, srcSep, dstSep rune) string {
 }
 
 func ConvertNumber(records Records, column string, from, to NumberFormat) (Records, error) {
-	idx, err := ColumnIndex(records[0], column)
+	idx, err := records.Columns(column)
 	if err != nil {
 		return nil, err
 	}
@@ -138,9 +138,8 @@ func ConvertNumbers(records Records, from, to NumberFormat) (Records, error) {
 }
 
 func convertNumber(records Records, column int, from, to NumberFormat) (Records, error) {
-	result := Records{}
-	result = append(result, records[0]) // header
-	for _, record := range records[1:] {
+	result := records.Header().Clone()
+	for _, record := range records.Data() {
 		if len(record) <= column {
 			// unset field, keep the row as is
 			result = append(result, record)

@@ -41,7 +41,7 @@ func ParseDateFormat(s string) (DateFormat, error) {
 }
 
 func ConvertDate(records Records, column string, from, to DateFormat) (Records, error) {
-	idx, err := ColumnIndex(records[0], column)
+	idx, err := records.Columns(column)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func ConvertDate(records Records, column string, from, to DateFormat) (Records, 
 	}
 
 	result := Records{}
-	for _, record := range records[1:] {
+	for _, record := range records.Data() {
 		if len(record) <= idx[0] {
 			continue
 		}
@@ -64,7 +64,7 @@ func ConvertDate(records Records, column string, from, to DateFormat) (Records, 
 		result = append(result, newRecord)
 	}
 
-	return slices.Concat(Records{records[0]}, result), nil
+	return records.Header().Concat(result), nil
 }
 
 func ConvertDates(records Records, from, to DateFormat) (Records, error) {

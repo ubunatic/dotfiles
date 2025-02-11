@@ -61,3 +61,9 @@ func ConvertCsv(src, dst string, opts ...Opt) error {
 
 	return nil
 }
+
+// ConvertCSVStream converts a CSV file from src to dst using the provided options.
+// It reads the input line-by-line and writes the output line-by-line.
+func ConvertCSVStream(src, dst string, opts ...Opt) error {
+	return nil
+}

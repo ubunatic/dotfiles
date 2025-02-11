@@ -75,6 +75,13 @@ type FilterStatement struct {
 	Value  string
 }
 
+type SortStatement struct {
+	Column       string
+	Asc          bool
+	AsNumber     bool
+	NumberFormat converters.NumberFormat
+}
+
 func NewSelectStatement(args ...string) *SelectStatement {
 	cols, renames := []string{}, map[int]string{}
 
@@ -179,6 +186,37 @@ func NewFilterStatement(args []string) *FilterStatement {
 	}
 }
 
+func NewSortStatement(args []string, opts ...string) *SortStatement {
+	asc := true
+	number := false
+	fmt := converters.NumberInvalid
+
+	for _, opt := range opts {
+		switch opt {
+		case "asc":
+			asc = true
+		case "desc":
+			asc = false
+		case "num":
+			if fmt == converters.NumberInvalid {
+				fmt = converters.NumberDot
+			}
+		case "dot":
+			fmt = converters.NumberDot
+		case "comma":
+			fmt = converters.NumberComma
+		default:
+			slog.Error("invalid sort option", "opt", opt)
+		}
+	}
+
+	return &SortStatement{
+		Column:   converters.Trim(args[0]),
+		Asc:      asc,
+		AsNumber: number,
+	}
+}
+
 // Implement the Statement interface for each statement type.
 // This allows to use the statements in the CSV transformation pipeline.
 
@@ -220,6 +258,13 @@ func (s *DatesStatement) Converter() converters.Converter {
 func (s *FilterStatement) Converter() converters.Converter {
 	fn := func(records converters.Records) (converters.Records, error) {
 		return converters.Filter(records, s.Column, s.Op, s.Value)
+	}
+	return fn
+}
+
+func (s *SortStatement) Converter() converters.Converter {
+	fn := func(records converters.Records) (converters.Records, error) {
+		return converters.Sort(records, s.Column, s.Asc, s.NumberFormat)
 	}
 	return fn
 }
