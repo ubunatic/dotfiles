@@ -120,6 +120,18 @@ func TestPrograms(t *testing.T) {
 				{"Bob", "2023-03-03"},
 			},
 		},
+		{
+			program: "select name, age | number:dot age | sort:num age | select name",
+			want: converters.Records{
+				{"name"}, {"Charlie"}, {"Alice"}, {"Bob"},
+			},
+		},
+		{
+			program: "select name, age | number:dot age | sort:num:desc age | select name",
+			want: converters.Records{
+				{"name"}, {"Bob"}, {"Alice"}, {"Charlie"},
+			},
+		},
 	}
 
 	for _, tt := range tests {

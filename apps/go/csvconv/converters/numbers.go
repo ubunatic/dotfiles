@@ -47,9 +47,9 @@ func MustParseNumberFormat(s string) NumberFormat { return MustParse(s, ParseNum
 func ParseNumberFormat(s string) (NumberFormat, error) {
 	s = strings.TrimSpace(strings.ToLower(s))
 	switch s {
-	case "comma", ",":
+	case "comma", ",", "de":
 		return NumberComma, nil
-	case "dot", ".":
+	case "dot", ".", "float", "int", "num", "en":
 		return NumberDot, nil
 	default:
 		return NumberInvalid, ErrInvalidNumberFormat
