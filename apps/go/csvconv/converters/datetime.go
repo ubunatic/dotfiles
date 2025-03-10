@@ -51,16 +51,16 @@ func ConvertDate(records Records, column string, from, to DateFormat) (Records, 
 
 	result := Records{}
 	for _, record := range records.Data() {
-		if len(record) <= idx[0] {
+		if len(record) <= idx[0].Index {
 			continue
 		}
-		val := record[idx[0]]
+		val := record[idx[0].Index]
 		date, err := ParseDate(val, from)
 		if err != nil {
 			return nil, err
 		}
 		newRecord := slices.Clone(record)
-		newRecord[idx[0]] = FormatDate(date, to)
+		newRecord[idx[0].Index] = FormatDate(date, to)
 		result = append(result, newRecord)
 	}
 

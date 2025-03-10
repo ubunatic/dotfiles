@@ -28,17 +28,21 @@ func (r Records) Header() Records {
 	return r[:1]
 }
 
-func (r Records) Columns(name ...string) ([]int, error) {
-	return ColumnIndex(r.HeaderRow(), name...)
+func (r Records) Columns(name ...string) ([]Column, error) {
+	return ColumnIndex(r.HeaderRow(), Cols(name...)...)
 }
 
-func (r Records) Column(name string) (int, error) {
-	idx, err := ColumnIndex(r.HeaderRow(), name)
+func (r Records) ColumnIndex(names ...string) ([]Column, error) {
+	return ColumnIndex(r.HeaderRow(), Cols(names...)...)
+}
+
+func (r Records) Column(name string) (Column, error) {
+	idx, err := ColumnIndex(r.HeaderRow(), Col(name))
 	if err != nil {
-		return -1, err
+		return zeroCol, err
 	}
 	if len(idx) == 0 {
-		return -1, ErrColumnNotFound
+		return zeroCol, ErrColumnNotFound
 	}
 	return idx[0], nil
 }

@@ -55,16 +55,17 @@ func parseStatements(program ...string) []statementTuple {
 
 // parseTuple parses a statement text into a statement tuple.
 func parseTuple(text string) statementTuple {
-	tuple := statementTuple{}
-	parts := strings.Split(text, " ")
-	kw := strings.ToLower(parts[0])
-	kwParts := strings.Split(kw, ":")
-	tuple.keyword = kwParts[0]
-	if len(kwParts) > 1 {
+	words := strings.Split(text, " ")
+	keyword := strings.ToLower(words[0])   // example: "select", "number:float"
+	kwParts := strings.Split(keyword, ":") // example: ["select"], ["number", "float"]
+	tuple := statementTuple{
+		keyword: kwParts[0],
+	}
+	if len(kwParts) > 1 { // keyword has options
 		tuple.options = kwParts[1:]
 	}
-	if len(parts) > 1 {
-		tuple.args = parts[1:]
+	if len(words) > 1 { // statement has multiple args
+		tuple.args = words[1:]
 	}
 	return tuple
 }

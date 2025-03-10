@@ -8,7 +8,7 @@ import (
 
 var ErrColumnNotFound = errors.New("column not found")
 
-func SelectColumns(records Records, columns []string, renames map[int]string) (Records, error) {
+func SelectColumns(records Records, columns []Column) (Records, error) {
 	if len(columns) == 0 {
 		return records, nil
 	}
@@ -18,35 +18,36 @@ func SelectColumns(records Records, columns []string, renames map[int]string) (R
 		return nil, err
 	}
 
-	slog.Debug("Selecting columns", "columns", columns, "indices", indices, "renames", renames)
+	slog.Debug("Selecting columns", "columns", columns, "indices", indices)
 
-	return selectAndRename(records, indices, renames)
+	return selectAndRename(records, indices)
 }
 
-func selectAndRename(records Records, indices []int, renames map[int]string) (Records, error) {
+func selectAndRename(records Records, columns []Column) (Records, error) {
 	result := make(Records, len(records))
 
 	for i, record := range records {
-		newRecord := make([]string, len(indices))
-		for j, idx := range indices {
-			if idx >= len(record) {
+		newRecord := make([]string, len(columns))
+		for j, col := range columns {
+			if col.Index >= len(record) {
 				continue
 			}
-			newRecord[j] = record[idx]
+			newRecord[j] = record[col.Index]
 		}
 		result[i] = newRecord
 	}
-	return renameHeader(result, renames)
+	return renameHeader(result, columns)
 }
 
-func renameHeader(records Records, renames map[int]string) (Records, error) {
-	if len(renames) == 0 {
+func renameHeader(records Records, cols []Column) (Records, error) {
+	if len(cols) == 0 {
 		return records, nil
 	}
 	header := make([]string, len(records[0]))
 	for i := range len(header) {
-		if newName, ok := renames[i]; ok {
-			header[i] = newName
+		rename := cols[i].Rename
+		if rename != "" {
+			header[i] = rename
 		} else {
 			header[i] = records[0][i]
 		}

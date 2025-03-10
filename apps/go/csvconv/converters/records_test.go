@@ -29,7 +29,7 @@ func TestRecords(t *testing.T) {
 
 	columns, err := r.Columns("a", "b")
 	require.NoError(t, err)
-	require.Equal(t, []int{0, 1}, columns)
+	require.Equal(t, []Column{{Name: "a", Index: 0}, {Name: "b", Index: 1}}, columns)
 
 	head := r.Head(1)
 	require.Equal(t, r[:2], head)
@@ -68,7 +68,7 @@ func TestHeaderOnly(t *testing.T) {
 
 	columns, err := records.Columns("a", "b")
 	require.NoError(t, err)
-	require.Equal(t, []int{0, 1}, columns)
+	require.Equal(t, []Column{{Name: "a", Index: 0}, {Name: "b", Index: 1}}, columns)
 
 	head := records.Head(1)
 	require.Equal(t, records, head)
