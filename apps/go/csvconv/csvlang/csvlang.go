@@ -7,14 +7,13 @@ import (
 	"ubunatic.com/dotapps/go/csvconv/converters"
 )
 
-// Csvlang Grammar
-// ==============
+// CsvLang Grammar
+// ===============
+// The CSV transformation language is a simple language for defining
+// data transformation for CSV file content.
 //
-// The CSV transformation language is a simple language that allows to define
-// a sequence of transformations to apply to a CSV file.
-//
-// The language is composed of a sequence of statements separated by a pipe "|".
-// Each statement is a transformation that can be applied to the CSV file.
+// The language uses sequences of statements separated by a pipe "|".
+// Each statement is a transformation that can be applied to the CSV data.
 //
 // The following column-selection statements are supported:
 // - `select <column1>, <column2>, ...`: selects the column with the given name.
@@ -42,9 +41,27 @@ type Statement interface {
 	Converter() converters.Converter
 }
 
+func Col(name string) converters.Column        { return converters.Col(name) }
+func Cols(names ...string) []converters.Column { return converters.Cols(names...) }
+
 type SelectStatement struct {
-	Columns  []string
-	NewNames map[int]string
+	Columns []converters.Column
+}
+
+func (s *SelectStatement) ColumnNames() []string {
+	names := make([]string, len(s.Columns))
+	for i, col := range s.Columns {
+		names[i] = col.Name
+	}
+	return names
+}
+
+func (s *SelectStatement) Renames() []string {
+	renames := make([]string, len(s.Columns))
+	for i, col := range s.Columns {
+		renames[i] = col.Rename
+	}
+	return renames
 }
 
 type NumberStatement struct {
@@ -70,7 +87,7 @@ type DatesStatement struct {
 }
 
 type FilterStatement struct {
-	Column string
+	Column converters.Column
 	Op     string
 	Value  string
 }
@@ -83,31 +100,48 @@ type SortStatement struct {
 }
 
 func NewSelectStatement(args ...string) *SelectStatement {
-	cols, renames := []string{}, map[int]string{}
+	cols := []converters.Column{}
 
 	arg := strings.Join(args, " ")
 	args = converters.TrimSplit(arg, ",")
 
-	for _, arg := range args {
-		renameParts := converters.Unquotes(converters.TrimSplit(arg, "as", "::"))
-		switch len(renameParts) {
-		case 1:
-			cols = append(cols, renameParts[0])
+	for idx, arg := range args {
+		renameParts := converters.Unquotes(converters.TrimSplit(arg, "as", "->"))
+		col := renameParts[0]
+
+		colParts := strings.Split(col, ":")
+		colType := ""
+		colCast := ""
+		switch len(colParts) {
+		case 1: // pass
 		case 2:
-			renames[len(cols)] = renameParts[1]
-			cols = append(cols, renameParts[0])
+			colCast = colParts[1]
+		case 3:
+			colType = colParts[1]
+			colCast = colParts[2]
 		default:
-			panic("invalid select statement")
+			panic("invalid cast in select statement")
 		}
+
+		rename := ""
+		switch len(renameParts) {
+		case 1: // pass
+		case 2:
+			rename = renameParts[1]
+		default:
+			panic("invalid rename in select statement")
+		}
+
+		cols = append(cols, converters.Column{
+			Name:   col,
+			Index:  idx,
+			Rename: rename,
+			Type:   colType,
+			Cast:   colCast,
+		})
 	}
 
-	if len(renames) == 0 {
-		renames = nil
-	}
-	return &SelectStatement{
-		Columns:  cols,
-		NewNames: renames,
-	}
+	return &SelectStatement{Columns: cols}
 }
 
 func getNumberFormat(opts []string) (from, to converters.NumberFormat) {
@@ -180,7 +214,7 @@ func NewFilterStatement(args []string) *FilterStatement {
 	}
 	// TODO: add OR support
 	return &FilterStatement{
-		Column: converters.Trim(args[0]),
+		Column: converters.Col(converters.Trim(args[0])),
 		Op:     strings.ToLower(converters.Trim(args[1])),
 		Value:  converters.Trim(strings.Join(args[2:], " ")),
 	}
@@ -222,7 +256,7 @@ func NewSortStatement(args []string, opts ...string) *SortStatement {
 
 func (s *SelectStatement) Converter() converters.Converter {
 	fn := func(records converters.Records) (converters.Records, error) {
-		return converters.SelectColumns(records, s.Columns, s.NewNames)
+		return converters.SelectColumns(records, s.Columns)
 	}
 	return fn
 }
@@ -257,7 +291,7 @@ func (s *DatesStatement) Converter() converters.Converter {
 
 func (s *FilterStatement) Converter() converters.Converter {
 	fn := func(records converters.Records) (converters.Records, error) {
-		return converters.Filter(records, s.Column, s.Op, s.Value)
+		return converters.Filter(records, s.Column.Name, s.Op, s.Value)
 	}
 	return fn
 }

@@ -100,16 +100,16 @@ func TestFilter(t *testing.T) {
 	}
 }
 
-func equalRecords(a, b Records) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		for k, v := range a[i] {
-			if b[i][k] != v {
-				return false
-			}
-		}
-	}
-	return true
-}
+// func equalRecords(a, b Records) bool {
+// 	if len(a) != len(b) {
+// 		return false
+// 	}
+// 	for i := range a {
+// 		for k, v := range a[i] {
+// 			if b[i][k] != v {
+// 				return false
+// 			}
+// 		}
+// 	}
+// 	return true
+// }

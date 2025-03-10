@@ -137,15 +137,15 @@ func ConvertNumbers(records Records, from, to NumberFormat) (Records, error) {
 	return result, nil
 }
 
-func convertNumber(records Records, column int, from, to NumberFormat) (Records, error) {
+func convertNumber(records Records, col Column, from, to NumberFormat) (Records, error) {
 	result := records.Header().Clone()
 	for _, record := range records.Data() {
-		if len(record) <= column {
+		if len(record) <= col.Index {
 			// unset field, keep the row as is
 			result = append(result, record)
 			continue
 		}
-		val := Unquote(record[column])
+		val := Unquote(record[col.Index])
 		if val == "" {
 			// empty field, keep the row as is
 			result = append(result, record)
@@ -153,13 +153,13 @@ func convertNumber(records Records, column int, from, to NumberFormat) (Records,
 		}
 
 		if !IsNumber(val, from) {
-			slog.Error("invalid number", "number", record[column])
+			slog.Error("invalid number", "number", record[col.Index])
 			return nil, ErrInvalidNumber
 		}
 		slog.Debug("converting number", "number", val, "from", from, "to", to)
 
 		newRecord := slices.Clone(record)
-		newRecord[column] = ReplaceSeparator(val, from.Sep(), to.Sep())
+		newRecord[col.Index] = ReplaceSeparator(val, from.Sep(), to.Sep())
 		result = append(result, newRecord)
 	}
 	return result, nil

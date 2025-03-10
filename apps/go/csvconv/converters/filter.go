@@ -10,23 +10,23 @@ import (
 
 var ErrInvalidColumnIndex = errors.New("invalid column indices")
 
-func Filter(records Records, column, op, value string) (Records, error) {
-	indices, err := records.Columns(column)
+func Filter(records Records, column string, op, value string) (Records, error) {
+	cols, err := records.ColumnIndex(column)
 	if err != nil {
 		return nil, err
 	}
-	if len(indices) != 1 {
-		slog.Error("invalid column indices for filter", "indices", indices, "column", column)
+	if len(cols) != 1 {
+		slog.Error("invalid column indices for filter", "indices", cols, "column", column)
 		return nil, ErrInvalidColumnIndex
 	}
-	return filter(records, indices[0], op, value)
+	return filter(records, cols[0], op, value)
 }
 
-func filter(records Records, column int, op, value string) (Records, error) {
+func filter(records Records, column Column, op, value string) (Records, error) {
 	result := Records{}
 	result = append(result, records[0]) // header
 	for _, record := range records[1:] {
-		if compare(record[column], value, op) {
+		if compare(record[column.Index], value, op) {
 			result = append(result, record)
 		}
 	}

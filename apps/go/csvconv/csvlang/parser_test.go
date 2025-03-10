@@ -12,6 +12,24 @@ func TestMain(t *testing.T) {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
 }
 
+func TestSlices(t *testing.T) {
+	cols := Cols("a")
+	cols[0].Index = 1
+	require.Equal(t, 1, cols[0].Index)
+
+	modifySlice := func(cols []converters.Column) {
+		cols[0].Index = 2
+	}
+
+	modifySlice(cols)
+	require.Equal(t, 2, cols[0].Index, "slice of structs argument must allow struct modification")
+
+	newCol := cols[0] // new var of a non-pointer struct is a shallow copy of the struct in the slice
+	newCol.Index = 3
+	require.Equal(t, 3, newCol.Index)
+	require.Equal(t, 2, cols[0].Index, "by-value copy of struct must not affect struct in slice")
+}
+
 func TestParse(t *testing.T) {
 	tests := []struct {
 		program string
@@ -19,8 +37,8 @@ func TestParse(t *testing.T) {
 		expects []Statement
 	}{
 		{
-			program: "select col1, col2",
-			expect:  &SelectStatement{Columns: []string{"col1", "col2"}},
+			program: "select col1,col2",
+			expect:  &SelectStatement{Columns: Cols("col1", "col2")},
 		},
 		{
 			program: "number:dot col1",
@@ -40,16 +58,16 @@ func TestParse(t *testing.T) {
 		},
 		{
 			program: "filter col1 > 10",
-			expect:  &FilterStatement{Column: "col1", Op: ">", Value: "10"},
+			expect:  &FilterStatement{Column: Col("col1"), Op: ">", Value: "10"},
 		},
 		{
 			program: "and col1 = 10",
-			expect:  &FilterStatement{Column: "col1", Op: "=", Value: "10"},
+			expect:  &FilterStatement{Column: Col("col1"), Op: "=", Value: "10"},
 		},
 		{
 			program: "select col1|numbers dot|dates iso",
 			expects: []Statement{
-				&SelectStatement{Columns: []string{"col1"}},
+				&SelectStatement{Columns: Cols("col1")},
 				&NumbersStatement{From: converters.NumberDot, To: converters.NumberDot},
 				&DatesStatement{From: converters.DateAny, To: converters.DateISO},
 			},
@@ -107,7 +125,7 @@ func TestPrograms(t *testing.T) {
 			},
 		},
 		{
-			program: "select 'full name' as name2 | select name2::name | filter name ~ 'Bob'",
+			program: "select 'full name' as name2 | select name2->name | filter name ~ 'Bob'",
 			want: converters.Records{
 				{"name"},
 				{"Bob B."},
