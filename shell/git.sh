@@ -130,3 +130,17 @@ gitroot() {
     then cd "$@" || return $?
     fi
 }
+
+# gitlog dumps git logs shows the git log for the last month
+gitlog() {
+    local month="$(date +%m)"
+    local year="$(date +%Y)"
+    local until="$(date +%Y-%m-01)"
+    if (( month == 1 ))
+    then (( month = 12)); (( year-- ))
+    else (( month-- ))
+    fi
+    (( month > 10 )) || month="0$month"
+    echo "# GIT LOG from $year-$month-01 to $until, args=[$*]"
+    git log --since="$year-$month-01" --until="$until" "$@"
+}
