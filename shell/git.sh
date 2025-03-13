@@ -150,6 +150,6 @@ gitlog() {
 
 gitlog-all() {
     for r in $(echo "$*")
-    do (cd $r && gitlog --patch > git.log)
+    do (cd $r && gitlog --patch > git.txt)
     done
 }
