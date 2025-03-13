@@ -144,3 +144,10 @@ gitlog() {
     echo "# GIT LOG from $year-$month-01 to $until, args=[$*]"
     git log --since="$year-$month-01" --until="$until" "$@"
 }
+
+gitlog-all() {
+    for r in $(echo "$*")
+    do  echo "# REPO: $r"
+        (cd $r && gitlog --patch)
+    done
+}
