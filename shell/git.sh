@@ -136,18 +136,20 @@ gitlog() {
     local month="$(date +%m)"
     local year="$(date +%Y)"
     local until="$(date +%Y-%m-01)"
+    local repo="$(basename "$(pwd)")"
     if (( month == 1 ))
     then (( month = 12)); (( year-- ))
     else (( month-- ))
     fi
     (( month > 10 )) || month="0$month"
-    echo "# GIT LOG from $year-$month-01 to $until, args=[$*]"
+    echo "# Git Log for Repository $repo from $year-$month-01 to $until, args=[$*]"
+    echo "# == START: $repo ==========================================="
     git log --since="$year-$month-01" --until="$until" "$@"
+    echo "# == END: $repo ============================================="
 }
 
 gitlog-all() {
     for r in $(echo "$*")
-    do  echo "# REPO: $r"
-        (cd $r && gitlog --patch)
+    do (cd $r && gitlog --patch > git.log)
     done
 }
