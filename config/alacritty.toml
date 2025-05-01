@@ -37,7 +37,7 @@ offset = { x = 1, y = 1 }
 [keyboard]
 bindings = [
   # Commands
-  { key = "N", mods = "Shift",   action = "CreateNewWindow" },
+  { key = "N", mods = "Command", action = "CreateNewWindow" },
   { key = "O", mods = "Command", action = "Open" },
 
   # Umlaut Umleitung

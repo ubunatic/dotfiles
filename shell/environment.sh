@@ -1,3 +1,4 @@
+# shellcheck disable=SC2155
 
 # override these vars in your .userrc
 

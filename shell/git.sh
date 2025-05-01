@@ -1,6 +1,8 @@
 # Git and Github Commands
 # =======================
 
+# shellcheck disable=SC2155,SC2116
+
 ghdeploytag() {
     err "ghdeploytag not implemented"
 }
@@ -16,12 +18,12 @@ rebase() {
 grmb() {
     local main=${1:-"main"}
     local current="$(git branch --show-current)"
-    local merge_base="$(git merge-base $main $current)"
+    local merge_base="$(git merge-base "$main" "$current")"
     local answer=N
     log "# reset command: git reset $merge_base"
     echo "Reset current branch:$current with merge-base:$main (keep all changes, but loose all commits)? (y/N)"
-    if read answer && test "$answer" = "y"
-    then git reset $merge_base
+    if read -r answer && test "$answer" = "y"
+    then git reset "$merge_base"
     else error "aborted: git reset $merge_base"
     fi
 }
@@ -149,7 +151,13 @@ gitlog() {
 }
 
 gitlog-all() {
-    for r in $(echo "$*")
-    do (cd $r && gitlog --patch > git.txt)
+    for r in "$@"
+    do (cd "$r" && gitlog > gitlog.txt)
+    done
+}
+
+gitlog-all-full() {
+    for r in "$@"
+    do (cd "$r" && gitlog --patch > gitlog-full.txt)
     done
 }

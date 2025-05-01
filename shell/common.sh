@@ -25,7 +25,7 @@ dbg() {
 
 fail() { err "$@"; false; }
 
-ff() { find . -name "$*@"; }
+ff() { find . -name "$*"; }
 fz() { find . -name "*$**"; }
 
 prompt() {

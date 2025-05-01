@@ -1,10 +1,11 @@
+# shellcheck disable=SC2155
 
 # set to a non-empty value to force building all go apps
 DOTFILES_MUST_BUILD_APPS=
 
 dotapp-build-go-app() {
     local dir="$1"                  # app directory, including the app name
-    local app=$(basename $dir)      # app name is the last part of the path
+    local app=$(basename "$dir")    # app name is the last part of the path
     local dst="$DOTFILES/bin/$app"  # destination binary
 
     if test -e "$DOTFILES/bin/$app" && test -z "$DOTFILES_MUST_BUILD_APPS"
@@ -27,17 +28,15 @@ dotapp-build-go-app() {
 }
 
 dotapp-rebuild-all() {
-    for app in $DOTFILES/apps/go/*; do
-        DOTFILES_MUST_BUILD_APPS=1 DOTFILES_RUN_APP_TESTS=1 dotapp-build-go-app $app
+    for app in "$DOTFILES"/apps/go/*; do
+        DOTFILES_MUST_BUILD_APPS=1 DOTFILES_RUN_APP_TESTS=1 dotapp-build-go-app "$app"
     done
 }
 
-if test -e $DOTFILES/apps/go && type go >/dev/null; then
-  # TODO: add a step to build them once
-  mkdir -p $DOTFILES/bin
-  for app in $DOTFILES/apps/go/*; do
-    if   dotapp-build-go-app $app
-    then alias $(basename $app)="$DOTFILES/bin/$(basename $app)"
-    fi
+if test -e "$DOTFILES/apps/go" && type go >/dev/null; then
+  mkdir -p "$DOTFILES/bin"
+  for app in "$DOTFILES"/apps/go/*; do
+    dotapp-build-go-app "$app"                # build once (or always if DOTFILES_MUST_BUILD_APPS is set)
+    unalias "$(basename "$app")" 2>/dev/null  # remove any alias for the app
   done
 fi
