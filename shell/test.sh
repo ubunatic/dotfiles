@@ -9,7 +9,7 @@
 # Do not trust `set -e` or other unsafe measures.
 #
 
-export DOTFILES_TESTS="
+export DOTFILES_TESTS=(
 test_common
 test_find
 test_logging
@@ -18,7 +18,7 @@ test_go
 test_gomake
 test_gruboot
 test_efiboot
-"
+)
 
 test_shells() {
     log "testing bash"
@@ -27,10 +27,12 @@ test_shells() {
     DOTFILES_AUTOTEST=1 zsh -c "source '$DOTFILES/shell/userrc.sh'"
 }
 
+# shellcheck disable=SC2086
 test_functions() {
-    test_runner $DOTFILES_TESTS &&
-    log "$0: function testing successful" ||
-    err "$0: functions testing failed"
+    if test_runner "${DOTFILES_TESTS[@]}"
+    then log "$0: all tests successful"
+    else err "$0: some tests failed"
+    fi
 }
 
 # manually start all tests, incl zsh and bash test
@@ -41,13 +43,14 @@ test_dotfiles() {
 
 test_runner() {
     echo "running: $*"
-    local err=
-    for t in $(echo "$*"); do
+    local err
+    for t in "$@"; do
         echo "testing: $t"
         if "$t"
         then log "OK  $t"
         else err "ERR $t"; err=1
         fi
+        shift
     done
     test -z "$err"
 }

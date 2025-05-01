@@ -4,6 +4,8 @@
 # This is a generic file to help developing Go projects.
 # It provides file and command targets for common Go dev tasks.
 
+.PHONY: ⚙️  # make all non-file targets phony
+
 # Sources and Binaries
 # --------------------
 project := $(notdir $(CURDIR))
@@ -15,41 +17,36 @@ sources = $(shell $(source_cmd))
 
 # Default Build Target
 # --------------------
-.PHONY: all build
-all:       build
-build:     $(binary)
+all:       ⚙️ build
+build:     ⚙️ $(binary)
 $(binary): $(sources); go build -o $@ $(main)
 
 # Common Go Build Targets
 # -----------------------
-.PHONY: test debug install run clean
-test:    build; go test -race ./...
-debug:   build; go test -v -race ./...
-run:     build; $(binary)
-clean:        ; rm -f $(binary)
+test:    ⚙️ build; go test -race ./...
+debug:   ⚙️ build; go test -v -race ./...
+run:     ⚙️ build; $(binary)
+clean:   ⚙️      ; rm -f $(binary)
 
 # Advanced Go Targets
 # -------------------
-.PHONY: generate install update docs tag precommit
-generate:     ; go generate .
-install: build; go install .
-update:       ; go get -u
-tag:          ; # not implemented
-docs:         ; # not implemented
-precommit:    ; # not implemented
+generate:  ⚙️      ; go generate .
+install:   ⚙️ build; go install .
+update:    ⚙️      ; go get -u
+tag:       ⚙️      ; # not implemented
+docs:      ⚙️      ; # not implemented
+precommit: ⚙️      ; # not implemented
 
 # Advanced Go Testing Targets
 # ---------------------------
-.PHONY: lint cover vet bench
-lint:   ; # not implemented
-cover:  ; # not implemented
-vet:    ; # not implemented
-bench:  ; # not implemented
+lint:   ⚙️ ; # not implemented
+cover:  ⚙️ ; # not implemented
+vet:    ⚙️ ; # not implemented
+bench:  ⚙️ ; # not implemented
 
 # Help and Debug Targets
 # ----------------------
-.PHONY: vars usage
-vars:
+vars: ⚙️
 	# project  $(project)
 	# main:    $(main)
 	# binary:  $(binary)
@@ -58,7 +55,7 @@ vars:
 	# source_patterns: $(source_patterns)
 	# source_cmd:      $(source_cmd)
 
-usage:
+usage: ⚙️
 	# Usage: make TARGET [-n|-B]
 	#
 	# Targets:

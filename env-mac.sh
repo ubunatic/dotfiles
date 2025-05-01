@@ -1,13 +1,15 @@
 # Random collection of currently used env vars.
 # Highly system-specific and unstable --> Do not copy, try to build your own!
 
+# shellcheck disable=SC2155
+
 if type tty > /dev/null
 then export GPG_TTY="$(tty)"
 fi
 
-if test -e $HOMEBREW_PREFIX/opt/openjdk@11
+if test -e "$HOMEBREW_PREFIX/opt/openjdk@11"
 then
-    export JAVA_HOME=$HOMEBREW_PREFIX/opt/openjdk@11
+    export JAVA_HOME="$HOMEBREW_PREFIX/opt/openjdk@11"
     export CPPFLAGS="-I$HOMEBREW_PREFIX/opt/openjdk@11/include"
 fi
 
@@ -69,8 +71,8 @@ then
     then export PATH=$PATH:$CONFLUENT_HOME/bin
     fi
     if test -n "$ZSH_VERSION"; then
-        mkdir -p $HOME/.oh-my-zsh/completions
-        confluent completion zsh > $HOME/.oh-my-zsh/completions/_confluent
+        mkdir -p "$HOME/.oh-my-zsh/completions"
+        confluent completion zsh > "$HOME/.oh-my-zsh/completions/_confluent"
         autoload -U compinit && compinit
     fi
 fi
@@ -85,7 +87,7 @@ $APPS/platform-tools
 $HOME/platform-tools
 "
 
-for p in $(echo $PATH_PATHS); do
+for p in $(echo "$PATH_PATHS"); do
     if test -d "$p"
     then export PATH="$p:$PATH"
     fi

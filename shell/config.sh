@@ -1,3 +1,4 @@
+# shellcheck disable=SC2155
 
 dotfile_config() {(
     set -e

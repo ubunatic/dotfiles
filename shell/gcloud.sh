@@ -26,6 +26,7 @@ impersonate() {
 }
 
 # Add gcloud completion and PATH if not present.
+# shellcheck disable=SC1091
 if test -e "$APPS/google-cloud-sdk" && test -n "$ZSH_VERSION" && ! type gcloud > /dev/null
 then
     # The next line updates PATH for the Google Cloud SDK.
