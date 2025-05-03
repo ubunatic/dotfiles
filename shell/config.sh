@@ -1,5 +1,6 @@
 # shellcheck disable=SC2155
 
+# dotfiles-config restores or backups a config file from $DOTFILES/config to a local path.
 dotfiles-config() {(
     set -o errexit
     local cmd="$1" root="$2" profile="$3"
@@ -9,8 +10,8 @@ dotfiles-config() {(
     then err "usage: $0 backup|restore CONFIG_ROOT CONFIG_FILE"; return 1
     fi
 
-    local local_file="$(find "$root" -name "$profile")"
-    local file="$(basename "$local_file")"
+    local file="$(basename "$profile")"
+    local local_file="$root/$file"
     local remote_file="$DOTFILES/config/$file"
     local trg="" src=""
 
