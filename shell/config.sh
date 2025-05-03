@@ -1,7 +1,7 @@
 # shellcheck disable=SC2155
 
-dotfile_config() {(
-    set -e
+dotfiles-config() {(
+    set -o errexit
     local cmd="$1" root="$2" profile="$3"
     log "$0: cmd=$1 root='$root' profile='$profile'"
 
@@ -38,11 +38,3 @@ dotfile_config() {(
     fi
     log "$0: DONE"
 )}
-
-backup_input_remapper()  {
-    dotfile_config backup "$INPUT_REMAPPER_ROOT" "$INPUT_REMAPPER_PROFILE"
-}
-
-restore_input_remapper() {
-    dotfile_config restore "$INPUT_REMAPPER_ROOT" "$INPUT_REMAPPER_PROFILE"
-}

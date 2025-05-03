@@ -9,18 +9,23 @@
 # Do not trust `set -e` or other unsafe measures.
 #
 
-export DOTFILES_TESTS=(
-test_common
-test_find
-test_logging
-test_env
-test_go
-test_gomake
-test_gruboot
-test_efiboot
-)
+export DOTFILES_TESTS="
+dotfiles-testcommon
+dotfiles-testfind
+dotfiles-testlogging
+dotfiles-testenv
+dotfiles-testgo
+dotfiles-testgomake
+dotfiles-testgruboot
+dotfiles-testefiboot
+dotfiles-testcolors
+"
 
-test_shells() {
+dotfiles-testnames() {
+    echo $DOTFILES_TESTS
+}
+
+dotfiles-testshells() {
     log "testing bash"
     DOTFILES_AUTOTEST=1 bash -c "source '$DOTFILES/shell/userrc.sh'" &&
     log "testing zsh" &&
@@ -28,33 +33,49 @@ test_shells() {
 }
 
 # shellcheck disable=SC2086
-test_functions() {
-    if test_runner "${DOTFILES_TESTS[@]}"
-    then log "$0: all tests successful"
-    else err "$0: some tests failed"
+dotfiles-testfunctions() {
+    if dotfiles-testcommands $(dotfiles-testnames)
+    then log "$0: function tests successful"
+    else err "$0: function tests failed"
     fi
 }
 
 # manually start all tests, incl zsh and bash test
-test_dotfiles() {
-    test_functions &&
-    test_shells
+dotfiles-testall() {
+    if dotfiles-testfunctions &&
+       dotfiles-testdotapps &&
+       dotfiles-testshells
+    then log "$0: tests successful"
+    else err "$0: tests failed"; return 1
+    fi
 }
 
-test_runner() {
-    echo "running: $*"
+dotfiles-testcommands() {
     local err
     for t in "$@"; do
-        echo "testing: $t"
-        if "$t"
-        then log "OK  $t"
-        else err "ERR $t"; err=1
-        fi
-        shift
+        dotfiles-testcommand "$t"
+        test $? -eq 0 || err=1
     done
     test -z "$err"
 }
 
+dotfiles-testcommand() {
+    local cmd out code
+    DEBUG=1
+    cmd="$*"
+    dbg -n "testing '$cmd' 🧪"
+    out="$($* 2>&1)"
+    code=$?
+    echo -ne "\r" 2>/dev/stderr
+    if test "$code" -eq 0
+    then dbg "testing '$cmd' ✅ code=$code"
+    else dbg "testing '$cmd' ❌ code=$code"
+        echo "$out" >/dev/stderr
+        dbg "dotapp '$cmd': ❌ code=$code"
+    fi
+    return $code
+}
+
 if test -n "$DOTFILES_AUTOTEST"
-then test_functions
+then dotfiles-testfunctions
 fi

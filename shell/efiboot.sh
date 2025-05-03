@@ -49,7 +49,7 @@ efiboot_to_windows() {
     fi
 }
 
-test_efiboot() {
+dotfiles-testefiboot() {
     (
         ok() { log "OK efiboot_$*"; }
         EFIBOOT_MOCK=1

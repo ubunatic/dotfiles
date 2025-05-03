@@ -78,7 +78,7 @@ gruboot_windows_warning() {
     echo
 }
 
-test_gruboot() {
+dotfiles-testgruboot() {
     (
         GRUBOOT_MOCK=1
         gruboot_warn            2>&1 | grep -q "WARN"
