@@ -6,10 +6,6 @@ cluster(){
    gcloud container clusters get-credentials --zone "$zone" "$@"
 }
 
-gconfig() { gcloud config "$@"; }
-gcfg()    { gcloud config "$@"; }
-gauth()   { gcloud auth   "$@"; }
-
 reauth() {
    gcloud auth login --update-adc
 }

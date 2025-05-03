@@ -58,7 +58,7 @@ find_up() {
 }
 
 # emulate make $(shell ...) command
-shell () { bash -c "$*"; }
+shell() { bash -c "$*"; }
 
 {
   unalias error
@@ -70,14 +70,14 @@ error() { err "$@"; }
 debug() { dbg "$@"; }
 log()   { inf "$@"; }
 
-test_logging() {
+dotfiles-testlogging() {
     log "testing log command via their aliases"
     error "ERROR Test (this ERR log is expected)" &&
     debug "DEBUG Test" &&
     log "LOG Test"
 }
 
-test_find() {(
+dotfiles-testfind() {(
     log "testing file find commands ff and fz"
     cd "$DOTFILES" &&
     ff "shell"  | grep -q ./shell &&
@@ -86,7 +86,7 @@ test_find() {(
   ! fz "R4ND0M" | grep -q '.*'
 )}
 
-test_common() {
+dotfiles-testcommon() {
   (echo "y" | ask "test" && echo "OK" || echo "NO") | grep -q "OK"
   (echo "N" | ask "test" && echo "OK" || echo "NO") | grep -q "NO"
 }

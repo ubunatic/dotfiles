@@ -76,17 +76,25 @@ gitmail() {
 }
 
 gitmail_switch() {
-    local where="--local"
-    case "$1" in
-    local)  where="--local" ;;
-    global) where="--global" ;;
-    esac
-    echo "switching gitmail $where"
+    local where="--local"    
+    local email=""
+    local switch_email=""
+
+    for arg in "$@"; do case "$arg" in
+    local|--local)   where="--local"  ;;
+    global|--global) where="--global" ;;
+    *)               email="$arg"     ;;
+    esac; done
+
+    log "switching gitmail $where"
     case "$(git config user.email)" in
-    "$GIT_CORPORATE_EMAIL") git config "$where" user.email "$GIT_PRIVATE_EMAIL" ;;
-    "$GIT_PRIVATE_EMAIL")   git config "$where" user.email "$GIT_CORPORATE_EMAIL" ;;
-    *) error "failed to change gitmail" ;;
+    "$GIT_CORPORATE_EMAIL") switch_email="$GIT_PRIVATE_EMAIL" ;;
+    "$GIT_PRIVATE_EMAIL")   switch_email="$GIT_CORPORATE_EMAIL" ;;
+    "$email")               ;; # no change
+    "")                     switch_email="$email" ;;    
+    *) err "failed to determine email for git" ;;
     esac
+    git config "$where" user.email "$email"
     gitmail
 }
 

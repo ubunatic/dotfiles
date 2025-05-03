@@ -1,7 +1,7 @@
 
 # add Android SDK platform tools to path
-if test -d "$SYSTEM_APPS/platform-tools"; then
-    PATH="$SYSTEM_APPS/platform-tools:$PATH"
+if test -d "$APPS/platform-tools"; then
+    PATH="$APPS/platform-tools:$PATH"
 fi
 
 if test -d "$DOTFILES/bin"; then

@@ -11,6 +11,14 @@ _RED=$(tput setaf 1)
 _RESET=$(tput sgr0)
 _BOLD=$(tput bold)
 
+dotfiles-testcolors() {
+    local color
+    for c in GREEN BLUE CYAN RED; do
+        eval color="\$_$c"
+        echo "regular: ${color}$c${_RESET},\tbold: ${_BOLD}${color}$c${_RESET}"
+    done    
+}
+
 # File system aliases
 alias ll="ls -la"
 alias ccd="cd"
@@ -46,12 +54,6 @@ alias gpsupu='git push --set-upstream "$USER" "$(git branch --show-current)"'
 alias gr="gitroot"
 alias cg="gitroot"
 alias main="git checkout main && git pull"
-
-# Other aliases
-alias compose=docker-compose
-
-# CSV Converter app
-alias cvsconv=csvconv
 
 if test "$SYSTEM_UNAME" = "Darwin"
 then alias apt="brew"
