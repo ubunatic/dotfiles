@@ -1,0 +1,9 @@
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  test:
+    runs-on: docker
+    steps:
+      - run: echo All Good
