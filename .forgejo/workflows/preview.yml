@@ -7,12 +7,12 @@ on:
 
 jobs:
   preview:
-    runs-on: docker
+    runs-on: [codeberg-small, codeberg-tiny]
     steps:
+      - run: echo "Hello Leaker!"
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-            - name: lint
       - run: |
           echo "$GITHUB_TOKEN" | wc -c
           echo "😈 I could have leaked the secrets!"
