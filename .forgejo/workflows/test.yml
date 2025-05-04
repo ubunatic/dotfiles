@@ -1,4 +1,7 @@
-on: [push]
+on:
+  push:
+    types: [opened, synchronize, reopened]
+
 jobs:
   test:
     runs-on: docker

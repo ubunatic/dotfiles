@@ -1,0 +1,23 @@
+on:
+  # This uses 'on.pull_request_target' to run with workflows from 'main' only.
+  # Changes to workflows on the branch of the commit are ignored.
+  # Make sure to unset the any PRODUCTION secrets, such as the GITHUB_TOKEN.
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  preview:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+            - name: lint
+      - run: |
+          echo "$GITHUB_TOKEN" | wc -c
+          echo "😈 I could have leaked the secrets!"
+      - run: |
+          echo "$GITHUB_TOKEN"
+          echo "👿 Cannot leak secrets anymore."
+        env:
+          GITHUB_TOKEN: override
