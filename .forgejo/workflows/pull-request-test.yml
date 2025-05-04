@@ -3,7 +3,7 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  test:
+  pull-request-test:
     runs-on: docker
     steps:
       - run: echo All Good
