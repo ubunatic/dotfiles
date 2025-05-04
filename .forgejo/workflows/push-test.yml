@@ -1,0 +1,6 @@
+on: [push]
+jobs:
+  push-test:
+    runs-on: [codeberg-small, codeberg-tiny]
+    steps:
+      - run: echo All Good

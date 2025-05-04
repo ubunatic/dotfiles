@@ -3,7 +3,7 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  test:
-    runs-on: docker
+  pull-request-test:
+    runs-on: [codeberg-small, codeberg-tiny]
     steps:
       - run: echo All Good
