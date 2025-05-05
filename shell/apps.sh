@@ -3,11 +3,14 @@
 DOTFILES_MUST_BUILD_APPS=
 
 dotapps-find() {
-    find "$DOTFILES/apps/go" -maxdepth 1 -mindepth 1 -type dir 2>/dev/null
+    find "$DOTFILES/apps/go" -maxdepth 1 -mindepth 1 -type d 2>/dev/null
 }
 
 dotapps-names() {
-    basename $(dotapps-find) 2>/dev/null
+    local dir
+    for dir in $(dotapps-find); do
+        basename "$dir"
+    done
 }
 
 dotapps-build-app() {
@@ -89,8 +92,7 @@ dotapps() {
 dotfiles-testdotapps() {
     local err
     for cmd in clean test build names find; do
-        test_command dotapps $cmd
-        test $? -eq 0 || err=1
+        dotfiles-testcommand "dotapps-$cmd"
     done
     return $err
 }
