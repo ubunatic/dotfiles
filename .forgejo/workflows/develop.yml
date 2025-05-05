@@ -1,0 +1,9 @@
+on: [push]
+
+jobs:
+  push-test:
+    runs-on: [codeberg-small, codeberg-tiny]
+    steps:
+      - uses: actions/checkout@v3
+      - shell: bash
+        run: scripts/docker-test.sh
