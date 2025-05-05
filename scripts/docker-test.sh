@@ -44,7 +44,12 @@ done
 
 if dotapps clean build test
 then echo "dotapps build successful"
-else echo "dotapps build failed"
+else echo "dotapps build failed"; exit 1
+fi
+
+if make -n -C apps/go/gsu -f ../../../scripts/go.mk
+then echo "make go successful"
+else echo "make go failed"; exit 1
 fi
 
 dotfiles-testall

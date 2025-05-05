@@ -15,11 +15,13 @@ dotfiles-testfind
 dotfiles-testlogging
 dotfiles-testenv
 dotfiles-testgo
-dotfiles-testgomake
 dotfiles-testgruboot
 dotfiles-testefiboot
 dotfiles-testcolors
 "
+
+# disabled test for unmaintained code
+# dotfiles-testgomake
 
 dotfiles-testnames() {
     echo $DOTFILES_TESTS
