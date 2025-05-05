@@ -39,3 +39,30 @@ dotfiles-config() {(
     fi
     log "$0: DONE"
 )}
+
+dotfiles-install() {
+    local dst="$HOME/.userrc"
+
+    if   touch -c "$dst"
+    then log "checking for existing DOTFILES defintion in '$dst'"
+    elif touch "$dst" 2> /dev/null
+    then log "created missing profile file '$dst'"
+    else err "failed to create profile file '$dst'"; return 1
+    fi
+
+    if grep -q "export DOTFILES=" "$dst"
+    then
+        log "dotfiles already installed in '$dst'"
+        return
+    else
+        if test -z "$DOTFILES"
+        then err "DOTFILES location not set!"; return 1
+        else
+            log "installing DOTFILES setup in '$dst'"
+            echo "# setup dotfiles for zsh and bash"   >> "$dst"
+            echo "export DOTFILES='$DOTFILES'"         >> "$dst"
+            echo 'source "$DOTFILES/shell/userrc.sh"'  >> "$dst"
+            log "please add: source '\$HOME/.userrc' to your .bashrc or .zshrc"
+        fi
+    fi
+}
