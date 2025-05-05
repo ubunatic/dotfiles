@@ -38,6 +38,11 @@ shell/test.sh
 for source_file in $(echo $test_files); do
     if source $source_file
     then echo "loaded $source_file"
-    else echo "failed to load $source_file"
+    else echo "failed to load $source_file"; exit 1
     fi
 done
+
+if dotapps clean build test
+then echo "dotapps build successful"
+else echo "dotapps build failed"
+fi
