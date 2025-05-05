@@ -1,13 +1,13 @@
-# shellcheck disable=SC2155
+# shellcheck disable=SC2155,SC2046
 
 DOTFILES_MUST_BUILD_APPS=
 
 dotapps-find() {
-    find "$DOTFILES/apps/go" -maxdepth 1 -mindepth 1 2>/dev/null
+    find "$DOTFILES/apps/go" -maxdepth 1 -mindepth 1 -type dir 2>/dev/null
 }
 
 dotapps-names() {
-    find "$DOTFILES/apps/go" -maxdepth 1 -mindepth 1 -printf '%f\n' 2>/dev/null
+    basename $(dotapps-find)
 }
 
 dotapps-build-app() {
@@ -39,7 +39,7 @@ dotapps-build-app() {
 
 dotapps-build() {
     for app in $(dotapps-find); do
-        dotapps-build-app $app
+        dotapps-build-app "$app"
     done
 }
 
@@ -63,8 +63,9 @@ dotapps-usage(){
 Usage: dotapps [COMMAND...]
 
 Commands:
-    clean        remove previously built binaries
+    clean        remove previously built binaries    
     build        build binaries
+    test         run app/package tests    
     rebuild      build binaries and run tests
     names        print names of known dotapps
     find         find source paths of known dotapps
@@ -74,10 +75,13 @@ EOF
 }
 
 dotapps() {
+    if test $# -eq 0
+    then dotapps-usage; return 1
+    fi
     for cmd in "$@"; do case $cmd in
     (clean|build|test|rebuild) "dotapps-$cmd" || return 1 ;;
     (names|find)               "dotapps-$cmd" || return 1 ;;
-    (usage|help|-h|--help)     "dotapps-usage";  return 1 ;;    
+    (usage|help|-h|--help)     "dotapps-usage";  return 1 ;;
     (*)                        echo "unsupported dotapps command: $cmd"; return 1;;
     esac; done
 }
