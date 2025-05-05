@@ -16,7 +16,7 @@ dotfiles-testcolors() {
     for c in GREEN BLUE CYAN RED; do
         eval color="\$_$c"
         echo "regular: ${color}$c${_RESET},\tbold: ${_BOLD}${color}$c${_RESET}"
-    done    
+    done
 }
 
 # File system aliases
@@ -54,6 +54,8 @@ alias gpsupu='git push --set-upstream "$USER" "$(git branch --show-current)"'
 alias gr="gitroot"
 alias cg="gitroot"
 alias main="git checkout main && git pull"
+
+unalias gsu 2>/dev/null
 
 if test "$SYSTEM_UNAME" = "Darwin"
 then alias apt="brew"

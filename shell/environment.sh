@@ -2,8 +2,6 @@
 
 # override these vars in your .userrc
 
-export APPS="${APPS:-"$(dotfiles-appsdir)"}"
-
 if test -z "$SYSTEM_UNAME"
 then export SYSTEM_UNAME="$(uname 2> /dev/null || true)"
 fi
@@ -18,6 +16,8 @@ dotfiles-appsdir() {
     mkdir -p "$HOME/.local" 2>/dev/null
     echo "$HOME/.local"
 }
+
+export APPS="${APPS:-"$(dotfiles-appsdir)"}"
 
 dotfiles-testenv() {
     local apps_dir="$(dotfiles-appsdir)"
