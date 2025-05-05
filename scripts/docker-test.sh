@@ -46,3 +46,5 @@ if dotapps clean build test
 then echo "dotapps build successful"
 else echo "dotapps build failed"
 fi
+
+dotfiles-testall
