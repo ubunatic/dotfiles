@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 export TERM="${TERM:-"xterm-256color"}"
+export DOTFILES="$(pwd)"
 
 if ls -la &&
    touch -c shell &&
