@@ -1,0 +1,14 @@
+on:
+  push:
+    branches:
+      - develop-*
+
+jobs:
+  push-test:
+    runs-on: [codeberg-small, codeberg-tiny]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: quick test (fail fast)
+        shell: bash
+        run: echo "develop here"

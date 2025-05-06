@@ -2,8 +2,24 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+  schedule:
+    # schedule two times a week
+    - cron: "33 11 * * 1,5"
+
 jobs:
   pull-request-test:
     runs-on: [codeberg-small, codeberg-tiny]
     steps:
-      - run: echo All Good
+      - uses: actions/checkout@v4
+
+      - name: quick test (fail fast)
+        shell: bash
+        run: scripts/integration-test.sh
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.2"
+
+      - name: full test (with Go)
+        shell: bash
+        run: scripts/integration-test.sh
