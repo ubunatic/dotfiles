@@ -1,3 +1,5 @@
+![test status](https://codeberg.org/ubunatic/dotfiles/badges/workflows/pull-request-test.yml/badge.svg?label=test)
+
 # Dotfiles
 
 Personal [Dotfiles](https://wiki.archlinux.org/title/Dotfiles) collection of shell scripts and terminal apps to `source` in my terminal sessions.
