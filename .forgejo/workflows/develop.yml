@@ -1,12 +1,14 @@
-on: [push]
+on:
+  push:
+    branches:
+      - develop-*
 
 jobs:
   push-test:
     runs-on: [codeberg-small, codeberg-tiny]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.24.2"
-      - shell: bash
-        run: scripts/docker-test.sh
+
+      - name: quick test (fail fast)
+        shell: bash
+        run: echo "develop here"

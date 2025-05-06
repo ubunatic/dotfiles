@@ -1,6 +1,7 @@
 # shellcheck disable=SC2155,SC2046
 
 DOTFILES_MUST_BUILD_APPS=
+DOTFILES_SKIP_BUILD_APPS=
 
 dotapps-find() {
     find "$DOTFILES/apps/go" -maxdepth 1 -mindepth 1 -type d 2>/dev/null
@@ -19,7 +20,9 @@ dotapps-build-app() {
     local src="$DOTFILES/apps/go/$app" # source dir
 
     if test -e "$DOTFILES/bin/$app" && test -z "$DOTFILES_MUST_BUILD_APPS"
-    then return 0  # already built
+    then return  # already built
+    elif test -n "$DOTFILES_SKIP_BUILD_APPS"
+    then return  # skip build
     fi
 
     (
@@ -52,7 +55,7 @@ dotapps-rebuild() {
 }
 
 dotapps-test() {
-    DOTFILES_MUST_BUILD_APPS=1 DOTFILES_RUN_APP_TESTS=1 dotapps-build
+    DOTFILES_BUILD_APPS=1 DOTFILES_MUST_BUILD_APPS=1 DOTFILES_RUN_APP_TESTS=1 dotapps-build
 }
 
 dotapps-clean() {(

@@ -28,17 +28,17 @@ dotfiles-testnames() {
 }
 
 dotfiles-testshells() {
-    log "testing bash"
+    dbg "testing bash"
     DOTFILES_AUTOTEST=1 bash -c "source '$DOTFILES/shell/userrc.sh'" &&
-    log "testing zsh" &&
+    dbg "testing zsh" &&
     DOTFILES_AUTOTEST=1 zsh -c "source '$DOTFILES/shell/userrc.sh'"
 }
 
 # shellcheck disable=SC2086
 dotfiles-testfunctions() {
     if dotfiles-testcommands $(dotfiles-testnames)
-    then log "$0: function tests successful"
-    else err "$0: function tests failed"
+    then inf "$0: function tests successful ✅"
+    else err "$0: function tests failed ❌"
     fi
 }
 
@@ -47,8 +47,8 @@ dotfiles-testall() {
     if dotfiles-testfunctions &&
        dotfiles-testdotapps &&
        dotfiles-testshells
-    then log "$0: tests successful"
-    else err "$0: tests failed"; return 1
+    then inf "$0: tests successful ✅"
+    else err "$0: tests failed ❌"; return 1
     fi
 }
 
@@ -70,10 +70,10 @@ dotfiles-testcommand() {
     code=$?
     echo -ne "\r" 2>/dev/stderr
     if test "$code" -eq 0
-    then dbg "testing '$cmd' ✅ code=$code"
-    else dbg "testing '$cmd' ❌ code=$code"
+    then inf "testing '$cmd' ✅ code=$code"
+    else err "testing '$cmd' ❌ code=$code"
         echo "$out" >/dev/stderr
-        dbg "dotapp '$cmd': ❌ code=$code"
+        err "dotapp '$cmd' failed: ❌ code=$code"
     fi
     return $code
 }
