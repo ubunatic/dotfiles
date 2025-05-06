@@ -2,10 +2,16 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+  schedule:
+    # schedule two times a week
+    - cron: "33 11 * * 1,5"
+
 jobs:
   pull-request-test:
     runs-on: [codeberg-small, codeberg-tiny]
     steps:
+      - uses: actions/checkout@v4
+
       - name: quick test (fail fast)
         shell: bash
         run: scripts/integration-test.sh
