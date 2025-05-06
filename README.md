@@ -1,4 +1,4 @@
-![test status](https://codeberg.org/ubunatic/dotfiles/badges/workflows/pull-request-test.yml/badge.svg?label=test)
+[![test status](https://codeberg.org/ubunatic/dotfiles/badges/workflows/pull-request-test.yml/badge.svg?label=test)](https://codeberg.org/ubunatic/dotfiles/actions?workflow=pull-request-test.yml&actor=0&status=0)
 
 # Dotfiles
 
