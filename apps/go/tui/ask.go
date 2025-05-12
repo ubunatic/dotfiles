@@ -8,7 +8,7 @@ import (
 func echo(msg ...any) { fmt.Println(msg...) }
 
 func Ask(msg ...any) error {
-	msg = append(msg, "? (y/n)")
+	msg = append(msg, "? [y/N]")
 	echo(msg...)
 	var response string
 
