@@ -74,3 +74,10 @@ uninstall: ⚙️ upload
 
 query: ⚙️
 	curl $(query_addr)
+
+sources=$(shell find -name '*.go')
+vibe_file=~/Downloads/rpi-exporter.vibe.txt
+vibe: ⚙️
+	@for f in $(sources); do echo "// file:$$f"; cat $$f; echo -e "---\n"; done > $(vibe_file)
+	@grep -E '^// file:' $(vibe_file)
+	@echo "// exported sources for vibe-coding to vibe_file=$(vibe_file)"
