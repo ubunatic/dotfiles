@@ -1,0 +1,218 @@
+#!/usr/bin/env bash
+
+usage() {
+    cat <<-EOF
+Stackmanager - manage my docker stacks"
+Usage: $0 [FLAGS|VARS] COMMAND
+
+Flags:
+
+    --yes -y          auto-confirm execution of remote commands
+    --docker          use docker as container manager
+    --podman          use podman as container manager
+    --local           run commands locally
+    --help -h         show this help
+
+Vars:
+    key=value         sets the variable "key" to value "value"
+    user@host         set remote_host="host" and remote_user="user"
+
+Supported Vars:
+$(vars | sed -e 's|^|    |g')
+
+Commands:
+    expose-metrics    expose docker metrics
+    vars              show variables
+    test              run unit tests non-remote functions
+    ping              test remote access
+    help              show this help
+EOF
+}
+
+vars() {
+    cat <<-EOF
+remote_host=$remote_host
+remote_user=$remote_user
+remote_addr=$remote_addr
+metrics_port=$metrics_port
+docker=$docker
+local=$local
+confirm=$confirm
+container=$container
+portainer_version=$portainer_version
+EOF
+}
+
+log() { echo "INF $*" >/dev/stderr; }
+err() { echo "ERR $*" >/dev/stderr; }
+
+shudo() {
+    if test "$confirm" = "ask"
+    then
+        echo -n "run command: '$*' at $remote_addr? [y/N] " >/dev/stderr
+        if read -r key && test "$key" = "y"
+        then log "command confirmed"
+        else log "command aborted"; return 1
+        fi
+    fi
+
+    case "$local" in
+    (local) log "running command locally (sudo): $*"
+            sudo "$@" ;;
+    (user)  log "running command locally (user mode): $*"
+            "$@" ;;
+    (false) log "running command at $remote_addr (sudo): $*"
+            ssh "$remote_addr" sudo "$@" ;;
+    (*)     err "invalid local mode: '$local'"; exit 1
+            ;;
+    esac
+}
+
+test-shudo() {
+    log "testing sudo remote access at $remote_add"
+    if echo "123" | shudo bash -c "cat | grep 123 > /dev/null"
+    then log "remote access: OK"
+    else err "remote access: FAIL"; exit 1
+    fi
+}
+
+# See expose metrics docs https://docs.docker.com/engine/daemon/prometheus/.
+expose-metrics() {
+    test-shudo || exit 1
+    log "Exposing metrics for docker/podman on host: $remote_host"
+    content="{ \"metrics-addr\": \"127.0.0.1:$metrics_port\" }"
+    echo "$content" | shudo bash -c "cat > ~/Downloads/docker-daemon-config.json"
+    if shudo touch -c /etc/docker/daemon.json
+    then log "/etc/docker/daemon.json exists, please edit manually"
+    else log "cp ~/Downloads/docker-daemon-config.json /etc/docker/daemon.json"
+    fi
+}
+
+check-container() {
+    shudo $docker ps -f "name=$*" --format "{{.Names}}" | grep -qE "^$*$"
+}
+
+install-portainer-agent() {
+    if check-container portainer_agent
+    then log "portainer_agent container already running"
+    else
+        shudo $docker run -d \
+        -p 9001:9001 \
+        --name portainer_agent \
+        --restart=always \
+        -v "$docker_sock:/var/run/docker.sock" \
+        -v "$docker_volumes:/var/lib/docker/volumes" \
+        -v /:/host \
+        "docker.io/portainer/agent:$portainer_version"
+    fi
+}
+
+install-portainer() {
+    if check-container portainer
+    then log "portainer container already running"
+    else
+        shudo $docker volume create --ignore portainer_data &&
+        shudo $docker run -d \
+        -p 8000:8000 \
+        -p 9443:9443 \
+        --name portainer \
+        --restart=always \
+        -v "$docker_sock:/var/run/docker.sock" \
+        -v portainer_data:/data \
+        "docker.io/portainer/portainer-ce:$portainer_version"
+    fi
+}
+
+get-key() { echo "$*" | grep -o -E   '^[a-zA-Z0-9_]+';     }
+get-val() { echo "$*" | sed     -e 's|^[a-zA-Z0-9_]*=||g'; }
+get-user(){ echo "$*" | grep -o -E   '^[^@]+';     }
+get-host(){ echo "$*" | sed     -e 's|^[^@]*@||g'; }
+
+test-units() {
+    local errs=0
+    conclude() {
+        local c=$?
+        if  test $c -eq 0
+        then log "test: $1 OK"
+        else log "test: $1 ERR code=$c"
+        fi
+        (( errs++ ))
+    }
+    $0 help >/dev/null;                              conclude "usage"
+    $0 remote_host=test123 vars | grep -q "test123"; conclude "set host"
+    $0 abc=123 vars 2>&1        | grep -q "123";     conclude "other vars"
+    log "tests finished with $errs errors"
+    test $errs -eq 0
+}
+
+main() {
+    if test $# -eq 0
+    then usage; exit 0;
+    fi
+    for cmd in $*; do
+        case "$cmd" in
+            (exp*met*|em)    expose-metrics ;;
+            (test)           test-units ;;
+            (ping)           test-shudo ;;
+            (vars)           vars ;;
+            (ps)             shudo $docker ps;;
+            (check)          check-container $container ;;
+            (ins*portainer)  install-portainer ;;
+            (ins*port*agent) install-portainer-agent ;;
+            (*=*|*@*|-*)     continue ;;  # ignore vars and flags
+            (*)              err "unsupported command: '$cmd'"; exit 1 ;;
+        esac
+        if test $? -eq 0
+        then log "command $cmd: OK"
+        else err "command $cmd: FAIL"; exit 1
+        fi
+    done
+}
+
+for flag in $*; do case "$flag" in
+(--help|-h|help) usage; exit 0 ;;
+(-y|--yes)       confirm=yes ;;
+(--docker)       docker=docker
+                 docker_sock=/var/run/docker.sock
+                 docker_volumes=/var/lib/docker/volumes
+                 ;;
+(--podman)       docker=podman ;;
+(--local)        local=local remote_host=localhost remote_user="$USER";;
+(--user)         docker_sock=/var/run/user/1000/podman/podman.sock
+                 local=user ;;
+
+(*@*)   remote_user=$(get-user "$flag")
+        remote_host=$(get-host "$flag")
+        remote_addr="$remote_user@$remote_host"
+        log "setting remote_host=$remote_host"
+        log "setting remote_user=$remote_user"
+        log "setting remote_addr=$remote_addr"
+        ;;
+
+(*=*)   k="$(get-key "$flag")"
+        v="$(get-val "$flag")"
+        log "setting $k=$v"
+        eval "$k=$v"
+        ;;
+esac; done
+
+# external vars
+remote_host="${remote_host:-pi4}"
+remote_user="${remote_user:-pi}"
+remote_addr="${remote_addr:-$remote_user@$remote_host}"
+
+metrics_port="${host:-9323}"
+docker="${docker:-podman}"
+docker_sock="${docker_sock:-/run/podman/podman.sock}"
+docker_volumes="${docker_volumes:-/var/lib/containers/storage/volumes}"
+portainer_version="${portainer_version:-lts}"
+confirm="${confirm:-ask}"
+container="${container:-portainer}"
+local="${local:-false}"
+
+case "$docker" in
+    (docker|podman|echo) ;;  # allows vars
+    (*)  err "invalid docker executable: docker"; exit 1;;
+esac
+
+main "$@"
