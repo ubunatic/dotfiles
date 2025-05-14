@@ -28,9 +28,9 @@ dotfiles-testnames() {
 }
 
 dotfiles-testshells() {
-    dbg "testing bash"
+    inf "testing bash"
     DOTFILES_AUTOTEST=1 bash -c "source '$DOTFILES/shell/userrc.sh'" &&
-    dbg "testing zsh" &&
+    inf "testing zsh" &&
     DOTFILES_AUTOTEST=1 zsh -c "source '$DOTFILES/shell/userrc.sh'"
 }
 
@@ -63,7 +63,7 @@ dotfiles-testcommands() {
 
 dotfiles-testcommand() {
     local cmd out code
-    DEBUG=1
+    local DEBUG=1
     cmd="$*"
     dbg -n "testing '$cmd' 🧪"
     out="$($* 2>&1)"
