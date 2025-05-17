@@ -73,7 +73,7 @@ uninstall: ⚙️ upload
 	$(run) sudo $(upload_dir)/$(name) -uninstall
 
 query: ⚙️
-	curl $(query_addr)
+	curl -k $(query_addr)
 
 sources=$(shell find -name '*.go')
 vibe_file=~/Downloads/rpi-exporter.vibe.txt

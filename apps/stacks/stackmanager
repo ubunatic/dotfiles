@@ -40,48 +40,92 @@ local=$local
 confirm=$confirm
 container=$container
 portainer_version=$portainer_version
+cockpit_port=$cockpit_port
+cockpit_https=$cockpit_https
+cockpit_listen_conf_file=/etc/systemd/system/cockpit.socket.d/listen.conf
 EOF
 }
 
 log() { echo "INF $*" >/dev/stderr; }
 err() { echo "ERR $*" >/dev/stderr; }
 
-shudo() {
+confirm() {
+    local key=""
     if test "$confirm" = "ask"
     then
-        echo -n "run command: '$*' at $remote_addr? [y/N] " >/dev/stderr
-        if read -r key && test "$key" = "y"
-        then log "command confirmed"
-        else log "command aborted"; return 1
-        fi
+        echo -n "run command: '$*' at $remote_addr? [y]es [s]kip [a]bort: " >/dev/stderr
+        read -r key
+        case "$key" in
+        (Y|y|yes)        log "command confirmed"; echo "ok" ;;
+        (S|s|skip)       log "command skipped";   echo "skip" ;;
+        (N|n|no|a|abort) log "command aborted";   echo "abort" ;;
+        esac
     fi
+}
+
+shudo() {
+    case "$(confirm "$*")" in
+    (ok);; (skip) return 0;; (*) return 1;;
+    esac
 
     case "$local" in
-    (local) log "running command locally (sudo): $*"
+    (local) log "running command locally (sudo): '$*'"
             sudo "$@" ;;
-    (user)  log "running command locally (user mode): $*"
+    (user)  log "running command locally (user mode): '$*'"
             "$@" ;;
-    (false) log "running command at $remote_addr (sudo): $*"
+    (false) log "running command at $remote_addr (sudo): '$*'"
             ssh "$remote_addr" sudo "$@" ;;
     (*)     err "invalid local mode: '$local'"; exit 1
             ;;
     esac
 }
 
+bush() { shudo "bash -c '$*'"; }
+
+copy() {
+    case "$(confirm "scp '$1' '$remote_addr:$2'")" in
+    (ok);; (skip) return 0;; (*) return 1;;
+    esac
+    local tmp
+    tmp="$(ssh "$remote_addr" "mktemp /tmp/sshcopy.XXXXXXXXXX")" &&
+    log "uploading file $1 as $remote_addr:$tmp" &&
+    scp "$1" "$remote_addr:$tmp" &&
+    log "copying as super user file $tmp to $2" &&
+    ssh "$remote_addr" sudo cp "$tmp" "$2"
+}
+
 test-shudo() {
-    log "testing sudo remote access at $remote_add"
-    if echo "123" | shudo bash -c "cat | grep 123 > /dev/null"
-    then log "remote access: OK"
-    else err "remote access: FAIL"; exit 1
+    log "testing sudo remote access at $remote_addr"
+    if shudo "echo 123 | grep 123"
+    then log "remote sudo access: OK"
+    else err "remote sudo access: FAIL"; exit 1
     fi
 }
+
+test-copy () {
+    log "testing scp access at $remote_ add r"
+    if copy "$(echofile 123)" "/tmp/copy-test-$(date --iso-8601=date)"
+    then log "remote scp: OK"
+    else err "remote scp: FAIL"; exit  1
+    fi
+}
+
+catfile() {
+    local tmp_file
+    tmp_file="$(mktemp echotmp.XXXXXXXXXX)" &&
+    cat > "$tmp_file" &&
+    echo "$tmp_file"
+}
+
+echofile() { echo "$@" | catfile; }
+execho()   { echo "$*"; "$@"; }
 
 # See expose metrics docs https://docs.docker.com/engine/daemon/prometheus/.
 expose-metrics() {
     test-shudo || exit 1
     log "Exposing metrics for docker/podman on host: $remote_host"
     content="{ \"metrics-addr\": \"127.0.0.1:$metrics_port\" }"
-    echo "$content" | shudo bash -c "cat > ~/Downloads/docker-daemon-config.json"
+    shudo bash -c "cat > ~/Downloads/docker-daemon-config.json" <(echo echo "$content")
     if shudo touch -c /etc/docker/daemon.json
     then log "/etc/docker/daemon.json exists, please edit manually"
     else log "cp ~/Downloads/docker-daemon-config.json /etc/docker/daemon.json"
@@ -123,6 +167,49 @@ install-portainer() {
     fi
 }
 
+install-prometheus(){
+    shudo apt install prometheus prometheus-node-exporter -y &&
+    bush 'systemctl restart prometheus prometheus-node-exporter && systemctl status prometheus'
+}
+
+install-node-exporter(){
+    shudo apt install prometheus-node-exporter -y
+}
+
+install-podman() {
+    shudo apt install podman -y
+    bush 'systemctl start podman && systemctl status podman'
+}
+
+install-cockpit() {
+    shudo apt install cockpit cockpit-podman -y
+    shudo mkdir -p "$(dirname "$cockpit_listen_conf_file")"
+    copy "$(echofile "$cockpit_listen_conf")" "$cockpit_listen_conf_file"
+    bush 'systemctl daemon-reload && systemctl restart cockpit.socket && systemctl status cockpit.socket'
+}
+
+install-screenfetch() {
+    shudo apt install screenfetch -y
+}
+
+install-tools() {
+    shudo apt install git mc neofetch neovim htop jq yq -y
+}
+
+query-cockpit()    { execho curl -s -o /dev/null -k "https://$remote_host:$cockpit_port/metrics"; }
+query-prometheus() { execho curl -s -o /dev/null    "http://$remote_host:9090/metrics"; }
+query-exporter()   { execho curl -s -o /dev/null    "http://$remote_host:9100/metrics"; }
+
+query-all() {
+    query-cockpit &&
+    query-prometheus &&
+    query-exporter
+}
+
+screenshot() {
+    ssh "$remote_addr" screenfetch
+}
+
 get-key() { echo "$*" | grep -o -E   '^[a-zA-Z0-9_]+';     }
 get-val() { echo "$*" | sed     -e 's|^[a-zA-Z0-9_]*=||g'; }
 get-user(){ echo "$*" | grep -o -E   '^[^@]+';     }
@@ -151,14 +238,28 @@ main() {
     fi
     for cmd in $*; do
         case "$cmd" in
-            (exp*met*|em)    expose-metrics ;;
-            (test)           test-units ;;
-            (ping)           test-shudo ;;
-            (vars)           vars ;;
-            (ps)             shudo $docker ps;;
-            (check)          check-container $container ;;
-            (ins*portainer)  install-portainer ;;
-            (ins*port*agent) install-portainer-agent ;;
+            (test)            test-units ;;
+            (ping)            test-shudo ;;
+            (pingtest)        test-shudo && test-copy ;;
+            (vars)            vars ;;
+            (ps)              shudo $docker ps ;;
+            (check)           check-container $container ;;
+            # install and config change commands
+            (exp*met*|em)     expose-metrics ;;
+            (ins*pod*)        install-podman ;;
+            (ins*portainer)   install-portainer ;;
+            (ins*port*agent)  install-portainer-agent ;;
+            (ins*screenfetch) install-screenfetch ;;
+            (ins*tool*|tools) install-tools ;;
+            (ins*prom*)       install-prometheus ;;
+            (ins*node*exp*)   install-node-exporter ;;
+            (ins*cock*)       install-cockpit ;;
+            # query commands
+            (query*prom*)     query-prometheus ;;
+            (query*exp*)      query-exporter ;;
+            (query*cock*)     query-cockpit ;;
+            (query|query*all) query-all ;;
+            (screen*|fetch*|shot*)  screenshot ;;
             (*=*|*@*|-*)     continue ;;  # ignore vars and flags
             (*)              err "unsupported command: '$cmd'"; exit 1 ;;
         esac
@@ -209,6 +310,19 @@ portainer_version="${portainer_version:-lts}"
 confirm="${confirm:-ask}"
 container="${container:-portainer}"
 local="${local:-false}"
+
+cockpit_port="${cockpit_port:-9070}"
+cockpit_https="${cockpit_https:-}"
+cockpit_listen_conf_file=/etc/systemd/system/cockpit.socket.d/listen.conf
+cockpit_listen_conf="
+[Socket]
+# disable default port 9090 (usually used by prometheus)
+ListenStream=
+# add port 443
+ListenStream=$(test -z "$cockpit_https" || echo 443)
+# add port 9070
+ListenStream=$cockpit_port
+"
 
 case "$docker" in
     (docker|podman|echo) ;;  # allows vars
