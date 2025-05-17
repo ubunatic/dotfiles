@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+stackman_dir="$(dirname "$0")"
+cwd="$(pwd)"
+
+# Init phase: cd to cmd source dir. This helps Bash IDE to discover code
+# and allows modules to have simpler imports.
+if cd "$stackman_dir" && source "modules/init.sh" && cd "$cwd"
+then log "stackman modules imported"
+else echo "failed to load stackman modules" >/dev/stderr; exit 1
+fi
+
+main() {
+    if test $# -eq 0
+    then usage; exit 0;
+    fi
+    for cmd in $*; do
+        case "$cmd" in
+            (test)            test-units ;;
+            (ping)            test-shudo ;;
+            (ping!)           test-shudo && test-copy ;;
+            (vars)            vars ;;
+            (ps)              shudo $docker ps ;;
+            (check)           check-container $container ;;
+            # install and config change commands
+            (exp*met*|em)     expose-metrics ;;
+            (ins*pod*)        install-podman ;;
+            (ins*portainer)   install-portainer ;;
+            (ins*port*agent)  install-portainer-agent ;;
+            (ins*tool*|tools) install-tools ;;
+            (ins*prom*)       install-prometheus ;;
+            (ins*node*exp*)   install-node-exporter ;;
+            (ins*cock*)       install-cockpit ;;
+            # query commands
+            (query*prom*)     query-prometheus ;;
+            (query*exp*)      query-exporter ;;
+            (query*cock*)     query-cockpit ;;
+            (query|query*all) query-all ;;
+            (neo*|fetch*|sysinf*) systeminfo ;;
+            (*=*|*@*|-*)     continue ;;  # ignore vars and flags
+            (*)              err "unsupported command: '$cmd'"; exit 1 ;;
+        esac
+        if test $? -eq 0
+        then log "command $cmd: OK"
+        else err "command $cmd: FAIL"; exit 1
+        fi
+    done
+}
+
+parse-args "$@"
+main "$@"
