@@ -206,8 +206,8 @@ query-all() {
     query-exporter
 }
 
-screenshot() {
-    ssh "$remote_addr" screenfetch
+systeminfo() {
+    ssh "$remote_addr" neofetch
 }
 
 get-key() { echo "$*" | grep -o -E   '^[a-zA-Z0-9_]+';     }
@@ -249,7 +249,6 @@ main() {
             (ins*pod*)        install-podman ;;
             (ins*portainer)   install-portainer ;;
             (ins*port*agent)  install-portainer-agent ;;
-            (ins*screenfetch) install-screenfetch ;;
             (ins*tool*|tools) install-tools ;;
             (ins*prom*)       install-prometheus ;;
             (ins*node*exp*)   install-node-exporter ;;
@@ -259,7 +258,7 @@ main() {
             (query*exp*)      query-exporter ;;
             (query*cock*)     query-cockpit ;;
             (query|query*all) query-all ;;
-            (screen*|fetch*|shot*)  screenshot ;;
+            (neo*|fetch*|sysinf*) systeminfo ;;
             (*=*|*@*|-*)     continue ;;  # ignore vars and flags
             (*)              err "unsupported command: '$cmd'"; exit 1 ;;
         esac
