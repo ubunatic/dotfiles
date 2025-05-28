@@ -54,6 +54,7 @@ alias gpsupu='git push --set-upstream "$USER" "$(git branch --show-current)"'
 alias gr="gitroot"
 alias cg="gitroot"
 alias main="git checkout main && git pull"
+alias next="git checkout next && git pull"
 
 unalias gsu 2>/dev/null
 
