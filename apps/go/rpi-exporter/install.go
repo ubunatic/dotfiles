@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/exec"
 	"path"
+
+	"ubunatic.com/dotapps/go/rpi-exporter/collector"
 )
 
 //go:embed Makefile
@@ -45,6 +47,10 @@ func Uninstall() error {
 }
 
 func Install() error {
+	if !collector.IsRpi() {
+		return fmt.Errorf("cannot install on non-Rpi system")
+	}
+
 	tmp, bin, err := createWorkspace()
 	if err != nil {
 		return err

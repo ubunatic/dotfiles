@@ -26,7 +26,7 @@ func IsRpi() bool {
 		_, err := cmd.CombinedOutput()
 		status := err == nil
 		if status {
-			slog.Info("raspi-config not found, storing raspi status", "is_rpi", status)
+			slog.Info("raspi-config found, storing raspi status", "is_rpi", status)
 		} else {
 			slog.Warn("raspi-config not found, storing raspi status", "is_rpi", status, "error", err)
 		}
