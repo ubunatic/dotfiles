@@ -17,7 +17,7 @@ Or copy the `.keylayout` and the `.icns` files manually.
 
 Post Install
 ------------
-To use the new keyboard layouts, you may need to log out and log back in.
+To use the new keyboard layouts, you may need to log out and log back in. For changed KeyBindings only just restart you apps.
 You can select the keyboard layout in System Preferences > Keyboard > Input Sources. Or run `make settings` to jump there.
 
 Development
