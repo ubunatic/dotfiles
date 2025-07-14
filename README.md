@@ -7,11 +7,23 @@ Personal [Dotfiles](https://wiki.archlinux.org/title/Dotfiles) collection of she
 ## Usage
 Fork this repo and clone it to, e.g., `$HOME/git/dotfiles`, then `source` it your `.profile`.
 ```bash
-source "$HOME/git/dotfiles/shell/userrc.sh"
+export DOTFILES=$HOME/git/dotfiles
+source "$DOTFILES/shell/userrc.sh"
 ```
 See the [shell](/shell) library for more details.
 
-Note that some tools are real [apps](/apps) written in Go. These are compiled once and setup via [shell/go.sh](/shell/go.sh); if `go` is installed on your system.
+Alternatively, use the [install.sh](./install.sh) script:
+```sh
+# with zsh as default shell 
+zsh install.sh --help
+```
+```bash
+# with bash as default shell 
+./install.sh --help
+```
+Other shells may not work as expected.
+
+Note that some tools are real [apps](/apps) written in Go. These are compiled once and setup via [shell/go.sh](/shell/go.sh); if `go` is installed on your system. The first `source` may take a few mintes.
 
 ## Contribution Guide
 Contributions are welcome. Simply fork this repo and create a [Pull Request](https://codeberg.org/ubunatic/dotfiles/pulls). Make sure you stick to the existing `bash` scripting style.
