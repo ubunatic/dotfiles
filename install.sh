@@ -69,7 +69,13 @@ install-core(){
 }
 
 validate() {
-    grep -iE "dotfiles|userrc" ~/.userrc ~/.profile ~/.bashrc ~/.zshrc 2> /dev/null 
+    for f in ~/.userrc ~/.profile ~/.bashrc ~/.zshrc; do
+        if test -e "$f"
+        then echo "ℹ️ $f"
+        else continue
+        fi
+        grep -E 'dotfiles|userrc' "$f"
+    done
 }
 
 main() {
