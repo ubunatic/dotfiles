@@ -84,5 +84,16 @@
     {
         "key": "shift+alt+y",
         "command": "redo"
+    },
+
+    // MacOS Bindings
+    {
+        "key": "cmd+[IntlBackslash]",
+        "command": "workbench.action.terminal.toggleTerminal",
+        "when": "terminal.active"
+    },
+    {
+        "key": "cmd+k cmd+k",
+        "command": "workbench.action.openGlobalKeybindings"
     }
 ]
