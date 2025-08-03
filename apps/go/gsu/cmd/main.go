@@ -92,7 +92,7 @@ func main() {
 				return gsu.ErrConnectFailed
 			}
 
-			err = tui.Ask("Delete", object, "in bucket", bucket)
+			err = tui.Confirm("Delete", object, "in bucket", bucket)
 			if err != nil {
 				return gsu.ErrRmAborted
 			}
