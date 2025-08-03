@@ -1,4 +1,10 @@
-.PHONY: 👨🏻‍🏫 ⚙️
+.PHONY: ⚙️ 👨🏻‍🏫  # make all commands phony
+
+# The "usage" targets will find all commands in the available Makefiles and generate a usage message as follows:
+# - lines starting with '##' are section headers
+# - comments with '##' on the same line as a target are used as descriptions for the commands
+# - command names are colored, descriptions are in normal text and indented
+# - at the end of a section, a separator line is printed and the file name of the command is printed
 
 SHELL = bash
 
