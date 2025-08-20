@@ -96,5 +96,68 @@
     {
         "key": "cmd+k cmd+k",
         "command": "workbench.action.openGlobalKeybindings"
+    },
+    {
+        "key": "cmd+left",
+        "command": "workbench.action.navigateBack",
+        "when": "canNavigateBack"
+    },
+    {
+        "key": "cmd+right",
+        "command": "workbench.action.navigateForward",
+        "when": "canNavigateForward"
+    },
+    {
+        "key": "shift+cmd+o",
+        "command": "workbench.action.openRecent"
+    },
+
+    // Give back control over Minus Key (for zooming)
+    {
+        "key": "ctrl+-",
+        "command": "-workbench.action.navigateBack",
+        "when": "canNavigateBack"
+    },
+    {
+        "key": "ctrl+shift+-",
+        "command": "-workbench.action.navigateForward",
+        "when": "canNavigateForward"
+    },
+
+    // Toggle Terminal
+    // Cmd|Ctrl + [§|±] (EN Mac layout)
+    // Cmd|Ctrl + [^|°] (DE Win layout, needs CMD+code(50) mapped to `)
+    {
+        "key": "ctrl+[IntlBackslash]",
+        "command": "workbench.action.terminal.toggleTerminal",
+        "when": "terminal.active"
+    },
+    {
+        "key": "cmd+[IntlBackslash]",
+        "command": "workbench.action.terminal.toggleTerminal",
+        "when": "terminal.active"
+    },
+    {
+        "key": "ctrl+[Backquote]",
+        "command": "workbench.action.terminal.toggleTerminal",
+        "when": "terminal.active"
+    },
+    {
+        "key": "cmd+[Backquote]",
+        "command": "workbench.action.terminal.toggleTerminal",
+        "when": "terminal.active"
+    },
+
+    // Gemini Diff View rules prevent saving in diff editor. Let's fix this!
+    {
+        "key": "cmd+s",
+        "command": "-geminicodeassist.saveKeysClicked",
+        "when": "inGeminiDiffView || isInDiffEditor"
+    },
+    // rewrite the rule to capture saves only in Gemini tools
+    {
+        "key": "cmd+s",
+        "command": "geminicodeassist.saveKeysClicked",
+        "when": "inGeminiDiffView"
     }
 ]

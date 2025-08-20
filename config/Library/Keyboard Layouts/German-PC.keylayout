@@ -1117,7 +1117,16 @@
             <key code="48" output="&#x0009;"/>
             <key code="49" output=" "/>
             <!-- <key code="50" output="≥"/> -->
-            <key code="50" output="°"/>
+            <!-- <key code="50" output="°"/> -->
+            <!--
+            Map [cmd + ^] to [cmd + `]
+
+            [cmd + ^] cannot be safely used in MacOS.
+            System and app bindings may not capture it
+            or just refuse to react to it.
+
+            -->
+            <key code="50" output="`"/>
             <key code="51" output="&#x0008;"/>
             <key code="52" output="&#x0003;"/>
             <key code="53" output="&#x001B;"/>

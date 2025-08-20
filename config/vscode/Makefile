@@ -8,12 +8,12 @@ ifeq ($(OS),Darwin)
 PREFIX = ${HOME}/Library/Application Support
 endif
 
-CODES = VSCodium code-oss code code-insiders Code 
+CODES = VSCodium code-oss code code-insiders Code
 
 CODE   := $(shell for c in $(CODES); do test -d "$(PREFIX)/$$c" && echo "$$c" && break; done)
 PREFIX := $(PREFIX)/$(CODE)/User
 
-get_bindings = sed -e 's|//.*||g' "$(PREFIX)/keybindings.json" | jq -c '.[]'
+get_bindings = sed -e 's|//.*||g' "$(PREFIX)/keybindings.json" | jq -c '.[]' | sort -u
 
 info: ⚙️  ## Show current settings
 	@if test -e "$(PREFIX)/keybindings.json"; \
@@ -26,7 +26,10 @@ bindings: ⚙️  ## Show current bindings
 	@$(get_bindings) | head -n 5
 	@echo "..."
 	@$(get_bindings) | tail -n 5
-	@echo -n "Total:"; $(get_bindings) | wc -l
+	@echo -nu "Total:"; $(get_bindings) | wc -l
+
+diff: ⚙️  ## Show current diff
+	@diff -u keybindings.json "$(PREFIX)/keybindings.json" || true
 
 install: ⚙️  ## Install  bindings
 	@mkdir -p "$(PREFIX)"
