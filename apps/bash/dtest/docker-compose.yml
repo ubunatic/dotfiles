@@ -1,0 +1,15 @@
+services:
+  testing:
+    # USAGE: Run '.github/scripts/docker-test.sh docker-test' and see the script for more details.
+    image: golang:1.24
+    volumes:
+      # NOTE: Use compose arg --project-directory "<root>" for mounting the correct project root.
+      - .:/app
+      # NOTE: Run 'go mod vendor' before mounting and make sure you clean up afterwards.
+      - ./vendor:/app/vendor
+    working_dir: /app
+    environment:
+      GOPRIVATE:  "github.com/toknapp/*"
+      GOPROXY:    "https://proxy.golang.org"
+
+    command: go test ${TEST_FLAGS} ${TEST_PKG}

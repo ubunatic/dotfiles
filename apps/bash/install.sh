@@ -8,6 +8,7 @@ log()  { echo "INF: $*" >/dev/stderr; }
 # single file apps
 singlefile_apps=(
     mclog:mclog/mclog.sh
+    dtest:dtest/docker-test.sh
 )
 
 make_bin_dir() {
