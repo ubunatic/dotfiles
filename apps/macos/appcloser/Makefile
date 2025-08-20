@@ -25,6 +25,7 @@ install: ⚙️
 
 uninstall: ⚙️
 	rm -f $(prefix)/$(script)
+	rm -f $(prefix)/$(plist)
 
 list ls: ⚙️
 	@echo "Listing macOS app scripts..."
