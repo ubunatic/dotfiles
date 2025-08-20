@@ -27,6 +27,7 @@ for source_file in \
     grub.sh \
     prompt.sh \
     apps.sh \
+    docker.sh \
     completions.sh \
     test.sh
 do
