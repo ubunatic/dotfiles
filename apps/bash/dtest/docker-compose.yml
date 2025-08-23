@@ -9,7 +9,6 @@ services:
       - ./vendor:/app/vendor
     working_dir: /app
     environment:
-      GOPRIVATE:  "github.com/toknapp/*"
-      GOPROXY:    "https://proxy.golang.org"
+      GOPROXY: "https://proxy.golang.org"
 
     command: go test ${TEST_FLAGS} ${TEST_PKG}
