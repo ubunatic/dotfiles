@@ -47,11 +47,15 @@ dotapps-build() {
     for app in $(dotapps-find); do
         dotapps-build-app "$app"
     done
+
+    "$DOTFILES/apps/bash/install.sh"
 }
 
 dotapps-rebuild() {
     dotapps-clean
     dotapps-test
+
+    "$DOTFILES/apps/bash/install.sh" --reinstall
 }
 
 dotapps-test() {
@@ -93,11 +97,9 @@ dotapps() {
 }
 
 dotfiles-testdotapps() {
-    local err
     for cmd in clean test build names find; do
-        dotfiles-testcommand "dotapps-$cmd"
+        dotfiles-testcommand "dotapps-$cmd" || return $?
     done
-    return $err
 }
 
 if test -e "$DOTFILES/apps/go" && type go >/dev/null; then

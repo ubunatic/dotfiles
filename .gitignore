@@ -5,3 +5,6 @@ bin
 build
 *.tar.gz
 .ipynb_*
+
+# custom build files
+apps/macos/appcloser/appcloser
