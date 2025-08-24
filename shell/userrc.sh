@@ -28,6 +28,7 @@ for source_file in \
     prompt.sh \
     apps.sh \
     docker.sh \
+    proxmox.sh \
     completions.sh \
     test.sh
 do
