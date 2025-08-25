@@ -1,4 +1,4 @@
-[![test status](https://codeberg.org/ubunatic/dotfiles/badges/workflows/pull-request-test.yml/badge.svg?label=test)](https://codeberg.org/ubunatic/dotfiles/actions?workflow=pull-request-test.yml&actor=0&status=0)
+[![test status](https://codeberg.org/ubunatic/dotfiles/badges/workflows/pull-request-test.yml/badge.svg?label=test)](https://codeberg.org/ubunatic/dotfiles/actions?workflow=pull-request-test.yml&actor=0&status=0) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ubunatic/dotfiles)
 
 # Dotfiles
 
@@ -14,11 +14,11 @@ See the [shell](/shell) library for more details.
 
 Alternatively, use the [install.sh](./install.sh) script:
 ```sh
-# with zsh as default shell 
+# with zsh as default shell
 zsh install.sh --help
 ```
 ```bash
-# with bash as default shell 
+# with bash as default shell
 ./install.sh --help
 ```
 Other shells may not work as expected.
