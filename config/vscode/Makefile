@@ -17,7 +17,7 @@ get_bindings = sed -e 's|//.*||g' "$(PREFIX)/keybindings.json" | jq -c '.[]' | s
 
 info: ⚙️  ## Show current settings
 	@if test -e "$(PREFIX)/keybindings.json"; \
-	 then echo "✅ keybindings.json exists"; $(MAKE) bindings; \
+	 then echo "✅ keybindings.json exists in $(PREFIX)"; $(MAKE) bindings; \
 	 else echo "❌ keybindings.json does not exist"; \
 	 fi
 
@@ -30,6 +30,15 @@ bindings: ⚙️  ## Show current bindings
 
 diff: ⚙️  ## Show current diff
 	@diff -u keybindings.json "$(PREFIX)/keybindings.json" || true
+
+merge: ⚙️  ## Merge  bindings
+	@go run cmd/merge/main.go keybindings.json "$(PREFIX)/keybindings.json"
+
+import: ⚙️  ## Merge existing bindings to dotfiles bindings
+	@go run cmd/merge/main.go keybindings.json "$(PREFIX)/keybindings.json" keybindings.json
+
+clean-backups: ⚙️  ## Clean up backups
+	@rm -f keybindings.json.bak.*
 
 install: ⚙️  ## Install  bindings
 	@mkdir -p "$(PREFIX)"
