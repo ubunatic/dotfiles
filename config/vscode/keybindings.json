@@ -1,163 +1,277 @@
+// Place your key bindings in this file to override the defaults
 [
-    // PC Bindings
-    {
-        "key": "ctrl+k ctrl+k",
-        "command": "-editor.action.selectFromAnchorToCursor",
-        "when": "editorTextFocus && selectionAnchorSet"
-    },
-    {
-        "key": "ctrl+k ctrl+k",
-        "command": "workbench.action.openGlobalKeybindings"
-    },
-    {
-        "key": "alt+k alt+k",
-        "command": "workbench.action.openGlobalKeybindings"
-    },
-    {
-        "key": "ctrl+k k",
-        "command": "workbench.action.openGlobalKeybindings"
-    },
-    {
-        "key": "alt+k k",
-        "command": "workbench.action.openGlobalKeybindings"
-    },
-    {
-        "key": "alt+s",
-        "command": "workbench.action.files.save"
-    },
-    {
-        "key": "alt+w",
-        "command": "workbench.action.closeActiveEditor"
-    },
-    {
-        "key": "alt+d",
-        "command": "editor.action.addSelectionToNextFindMatch",
-        "when": "editorFocus"
-    },
-    {
-        "key": "alt+c",
-        "command": "editor.action.clipboardCopyAction"
-    },
-    {
-        "key": "alt+c",
-        "command": "workbench.action.terminal.copySelection",
-        "when": "terminalTextSelectedInFocused || terminalFocus && terminalHasBeenCreated && terminalTextSelected || terminalFocus && terminalProcessSupported && terminalTextSelected || terminalFocus && terminalTextSelected && terminalTextSelectedInFocused || terminalHasBeenCreated && terminalTextSelected && terminalTextSelectedInFocused || terminalProcessSupported && terminalTextSelected && terminalTextSelectedInFocused"
-    },
-    {
-        "key": "alt+v",
-        "command": "workbench.action.terminal.paste",
-        "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
-    },
-    {
-        "key": "alt+v",
-        "command": "editor.action.clipboardPasteAction"
-    },
-    {
-        "key": "alt+x",
-        "command": "editor.action.clipboardCutAction"
-    },
-    {
-        "key": "alt+a",
-        "command": "editor.action.selectAll",
-        "when": "editorTextFocus"
-    },
-    {
-        "key": "alt+a",
-        "command": "workbench.action.terminal.selectAll",
-        "when": "terminalFocus"
-    },
-    {
-        "key": "alt+y",
-        "command": "undo"
-    },
-    {
-        "key": "alt+z",
-        "command": "undo"
-    },
-    {
-        "key": "ctrl+y",
-        "command": "-redo"
-    },
-    {
-        "key": "shift+alt+z",
-        "command": "redo"
-    },
-    {
-        "key": "shift+alt+y",
-        "command": "redo"
-    },
 
-    // MacOS Bindings
-    {
-        "key": "cmd+[IntlBackslash]",
-        "command": "workbench.action.terminal.toggleTerminal",
-        "when": "terminal.active"
-    },
-    {
-        "key": "cmd+k cmd+k",
-        "command": "workbench.action.openGlobalKeybindings"
-    },
-    {
-        "key": "cmd+left",
-        "command": "workbench.action.navigateBack",
-        "when": "canNavigateBack"
-    },
-    {
-        "key": "cmd+right",
-        "command": "workbench.action.navigateForward",
-        "when": "canNavigateForward"
-    },
-    {
-        "key": "shift+cmd+o",
-        "command": "workbench.action.openRecent"
-    },
+   // PC Bindings
+   {
+      "key": "ctrl+k ctrl+k",
+      "command": "-editor.action.selectFromAnchorToCursor",
+      "when": "editorTextFocus && selectionAnchorSet"
+   },
+   {
+      "key": "ctrl+k ctrl+k",
+      "command": "workbench.action.openGlobalKeybindings",
+      "when": ""
+   },
+   {
+      "key": "alt+k alt+k",
+      "command": "workbench.action.openGlobalKeybindings",
+      "when": ""
+   },
+   {
+      "key": "ctrl+k k",
+      "command": "workbench.action.openGlobalKeybindings",
+      "when": ""
+   },
+   {
+      "key": "alt+k k",
+      "command": "workbench.action.openGlobalKeybindings",
+      "when": ""
+   },
+   {
+      "key": "alt+s",
+      "command": "workbench.action.files.save",
+      "when": ""
+   },
+   {
+      "key": "alt+w",
+      "command": "workbench.action.closeActiveEditor",
+      "when": ""
+   },
+   {
+      "key": "alt+d",
+      "command": "editor.action.addSelectionToNextFindMatch",
+      "when": "editorFocus"
+   },
+   {
+      "key": "alt+c",
+      "command": "editor.action.clipboardCopyAction",
+      "when": ""
+   },
+   {
+      "key": "alt+c",
+      "command": "workbench.action.terminal.copySelection",
+      "when": "terminalTextSelectedInFocused || terminalFocus && terminalHasBeenCreated && terminalTextSelected || terminalFocus && terminalProcessSupported && terminalTextSelected || terminalFocus && terminalTextSelected && terminalTextSelectedInFocused || terminalHasBeenCreated && terminalTextSelected && terminalTextSelectedInFocused || terminalProcessSupported && terminalTextSelected && terminalTextSelectedInFocused"
+   },
+   {
+      "key": "alt+v",
+      "command": "workbench.action.terminal.paste",
+      "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
+   },
+   {
+      "key": "alt+v",
+      "command": "editor.action.clipboardPasteAction",
+      "when": ""
+   },
+   {
+      "key": "alt+x",
+      "command": "editor.action.clipboardCutAction",
+      "when": ""
+   },
+   {
+      "key": "alt+a",
+      "command": "editor.action.selectAll",
+      "when": "editorTextFocus"
+   },
+   {
+      "key": "alt+a",
+      "command": "workbench.action.terminal.selectAll",
+      "when": "terminalFocus"
+   },
 
-    // Give back control over Minus Key (for zooming)
-    {
-        "key": "ctrl+-",
-        "command": "-workbench.action.navigateBack",
-        "when": "canNavigateBack"
-    },
-    {
-        "key": "ctrl+shift+-",
-        "command": "-workbench.action.navigateForward",
-        "when": "canNavigateForward"
-    },
+   // Alt+Y/Z are undo
+   // Alt+Shift+Z/Y are redo
+   {
+      "key": "alt+y",
+      "command": "undo",
+      "when": ""
+   },
+   {
+      "key": "alt+z",
+      "command": "undo",
+      "when": ""
+   },
+   {
+      "key": "shift+alt+z",
+      "command": "redo",
+      "when": ""
+   },
+   {
+      "key": "shift+alt+y",
+      "command": "redo",
+      "when": ""
+   },
 
-    // Toggle Terminal
-    // Cmd|Ctrl + [§|±] (EN Mac layout)
-    // Cmd|Ctrl + [^|°] (DE Win layout, needs CMD+code(50) mapped to `)
-    {
-        "key": "ctrl+[IntlBackslash]",
-        "command": "workbench.action.terminal.toggleTerminal",
-        "when": "terminal.active"
-    },
-    {
-        "key": "cmd+[IntlBackslash]",
-        "command": "workbench.action.terminal.toggleTerminal",
-        "when": "terminal.active"
-    },
-    {
-        "key": "ctrl+[Backquote]",
-        "command": "workbench.action.terminal.toggleTerminal",
-        "when": "terminal.active"
-    },
-    {
-        "key": "cmd+[Backquote]",
-        "command": "workbench.action.terminal.toggleTerminal",
-        "when": "terminal.active"
-    },
+   // Ctrl+Z/Y are undo, redo not needed
+   // because we can use Ctrl+Shift+Z/Y
+   {
+      "key": "ctrl+y",
+      "command": "-redo",
+      "when": ""
+   },
+   {
+      "key": "ctrl+z",
+      "command": "undo",
+      "when": ""
+   },
+   {
+      "key": "shift+ctrl+z",
+      "command": "redo",
+      "when": ""
+   },
+   {
+      "key": "shift+ctrl+y",
+      "command": "redo",
+      "when": ""
+   },
 
-    // Gemini Diff View rules prevent saving in diff editor. Let's fix this!
-    {
-        "key": "cmd+s",
-        "command": "-geminicodeassist.saveKeysClicked",
-        "when": "inGeminiDiffView || isInDiffEditor"
-    },
-    // rewrite the rule to capture saves only in Gemini tools
-    {
-        "key": "cmd+s",
-        "command": "geminicodeassist.saveKeysClicked",
-        "when": "inGeminiDiffView"
-    }
+   // MacOS Bindings
+   {
+      "key": "cmd+[IntlBackslash]",
+      "command": "workbench.action.terminal.toggleTerminal",
+      "when": "terminal.active"
+   },
+   {
+      "key": "cmd+k cmd+k",
+      "command": "workbench.action.openGlobalKeybindings",
+      "when": ""
+   },
+   {
+      "key": "cmd+left",
+      "command": "workbench.action.navigateBack",
+      "when": "canNavigateBack"
+   },
+   {
+      "key": "cmd+right",
+      "command": "workbench.action.navigateForward",
+      "when": "canNavigateForward"
+   },
+   {
+      "key": "shift+cmd+o",
+      "command": "workbench.action.openRecent",
+      "when": ""
+   },
+
+   // Give back control over Minus Key (for zooming)
+   {
+      "key": "ctrl+-",
+      "command": "-workbench.action.navigateBack",
+      "when": "canNavigateBack"
+   },
+   {
+      "key": "ctrl+shift+-",
+      "command": "-workbench.action.navigateForward",
+      "when": "canNavigateForward"
+   },
+
+   // Alt-based Text Movements
+   {
+      "key": "alt+left",
+      "command": "cursorWordLeft",
+      "when": "textInputFocus"
+   },
+   {
+      "key": "alt+right",
+      "command": "cursorWordRight",
+      "when": "textInputFocus"
+   },
+   {
+      "key": "alt+up",
+      "command": "cursorUp",
+      "when": "textInputFocus"
+   },
+   {
+      "key": "alt+down",
+      "command": "cursorDown",
+      "when": "textInputFocus"
+   },
+   {
+      "key": "alt+shift+left",
+      "command": "cursorWordLeftSelect",
+      "when": "textInputFocus"
+   },
+   {
+      "key": "alt+shift+right",
+      "command": "cursorWordRightSelect",
+      "when": "textInputFocus"
+   },
+   {
+      "key": "alt+shift+up",
+      "command": "cursorUpSelect",
+      "when": "textInputFocus"
+   },
+   {
+      "key": "alt+shift+down",
+      "command": "cursorDownSelect",
+      "when": "textInputFocus"
+   },
+
+   // Toggle Terminal
+   // Cmd|Ctrl + [§|±] (EN Mac layout)
+   // Cmd|Ctrl + [^|°] (DE Win layout, needs CMD+code(50) mapped to `)
+   {
+      "key": "ctrl+[IntlBackslash]",
+      "command": "workbench.action.terminal.toggleTerminal",
+      "when": "terminal.active"
+   },
+   {
+      "key": "ctrl+[Backquote]",
+      "command": "workbench.action.terminal.toggleTerminal",
+      "when": "terminal.active"
+   },
+   {
+      "key": "cmd+[Backquote]",
+      "command": "workbench.action.terminal.toggleTerminal",
+      "when": "terminal.active"
+   },
+
+   // Gemini Diff View rules prevent saving in diff editor. Let's fix this!
+   {
+      "key": "cmd+s",
+      "command": "-geminicodeassist.saveKeysClicked",
+      "when": "inGeminiDiffView || isInDiffEditor"
+   },
+
+   // rewrite the rule to capture saves only in Gemini tools
+   {
+      "key": "cmd+s",
+      "command": "geminicodeassist.saveKeysClicked",
+      "when": "inGeminiDiffView"
+   },
+   {
+      "key": "ctrl+shift+[Equal]",
+      "command": "-workbench.action.terminal.toggleTerminal",
+      "when": "terminal.active"
+   },
+
+   // Meta for Ctrl+S/X/V/C etc.
+   {
+      "key": "meta+s",
+      "command": "workbench.action.files.save",
+      "when": "textInputFocus"
+   },
+   {
+      "key": "meta+c",
+      "command": "workbench.action.terminal.copySelection",
+      "when": "terminalTextSelectedInFocused || terminalFocus && terminalHasBeenCreated && terminalTextSelected || terminalFocus && terminalProcessSupported && terminalTextSelected || terminalFocus && terminalTextSelected && terminalTextSelectedInFocused || terminalHasBeenCreated && terminalTextSelected && terminalTextSelectedInFocused || terminalProcessSupported && terminalTextSelected && terminalTextSelectedInFocused"
+   },
+   {
+      "key": "meta+v",
+      "command": "workbench.action.terminal.paste",
+      "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
+   },
+   {
+      "key": "meta+v",
+      "command": "editor.action.clipboardPasteAction",
+      "when": ""
+   },
+   {
+      "key": "meta+x",
+      "command": "editor.action.clipboardCutAction",
+      "when": ""
+   },
+   {
+      "key": "meta+a",
+      "command": "editor.action.selectAll",
+      "when": "editorTextFocus"
+   }
 ]
