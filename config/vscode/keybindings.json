@@ -27,6 +27,9 @@
       "command": "workbench.action.openGlobalKeybindings",
       "when": ""
    },
+
+   // No need for Alt keys!
+   // Lets remap them to the common Cmd/Ctrl combinations.
    {
       "key": "alt+s",
       "command": "workbench.action.files.save",
@@ -273,5 +276,22 @@
       "key": "meta+a",
       "command": "editor.action.selectAll",
       "when": "editorTextFocus"
+   },
+   {
+      "key": "ctrl+]",
+      "command": "-editor.action.indentLines",
+      "when": "editorTextFocus && !editorReadonly"
+   },
+   {
+      "key": "ctrl+]",
+      "command": "workbench.action.zoomIn"
+   },
+   {
+      "key": "ctrl+0",
+      "command": "workbench.action.zoomReset"
+   },
+   {
+      "key": "ctrl+0",
+      "command": "-workbench.action.focusSideBar"
    }
 ]
