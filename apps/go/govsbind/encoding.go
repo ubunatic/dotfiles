@@ -4,13 +4,27 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log/slog"
 	"os"
 	"strings"
 )
 
-// BindingFileDecoder parse the JSON with comments from a Keybindings files as:
+func ReadKeybindings(file string) (*BindingFile, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open keybindings file %s: %w", file, err)
+	}
+	defer f.Close()
+
+	b, err := unmarshalKeybindings(f)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal keybindings from %s: %w", file, err)
+	}
+	return b, nil
+}
+
+// unmarshalKeybindings parses input data as JSON with comments
+// from a keybindings.json files as follows.
 //
 //	// File-level comment
 //	[ <-- must be on its own line
@@ -19,11 +33,7 @@ import (
 //	  { single or multi-line JSON binding }, <-- may be followed by a comma
 //	  // ...
 //	] <-- must be on its own line
-type BindingFileDecoder struct {
-	reader io.Reader
-}
-
-func (d *BindingFileDecoder) Decode(b *BindingFile) error {
+func unmarshalKeybindings(f *os.File) (*BindingFile, error) {
 	// parse strategy:
 	// 1. read line by line (header first as then then bindings trimmed)
 	// 2. trim whitespace
@@ -31,7 +41,12 @@ func (d *BindingFileDecoder) Decode(b *BindingFile) error {
 	// 4. if line is empty, continue
 	// 5. if line is a JSON object, unmarshal into Keybinding
 
-	scanner := bufio.NewScanner(d.reader)
+	b := &BindingFile{
+		file:        f,
+		Comments:    []string{},
+		KeyBindings: []Keybinding{},
+	}
+	scanner := bufio.NewScanner(f)
 
 	// scan header until "["
 	for scanner.Scan() {
@@ -106,30 +121,57 @@ func (d *BindingFileDecoder) Decode(b *BindingFile) error {
 		)
 	}
 
-	return io.EOF
+	return b, nil
 }
 
-func ReadKeybindings(file string) (*BindingFile, error) {
-	f, err := os.Open(file)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open keybindings file %s: %w", file, err)
-	}
-	defer f.Close()
+func marshalKeybinding(kb Keybinding, prefix, indent string) ([]byte, error) {
+	w := &strings.Builder{}
+	// start with comments
+	w.Write([]byte(kb.CommentString(prefix)))
 
-	decoder := BindingFileDecoder{reader: f}
-	b := &BindingFile{
-		file:        f,
-		Comments:    []string{},
-		KeyBindings: []Keybinding{},
+	// then add JSON without HTML escaping
+	w.Write([]byte(prefix))
+	enc := json.NewEncoder(w)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent(prefix, indent)
+	if err := enc.Encode(kb.KeybindingEntry); err != nil {
+		return nil, err
 	}
+	res := strings.TrimRight(w.String(), "\n")
 
-	for {
-		if err := decoder.Decode(b); err != nil {
-			if err == io.EOF {
-				break
-			}
-			return nil, fmt.Errorf("failed to decode keybinding from %s: %w", file, err)
+	// remove without trailing newline to allow for `},` closing in lists
+	return []byte(res), nil
+}
+
+func marshalKeybindings(kbs KeyBindings, prefix, indent string) ([]byte, error) {
+	var result []byte
+	for i, binding := range kbs {
+		data, err := marshalKeybinding(binding, prefix+indent, indent)
+		if err != nil {
+			return nil, err
+		}
+		if len(binding.comments) > 0 {
+			result = append(result, []byte("\n")...) // separate commented keybindings visually
+		}
+		result = append(result, data...)
+		if i < len(kbs)-1 {
+			result = append(result, []byte(",\n")...)
 		}
 	}
-	return b, nil
+	if len(result) == 0 {
+		return nil, nil
+	}
+	start := []byte(prefix + "[\n")
+	end := []byte(prefix + "\n]\n")
+	return append(append(start, result...), end...), nil
+}
+
+func commentString(comments []string, indent string) string {
+	var sb strings.Builder
+	for _, comment := range comments {
+		sb.WriteString(indent)
+		sb.WriteString(comment)
+		sb.WriteString("\n")
+	}
+	return sb.String()
 }

@@ -9,6 +9,7 @@ PREFIX = ${HOME}/Library/Application Support
 endif
 
 CODES = VSCodium code-oss code code-insiders Code
+MERGETOOL = bash -ic "dotapps build" && govsbind
 
 CODE   := $(shell for c in $(CODES); do test -d "$(PREFIX)/$$c" && echo "$$c" && break; done)
 PREFIX := $(PREFIX)/$(CODE)/User
@@ -32,13 +33,17 @@ diff: ⚙️  ## Show current diff
 	@diff -u keybindings.json "$(PREFIX)/keybindings.json" || true
 
 merge: ⚙️  ## Merge  bindings
-	@go run cmd/merge/main.go keybindings.json "$(PREFIX)/keybindings.json"
+	@$(MERGETOOL) keybindings.json "$(PREFIX)/keybindings.json"
 
 import: ⚙️  ## Merge existing bindings to dotfiles bindings
-	@go run cmd/merge/main.go keybindings.json "$(PREFIX)/keybindings.json" keybindings.json
+	@$(MERGETOOL) keybindings.json "$(PREFIX)/keybindings.json" keybindings.json
 
 clean-backups: ⚙️  ## Clean up backups
 	@rm -f keybindings.json.bak.*
+
+test-merge-tool:
+	@$(MERGETOOL) keybindings.json "$(PREFIX)/keybindings.json"
+	@echo "✅ test-merge succeeded"
 
 install: ⚙️  ## Install  bindings
 	@mkdir -p "$(PREFIX)"

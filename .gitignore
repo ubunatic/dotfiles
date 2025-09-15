@@ -8,3 +8,15 @@ build
 
 # custom build files
 apps/macos/appcloser/appcloser
+
+# backup files
+*.bak.*
+*.bak
+
+# Ignore plaintext config files. See homelab/.config/crypt.sh.
+homelab/.config/*
+# Allow checking in the encrypted config archive.
+!homelab/.config/config.tar.gz.gpg
+# Allow checking in the crypt.sh script itself and markdown documentation.
+!homelab/.config/*.sh
+!homelab/.config/*.md

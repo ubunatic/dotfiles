@@ -277,6 +277,8 @@
       "command": "editor.action.selectAll",
       "when": "editorTextFocus"
    },
+
+   // Allow zooming on DE keyboard
    {
       "key": "ctrl+]",
       "command": "-editor.action.indentLines",
@@ -284,14 +286,12 @@
    },
    {
       "key": "ctrl+]",
-      "command": "workbench.action.zoomIn"
+      "command": "workbench.action.zoomIn",
+      "when": ""
    },
    {
       "key": "ctrl+0",
-      "command": "workbench.action.zoomReset"
-   },
-   {
-      "key": "ctrl+0",
-      "command": "-workbench.action.focusSideBar"
+      "command": "workbench.action.zoomReset",
+      "when": ""
    }
 ]
