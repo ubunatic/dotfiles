@@ -68,3 +68,6 @@ info: vars  ## Show info about input-remapper bindings
 	# $(autoload)
 	# Active mappings:
 	# $(active)
+
+show: info ## Show current autoload preset
+	$(goremapper) -show-preset macstyle

@@ -9,7 +9,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "Super_R",
-        "name": "modifier: Caps Lock -> Super",
+        "name": "modifier: Caps Lock >> Super  (restore Super)",
         "mapping_type": "key_macro"
     },
     {
@@ -27,7 +27,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "KEY_LEFTCTRL + Left",
-        "name": "text-nav: Super L + Left",
+        "name": "text-nav: Super+\u27a1\ufe0f >> Ctrl+\u27a1\ufe0f  (\ud83c\udf4f Opt+\u27a1\ufe0f)",
         "mapping_type": "key_macro"
     },
     {
@@ -40,7 +40,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "KEY_LEFTCTRL",
-        "name": "modifier: Alt L -> Ctrl",
+        "name": "modifier: Alt >> Ctrl  (\ud83c\udf4f Cmd)",
         "mapping_type": "key_macro"
     },
     {
@@ -58,7 +58,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "ISO_Level3_Shift + q",
-        "name": "AltGr: Super L + q",
+        "name": "Iso: Super + q >> Iso3 + q  (\ud83c\udde9\ud83c\uddea Q, don't quit)",
         "mapping_type": "key_macro"
     },
     {
@@ -76,7 +76,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "Alt_L",
-        "name": "modifier: Control L + Super L",
+        "name": "modifier: Ctrl + Super >> Alt  (restore Alt)",
         "mapping_type": "key_macro"
     },
     {
@@ -94,7 +94,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "ISO_Level3_Shift + less",
-        "name": "AltGr: Super L + less",
+        "name": "Iso: Super + less >> Iso3 + less  (\ud83c\udde9\ud83c\uddea Pipe)",
         "mapping_type": "key_macro"
     },
     {
@@ -112,7 +112,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "ISO_Level3_Shift + 8",
-        "name": "umlaut:  Super L + \u00f6 -> [",
+        "name": "umlaut:  Super + \u00f6 >> [  (\ud83e\uddd1\u200d\ud83d\udcbb Coding)",
         "mapping_type": "key_macro"
     },
     {
@@ -135,7 +135,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "ISO_Level3_Shift + 7",
-        "name": "umlaut:  Shift L + Super L + \u00f6 -> {",
+        "name": "umlaut:  \u2934\ufe0f+Super + \u00f6 >> {  (\ud83e\uddd1\u200d\ud83d\udcbb Coding)",
         "mapping_type": "key_macro"
     },
     {
@@ -153,7 +153,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "ISO_Level3_Shift + 9",
-        "name": "umlaut:  Super L + \u00e4 -> ]",
+        "name": "umlaut:  Super + \u00e4 >> ]  (\ud83e\uddd1\u200d\ud83d\udcbb Coding)",
         "mapping_type": "key_macro"
     },
     {
@@ -176,7 +176,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "ISO_Level3_Shift + 0",
-        "name": "umlaut: Shift L + Super L + \u00e4 -> }",
+        "name": "umlaut:  \u2934\ufe0f+Super + \u00e4 >> {  (\ud83e\uddd1\u200d\ud83d\udcbb Coding)",
         "mapping_type": "key_macro"
     },
     {
@@ -194,6 +194,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "ISO_Level3_Shift + plus",
+        "name": "Iso: Super + plus >> Iso3 + plus  (\ud83c\udde9\ud83c\uddea Tilde)",
         "mapping_type": "key_macro"
     },
     {
@@ -211,7 +212,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "KEY_LEFTCTRL + Right",
-        "name": "text-nav: Super L + Right",
+        "name": "text-nav: Super+\u2b05\ufe0f >> Ctrl+\u2b05\ufe0f  (\ud83c\udf4f Opt+\u2b05\ufe0f)",
         "mapping_type": "key_macro"
     },
     {
@@ -229,6 +230,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "ISO_Level3_Shift + ssharp",
+        "name": "Iso: Super + \u00df >> Iso3 + \u00df  (\ud83c\udde9\ud83c\uddea \u00df)",
         "mapping_type": "key_macro"
     },
     {
@@ -246,6 +248,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "ISO_Level3_Shift + 7",
+        "name": "Iso: Super + 7 >> Iso3 + 7 (\ud83c\udde9\ud83c\uddea Curly L)",
         "mapping_type": "key_macro"
     },
     {
@@ -263,6 +266,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "ISO_Level3_Shift + 8",
+        "name": "Iso: Super + 8 >> Iso3 + 8  (\ud83c\udde9\ud83c\uddea Square L)",
         "mapping_type": "key_macro"
     },
     {
@@ -280,6 +284,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "ISO_Level3_Shift + 9",
+        "name": "Iso: Super + 9 >> Iso3 + 9  (\ud83c\udde9\ud83c\uddea Square R)",
         "mapping_type": "key_macro"
     },
     {
@@ -297,6 +302,7 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "ISO_Level3_Shift + 0",
+        "name": "Iso: Super + 0 >> Iso3 + 0  (\ud83c\udde9\ud83c\uddea Curly R)",
         "mapping_type": "key_macro"
     },
     {
@@ -318,8 +324,49 @@
             }
         ],
         "target_uinput": "keyboard",
-        "output_symbol": "KEY_LEFTCTRL  + Super_L + space",
-        "name": "emote: Control L + Super L + space",
+        "output_symbol": "Control_L + Alt_L + e",
+        "name": "app: Control + Super + space  (\ud83c\udf4f Emoji)",
+        "mapping_type": "key_macro"
+    },
+    {
+        "input_combination": [
+            {
+                "type": 1,
+                "code": 29,
+                "origin_hash": "f41857944f231401fd2a41d9b959607a"
+            },
+            {
+                "type": 1,
+                "code": 56,
+                "origin_hash": "f41857944f231401fd2a41d9b959607a"
+            },
+            {
+                "type": 1,
+                "code": 57,
+                "origin_hash": "f41857944f231401fd2a41d9b959607a"
+            }
+        ],
+        "target_uinput": "keyboard",
+        "output_symbol": "Control_L + Alt_L + e",
+        "name": "app: Control + Alt + space  (\ud83c\udf4f Emoji)",
+        "mapping_type": "key_macro"
+    },
+    {
+        "input_combination": [
+            {
+                "type": 1,
+                "code": 56,
+                "origin_hash": "f41857944f231401fd2a41d9b959607a"
+            },
+            {
+                "type": 1,
+                "code": 125,
+                "origin_hash": "f41857944f231401fd2a41d9b959607a"
+            }
+        ],
+        "target_uinput": "keyboard",
+        "output_symbol": "Super_L",
+        "name": "modifier: Super + Alt >> Super (restore Super)",
         "mapping_type": "key_macro"
     }
 ]

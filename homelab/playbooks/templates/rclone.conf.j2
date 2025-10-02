@@ -1,0 +1,18 @@
+[drive]
+type = drive
+scope = drive.file
+team_drive =
+
+# client_id, client_secret, and token are set dynamically by rclone config command
+client_id =
+client_secret =
+token = {}
+
+[gcs]
+type = google cloud storage
+project_number = {{ google_cloud_project_number }}
+service_account_file = {{ rclone_service_account_file }}
+bucket_policy_only = true
+bucket_acl = private
+location = {{ google_cloud_bucket_location }}
+storage_class = {{ google_cloud_bucket_storage_class }}

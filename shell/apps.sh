@@ -34,7 +34,11 @@ dotapps-build-app() {
 
         # build the first main app that we can find
         for f in ./main.go ./cmd/main.go ./$app.go ./cmd/$app.go; do
-            test -e "$f" || continue
+            if test -e "$f"
+            then dbg "building $app from $f to $dst"
+            else dbg "no buildable file found for $app in $src"
+                 continue
+            fi
             go build -o "$dst" "$f"
             return $?
         done >/dev/stderr

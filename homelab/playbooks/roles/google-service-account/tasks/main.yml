@@ -1,0 +1,108 @@
+# Ansible Role: google-service-account
+# File: homelab/playbooks/roles/google-service-account/tasks/main.yml
+- name: Service Account Setup
+  block:
+    - name: Ensure environment variables are set
+      block:
+        - name: Check if required environment variables are set
+          ansible.builtin.assert:
+            that:
+              - service_account_file is defined
+              - service_account_name is defined
+              - service_account_display_name is defined
+              - google_cloud_project is defined
+            fail_msg: "One or more required environment variables are not set."
+
+        - name: Set service account directory variable
+          ansible.builtin.set_fact:
+            service_account_dir: "{{ service_account_file | dirname }}"
+            service_account_email: "{{ service_account_name }}@{{ google_cloud_project }}.iam.gserviceaccount.com"
+
+    - name: Ensure service account config directory exists
+      ansible.builtin.file:
+        path: "{{ service_account_dir }}"
+        state: directory
+        mode: '0700'
+
+    - name: Google Cloud Auth
+      tags: google-cloud
+      block:
+        - name: Check gcloud login status
+          ansible.builtin.command: gcloud auth list --format='get(status)'
+          register: gcloud_auth_status
+          changed_when: gcloud_auth_status.stdout != 'ACTIVE'
+
+        - name: Login user to Google Cloud if not already logged in using gcloud command
+          ansible.builtin.command: gcloud auth login --brief --update-adc --no-launch-browser
+          changed_when: false
+          when: gcloud_auth_status.stdout != 'ACTIVE'
+
+        - name: Read ADC Access Token
+          ansible.builtin.command: gcloud auth application-default print-access-token
+          register: gcloud_adc_access_token
+          changed_when: false
+
+        - name: Read Google Cloud project name and number from active config using gcloud command
+          ansible.builtin.command: gcloud config get project
+          register: google_cloud_project
+          changed_when: false
+
+        - name: Read Google Cloud project number from active config using gcloud command
+          ansible.builtin.command: gcloud projects describe {{ google_cloud_project.stdout }} --format='get(projectNumber)'
+          register: google_cloud_project_number
+          changed_when: false
+
+        - name: Set Google Cloud project facts
+          ansible.builtin.set_fact:
+            google_cloud_project:        "{{ google_cloud_project.stdout }}"
+            google_cloud_project_number: "{{ google_cloud_project_number.stdout }}"
+          changed_when: false
+
+    - name: Google Cloud Service Account
+      tags: google-cloud
+      block:
+        - name: Check if service account file exists
+          ansible.builtin.stat:
+            path: "{{ service_account_file }}"
+          register: service_account_file_stat
+
+        - name: Create service account file if it does not exist
+          when: not service_account_file_stat.stat.exists
+          block:
+            - name: Create service account
+              google.cloud.gcp_iam_service_account:
+                name: "rclone"
+                display_name: "{{ service_account_display_name }}"
+                project: "{{ google_cloud_project }}"
+                state: present
+                auth_kind: accesstoken
+                access_token: "{{ gcloud_adc_access_token.stdout }}"
+              register: service_account_info
+              changed_when: false
+          rescue:
+            - name: Ignore ALREADY_EXISTS error for service account creation
+              ansible.builtin.debug:
+                msg: "Service account already exists, ignoring error."
+              when: >
+                service_account_info is defined and
+                service_account_info.msg is defined and
+                'ALREADY_EXISTS' in service_account_info.msg
+
+        - name: "Create and download key file for service account: {{ service_account_name }}"
+          google.cloud.gcp_iam_service_account_key:
+            project: "{{ google_cloud_project }}"
+            state: present
+            auth_kind: accesstoken
+            access_token: "{{ gcloud_adc_access_token.stdout }}"
+            path: "{{ service_account_file }}"
+          when: not service_account_file_stat.stat.exists
+
+        - name: Check if Service Account can be used to access Google Cloud Storage
+          google.cloud.gcp_storage_bucket:
+            name: "{{ google_cloud_project }}-backup"
+            project: "{{ google_cloud_project }}"
+            auth_kind: serviceaccount
+            service_account_file: "{{ service_account_file }}"
+          register: service_account_info
+          changed_when: false
+          when: service_account_file_stat.stat.exists
