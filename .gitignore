@@ -5,6 +5,20 @@ bin
 build
 *.tar.gz
 .ipynb_*
+.vscode
+.idea
+.env
+.bak
 
 # custom build files
 apps/macos/appcloser/appcloser
+
+# backup files
+*.bak.*
+*.bak
+
+# Ignore plaintext config files. See homelab/.config/crypt.sh.
+homelab/.config
+homelab/.vault
+# Allow checking in any docs
+!*.md

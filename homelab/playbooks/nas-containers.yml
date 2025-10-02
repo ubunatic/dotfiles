@@ -1,0 +1,58 @@
+- name: Deploy a container on localhost
+  hosts: nas
+
+  tasks:
+    - name: Ensure Environment Variables are set
+      block:
+        - name: Ensure home is not empty
+          ansible.builtin.assert:
+            that:
+              - home is defined
+              - home != ""
+            fail_msg: "Environment variable HOME is not set."
+            success_msg: "Environment variable HOME is set to {{ home }}."
+
+        - name: Ensure host is not empty
+          ansible.builtin.assert:
+            that:
+              - host is defined
+              - host != ""
+
+            fail_msg: "Hostname could not be determined."
+            success_msg: "Hostname is set to {{ host }}."
+
+    - name: Install Podman
+      ansible.builtin.package:
+        name: podman
+        state: present
+      become: true
+
+    - name: Ensure vaultwarden data directory exists
+      ansible.builtin.file:
+        path: /opt/vaultwarden/data
+        state: directory
+        # only accessible by the user running the container
+        mode: '0700'
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_user_gid }}"
+      become: true
+
+    - name: Ensure vaultwarden container is running
+      containers.podman.podman_container:
+        name: vaultwarden
+        image: docker.io/vaultwarden/server:latest
+        state: started
+        ports: ["127.0.0.1:8000:80"]
+        env:
+          DOMAIN: "https://{{ host }}"
+        volumes:
+          - /opt/vaultwarden/data:/data
+        restart_policy: unless-stopped
+
+    - name: Display vaultwarden access information
+      ansible.builtin.debug:
+        msg: "Vaultwarden is accessible at http://{{ host }}:8000 or http://localhost:8000."
+
+    - name: Reminder to set up reverse proxy
+      ansible.builtin.debug:
+        msg: "Remember to set up a reverse proxy for external access if needed."

@@ -1,0 +1,37 @@
+- name: Rclone Backup to Google Cloud Storage
+  hosts: nas
+  gather_facts: false
+  roles:
+    - role: google-service-account
+      vars:
+        service_account_file: "{{ rclone_service_account_file }}"
+        service_account_name: "{{ rclone_service_account_name | default('rclone') }}"
+        service_account_display_name: "Rclone Service Account"
+  tasks:
+    - name: Ensure environment variables are set
+      block:
+        - name: Check if required environment variables are set
+          ansible.builtin.assert:
+            that:
+              - rclone_config is defined
+              - rclone_remote is defined
+              - rclone_service_account_file is defined
+              - rclone_backup_sources is defined
+            fail_msg: "One or more required environment variables are not set."
+
+        - name: Set rclone configuration directory variable
+          ansible.builtin.set_fact:
+            rclone_config_dir: "{{ rclone_config | dirname }}"
+
+    - name: Ensure rclone config directory exists
+      ansible.builtin.file:
+        path: "{{ rclone_config_dir }}"
+        state: directory
+        mode: '0700'
+
+    - name: Import existing rclone credentials (drive token, client_id, client_secret)
+      ansible.builtin.set_fact:
+        rclone_drive_token:         "{{ lookup('ini', 'token',           section='drive', file=rclone_config) }}"
+        rclone_drive_client_id:     "{{ lookup('ini', 'client_id',       section='drive', file=rclone_config) }}"
+        rclone_drive_client_secret: "{{ lookup('ini', 'client_secret',   section='drive', file=rclone_config) }}"
+      no_log: true

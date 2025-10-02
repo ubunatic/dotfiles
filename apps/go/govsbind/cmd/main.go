@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	vscode "codeberg.org/ubunatic/vscode/pkg"
+	vscode "ubunatic.com/dotapps/go/govsbind"
 )
 
 func fail(err error, msg string, args ...any) {
@@ -27,12 +27,20 @@ func backupFile(file string) error {
 	return os.Rename(file, backup)
 }
 
+func echo(args ...any) { fmt.Fprintln(os.Stderr, args...) }
+func usage() {
+	echo("VSCode Keybindings Merger")
+	echo("Usage: merge <file1> <file2> [output-file]")
+}
+
 func main() {
 	setupLogging()
 
 	files := os.Args[1:]
 	if len(files) < 2 || len(files) > 3 {
-		fail(nil, "usage: merge <file1> <file2> [output-file]", "args", os.Args)
+		slog.Error("invalid number of arguments", "count", len(files))
+		usage()
+		os.Exit(1)
 	}
 
 	res, err := vscode.MergedKeybindings(files[0], files[1])

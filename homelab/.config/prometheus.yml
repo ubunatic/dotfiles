@@ -1,0 +1,99 @@
+global:
+  scrape_interval:     1m
+  evaluation_interval: 1m
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets: ['localhost:9093']
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  - "alert_rules.yml"
+
+# All scrape configurations must reside here.
+scrape_configs:
+  - job_name: prometheus
+    scrape_interval: 5s
+    scrape_timeout: 5s
+    static_configs:
+      - targets:
+          - localhost:9090
+
+  - job_name: node
+    # install prometheus-node-exporter on these machines
+    static_configs:
+      - targets:
+          - localhost:9100
+          - pi4-admin.local:9100
+          - pi4.local:9100
+        labels:
+            system: rpi4
+            cpu:    bcm2711
+            os:     linux
+
+      - targets:
+          - elitedesk.local:9100
+        labels:
+            system: desktop
+            cpu:    core-i5
+            os:     linux
+
+      - targets:
+          - um760-pc.local:9100
+          - otto-pc.local:9100
+        labels:
+            system: desktop
+            cpu:    ryzen-7040
+            os:     windows
+
+      - targets:
+          - um760.local:9100
+        labels:
+            system: desktop
+            cpu:    ryzen-7040
+            os:     linux
+
+      - targets:
+          - M4-Pro.local:9100
+          - M1-Pro.local:9100
+        labels:
+            system: desktop
+            cpu:    apple-silicon
+            os:     macos
+
+  - job_name: alloy
+    static_configs:
+      - targets:
+          - pi4-admin.local:12345
+          - pi4.local:12345
+        labels:
+            system: rpi4
+            cpu:    bcm2711
+            os:     linux
+      - targets:
+          - elitedesk.local:12345
+        labels:
+            system: desktop
+            cpu:    core-i5
+            os:     linux
+      - targets:
+          - M4-Pro.local:12345
+          - M1-Pro.local:12345
+        labels:
+            system: desktop
+            cpu:    apple-silicon
+            os:     macos
+
+  - job_name: rpi_exporter
+    # install rpi-exporter on these machines
+    # https://codeberg.org/ubunatic/dotfiles/src/branch/main/apps/go/rpi-exporter
+    static_configs:
+      - targets:
+          - pi4-admin.local:9101
+          - pi4.local:9101
+        labels:
+            system: rpi4
+            cpu:    bcm2711
+            os:     linux

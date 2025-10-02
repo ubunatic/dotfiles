@@ -1,0 +1,35 @@
+- name: Default Homelab Host Playbook
+  hosts: all
+  become: true
+  tasks:
+    - name: Ensure sudo is installed
+      ansible.builtin.package:
+        name: sudo
+        state: present
+
+    - name: Ensure dev tools are installed
+      ansible.builtin.package:
+        name:
+          - git
+          - curl
+          - wget
+          - neovim
+          - neofetch
+          - htop
+          - unzip
+          - tar
+          - jq
+          - lsb-release
+          - gnupg
+          - podman
+          # google-auth Python package
+          - python3-google-auth
+        state: present
+
+    - name: Run neofetch and capture output
+      ansible.builtin.command: neofetch --stdout
+      register: neofetch_output
+      changed_when: false
+    - name: Show neofetch output
+      ansible.builtin.debug:
+        var: neofetch_output.stdout_lines
