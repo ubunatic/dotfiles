@@ -4,4 +4,3 @@ Stackmanager
 - Enable docker metrics on my hosts
 - Install prometheus tools
 - Install other tools
-
