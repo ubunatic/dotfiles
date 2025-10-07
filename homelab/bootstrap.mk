@@ -8,6 +8,12 @@ ifdef SUDO
 sudo = sudo
 endif
 
+ifeq ($(HOMELAB_DEVELOPER_OS),mac)
+secret_tool = source playbooks/scripts/secret-tool.macos.sh && secret-tool
+else
+secret_tool = secret-tool
+endif
+
 .env:  ## Create a .env file from the example (if it doesn't exist)
 	@cp .env .env.bak 2> /dev/null || true
 	cp .env.example .env
@@ -31,18 +37,24 @@ bootstrap: ⚙️ .env ## Bootstrap this homelab setup (install dependencies)
 	$(MAKE) bootstrap-ansible-vault password_name=homelab-vault-previous
 	$(MAKE) bootstrap-rclone-sa
 
-bootstrap-ansible: ⚙️  ## Check that ansible is installed
+bootstrap-ansible: ⚙️ bootstrap-ansible-$(HOMELAB_DEVELOPER_OS) ## Check that ansible is installed
+
+bootstrap-ansible-linux: ⚙️  ## Check that ansible is installed on Linux
 	@$(sudo) echo "running bootstrap with sudo='$(sudo)'"
-	$(sudo) apt update && $(sudo) apt install -y ansible ansible-lint git libsecret-tools
+	$(sudo) apt update && $(sudo) apt install -y ansible ansible-lint git libsecret-tools make
+	ansible-galaxy collection install -r requirements.yml
+
+bootstrap-ansible-mac: ⚙️  ## Check that ansible is installed on macOS
+	brew install ansible git make
 	ansible-galaxy collection install -r requirements.yml
 
 password_name = homelab-vault-current
 bootstrap-ansible-vault: ⚙️  ## Check that the Ansible Vault password is stored in secret-tool
 	@echo "👀 Checking Ansible Vault password '$(password_name)' in secret-tool"
-	@secret-tool lookup service "$(password_name)" >/dev/null || \
+	@$(secret_tool) lookup service "$(password_name)" >/dev/null || \
 	   (echo "🔑 Enter the Ansible Vault password '$(password_name)' to store in secret-tool:"; \
-		secret-tool store --label='Homelab Vault: $(password_name)' service "$(password_name)"; \
-		secret-tool lookup service "$(password_name)" >/dev/null)
+		$(secret_tool) store --label='Homelab Vault: $(password_name)' service "$(password_name)"; \
+		$(secret_tool) lookup service "$(password_name)" >/dev/null)
 	@echo "✅ Ansible Vault password '$(password_name)' is stored in secret-tool"
 
 gsutil gcloud: ⚙️  ## Check that gsutil and gcloud are installed
@@ -88,3 +100,6 @@ bucket:     bootstrap-bucket             ## Shortcut for bootstrap-bucket
 rclone-sa:  bootstrap-rclone-sa          ## Shortcut for bootstrap-rclone-sa
 sync:       bootstrap-bucket-sync        ## Shortcut for bootstrap-bucket-sync
 sync-force: bootstrap-bucket-sync-force  ## Shortcut for bootstrap-bucket-sync-force
+vault:      bootstrap-ansible-vault      ## Shortcut for bootstrap-ansible-vault
+mac:        bootstrap-ansible-mac        ## Shortcut for bootstrap-ansible-mac
+linux:      bootstrap-ansible-linux      ## Shortcut for bootstrap-ansible-linux

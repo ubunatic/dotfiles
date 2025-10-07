@@ -1,5 +1,8 @@
 - name: Default Homelab Host Playbook
-  hosts: all
+  hosts:
+    - nas
+    - pi
+    - mac
   become: true
   tasks:
     - name: Ensure sudo is installed
