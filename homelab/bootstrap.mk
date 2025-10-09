@@ -8,11 +8,7 @@ ifdef SUDO
 sudo = sudo
 endif
 
-ifeq ($(HOMELAB_DEVELOPER_OS),mac)
-secret_tool = source playbooks/scripts/secret-tool.macos.sh && secret-tool
-else
-secret_tool = secret-tool
-endif
+with_common = source playbooks/scripts/common.sh;
 
 .env:  ## Create a .env file from the example (if it doesn't exist)
 	@cp .env .env.bak 2> /dev/null || true
@@ -51,10 +47,10 @@ bootstrap-ansible-mac: ⚙️  ## Check that ansible is installed on macOS
 password_name = homelab-vault-current
 bootstrap-ansible-vault: ⚙️  ## Check that the Ansible Vault password is stored in secret-tool
 	@echo "👀 Checking Ansible Vault password '$(password_name)' in secret-tool"
-	@$(secret_tool) lookup service "$(password_name)" >/dev/null || \
-	   (echo "🔑 Enter the Ansible Vault password '$(password_name)' to store in secret-tool:"; \
-		$(secret_tool) store --label='Homelab Vault: $(password_name)' service "$(password_name)"; \
-		$(secret_tool) lookup service "$(password_name)" >/dev/null)
+	@$(with_common) secret-tool lookup service "$(password_name)" >/dev/null || \
+	    (echo "🔑 Enter the Ansible Vault password '$(password_name)' to store in secret-tool:"; \
+		 secret-tool store --label='Homelab Vault: $(password_name)' service "$(password_name)"; \
+		 secret-tool lookup service "$(password_name)" >/dev/null)
 	@echo "✅ Ansible Vault password '$(password_name)' is stored in secret-tool"
 
 gsutil gcloud: ⚙️  ## Check that gsutil and gcloud are installed

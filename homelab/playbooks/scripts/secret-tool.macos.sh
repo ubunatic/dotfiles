@@ -94,6 +94,37 @@ secret-tool-mac() {(
      esac
 )}
 
+secret-tool-get-or-create-secret() {
+     local service="$1"; shift
+     local label="$*"
+
+     # used for store action only, default label if not provided
+     if test -z "$label"
+     then label="Generic Secret"
+     fi
+
+     local password
+	if password="$(secret-tool lookup service "$service")"
+     then log "found password '$service' in secret-tool"
+          echo "$password"
+          return 0
+     fi
+
+     txt -n "🔑 Enter password '$label: $service' to store in secret-tool:"
+     if secret-tool store --label="$label: $service" service "$service"
+     then ok "✅ Password '$label: $service' is stored in secret-tool"
+     	if password="$(secret-tool lookup service "$service")"
+          then log "found password '$service' in secret-tool"
+               echo "$password"
+               return 0
+          else err "❌ Failed to retrieve password '$label: $service' from secret-tool after storing it"
+               return 1
+          fi
+     else err "❌ Failed to store password '$label: $service' in secret-tool"
+          return 1
+     fi
+}
+
 if ismac && ! command -v secret-tool &> /dev/null
 then secret-tool() { secret-tool-mac "$@"; }
 fi
