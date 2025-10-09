@@ -2,6 +2,10 @@
 
 include .env  # if not present, the .env target will called
 
+ifndef HOMELAB_DEVELOPER_OS
+$(error HOMELAB_DEVELOPER_OS not set in .env)
+endif
+
 BOOTSTRAP_URL = $(HOMELAB_BOOTSTRAP_BUCKET)/$(HOMELAB_BOOTSTRAP_FOLDER)
 SUDO = 1  # unset to disable sudo for bootstrap commands
 ifdef SUDO
@@ -47,10 +51,7 @@ bootstrap-ansible-mac: ⚙️  ## Check that ansible is installed on macOS
 password_name = homelab-vault-current
 bootstrap-ansible-vault: ⚙️  ## Check that the Ansible Vault password is stored in secret-tool
 	@echo "👀 Checking Ansible Vault password '$(password_name)' in secret-tool"
-	@$(with_common) secret-tool lookup service "$(password_name)" >/dev/null || \
-	    (echo "🔑 Enter the Ansible Vault password '$(password_name)' to store in secret-tool:"; \
-		 secret-tool store --label='Homelab Vault: $(password_name)' service "$(password_name)"; \
-		 secret-tool lookup service "$(password_name)" >/dev/null)
+	@$(with_common) secret-tool-lookup-or-store "$(password_name)" "Homelab Vault: $(password_name)" >/dev/null
 	@echo "✅ Ansible Vault password '$(password_name)' is stored in secret-tool"
 
 gsutil gcloud: ⚙️  ## Check that gsutil and gcloud are installed

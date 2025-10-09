@@ -15,11 +15,17 @@ ifdef DEBUG
 PLAYBOOK_EXTRA_ARGS=-vv
 endif
 
+# check HOMELAB_DEVELOPER_OS
+# if linux -> ignore "mac" in inventory/local.ini
+ifeq ($(HOMELAB_DEVELOPER_OS),linux)
+PLAYBOOK_EXTRA_ARGS+= --limit '!mac'
+endif
+
 debug: DEBUG=1
 debug: setup ⚙️  ## Run the setup for a specific target in debug mode
 setup: ⚙️ ## Run ansible playbook to setup all machines in the homelab
 	sudo echo "enabled sudo for ansible"
-	ansible-playbook -i machines/local.ini $(PLAYBOOK_EXTRA_ARGS) $(PLAYBOOK)
+	ansible-playbook -i inventory/local.ini $(PLAYBOOK_EXTRA_ARGS) $(PLAYBOOK)
 
 setup-host-common:    ⚙️ ## Setup the common tools
 setup-host-ansible:   ⚙️ ## Setup the ansible environment

@@ -14,7 +14,9 @@
 # Do not propose any completions if you do not understand `test` vs. `[ <condition> ]` rule, i.e.
 # ALWAYS use `test` for conditional checks and never use `[ <condition> ]`!!!!!
 
-test -n "$here" || source "$(dirname "${BASH_SOURCE:-$0}")/common.sh"
+if ! command -v hascommon > /dev/null
+then source "$(dirname "${BASH_SOURCE:-$0}")/common.sh"
+fi
 
 # secret-tool-mac implements subset of secret-tool functionality using macOS Keychain.
 #
@@ -94,7 +96,7 @@ secret-tool-mac() {(
      esac
 )}
 
-secret-tool-get-or-create-secret() {
+secret-tool-lookup-or-store() {
      local service="$1"; shift
      local label="$*"
 
@@ -112,15 +114,15 @@ secret-tool-get-or-create-secret() {
 
      txt -n "🔑 Enter password '$label: $service' to store in secret-tool:"
      if secret-tool store --label="$label: $service" service "$service"
-     then ok "✅ Password '$label: $service' is stored in secret-tool"
+     then ok "Password '$label: $service' is stored in secret-tool"
      	if password="$(secret-tool lookup service "$service")"
           then log "found password '$service' in secret-tool"
                echo "$password"
                return 0
-          else err "❌ Failed to retrieve password '$label: $service' from secret-tool after storing it"
+          else err "Failed to retrieve password '$label: $service' from secret-tool after storing it"
                return 1
           fi
-     else err "❌ Failed to store password '$label: $service' in secret-tool"
+     else err "Failed to store password '$label: $service' in secret-tool"
           return 1
      fi
 }
