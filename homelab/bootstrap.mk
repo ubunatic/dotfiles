@@ -13,13 +13,13 @@ ifdef SUDO
 sudo = sudo
 endif
 
-bootstrap-vars: ⚙️ .env
+vars: bootstrap-vars
+bootstrap-vars: ⚙️ .env  ## Show bootstrap make variables
 	@echo "Bootstrap Make Variables (bootstrap.mk):"
 	@echo "  BOOTSTRAP_URL: '$(BOOTSTRAP_URL)'"
 	@echo "  SUDO:          '$(SUDO)' (sudo command: '$(sudo)', unset SUDO to disable sudo)"
+	@env | grep '^HOMELAB_BOOTSTRAP_' | sort | awk '{print "  "$$0}'
 	@echo ""
-
-vars: bootstrap-vars
 
 bootstrap: ⚙️ .env ## Bootstrap this homelab setup (install dependencies)
 	$(MAKE) bootstrap-bucket

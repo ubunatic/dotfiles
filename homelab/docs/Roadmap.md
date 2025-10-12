@@ -13,23 +13,26 @@
 
 ## Homelab IaC and Configuration Management
 - [x] Create configuration management system (dotfiles repo)
-  - [ ] Add inventory file in [homelab/.config](.config)
-  - [x] create [homelab/.config](.config) with asymmetric encryption for internal/sensitive data
-  - [x] add script to encrypt/decrypt config files: [crypt.sh](.config/crypt.sh)
-  - [x] add cloud sync to Google Drive for config files
+  - [x] create bootstrap setup (See [Bootstrap.md](./Bootstrap.md))
+  - [x] add inventory file in [homelab/inventory](../inventory)
+  - [x] create [homelab/.config](../.config) non-sensitive data
+  - [x] create [homelab/.vault](../.vault) for sensitive data (Ansible Vault)
+  - [x] add script to encrypt/decrypt config files: [encrypt.sh](../scripts/vault-tool.sh)
+  - [x] add Makefile to manage common tasks: [Makefile](../Makefile)
+  - [ ] add cloud sync to Google Drive for config files
   - [x] add first config file: [prometheus.yml](.config/prometheus.yml)
   - [ ] add automation to install prometheus and copy config file (Ansible)
 
 Repeat the following for all services:
-- [x] Add config file to [homelab/.config](.config)
-- [x] Add and run automation to install service and copy config file (Ansible)
-- [ ] Test service functionality and backup/restore procedures
-- [ ] Document service setup and configuration in [homelab/docs](docs)
-- [ ] Uninstall service and reinstall from scratch using only documented procedures and config files
-- [ ] Test restore of service data from backup
+- Add config file to [homelab/.config](.config)
+- Add and run automation to install service and copy config file (Ansible)
+- Test service functionality and backup/restore procedures
+- Document service setup and configuration in [homelab/docs](docs)
+- Uninstall service and reinstall from scratch using only documented procedures and config files
+- Test restore of service data from backup
 
 ### Services to manage
-- [x] Prometheus (monitoring)
+- [ ] Prometheus (monitoring)
 - [ ] Grafana (dashboarding)
 - [ ] Node Exporter (system metrics)
 - [ ] NFS/Samba (file sharing)

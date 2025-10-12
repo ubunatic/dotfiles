@@ -2,7 +2,7 @@
 # Simple Dotfiles Installer
 
 here() { (cd "$(dirname "$0")" && pwd); }
-here=$(here)
+here="$(here)"
 
 usage() {
     cat <<-EOF
@@ -65,7 +65,7 @@ install-core(){
     echo "rcfile=$rcfile"
     echo "DOTFILES=$DOTFILES"
 
-    echo "run source ~/.userrc to activate dotfiles in this shell session"
+    echo "run 'source ~/.userrc' to activate dotfiles in this shell session"
 }
 
 validate() {

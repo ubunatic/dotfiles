@@ -2,6 +2,14 @@
   hosts: nas
 
   tasks:
+    - name: Check group variable 'services' is defined
+      ansible.builtin.assert:
+        that:
+          - services is defined
+          - services | length > 0
+        fail_msg: "Group variable 'services' is not defined or empty."
+        success_msg: "Group variable 'services' is defined with {{ services | length }} services."
+
     - name: Ensure Environment Variables are set
       block:
         - name: Ensure home is not empty

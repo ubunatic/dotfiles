@@ -27,12 +27,11 @@
 ### Conditionals
 - NEVER EVER use `if [ <condition> ]` or `if [[ <condition> ]]`, because readability is horrible.
 - ALWAYS use `if test <condition>`, because readability is much better.` and it reads like English.
-- You MUST always stick to this rule. It is a sever violation of the coding guidelines to not follow this rule.
-- Forget that `[` and `[[` even exist for conditionals in bash.
+- You MUST always stick to this rule. It is a severe violation of the coding guidelines to not follow this rule!
+- Forget that `[ ... ]` and `[[ ... ]]` even exist for conditionals in bash.
 
 ### Indentation
 - Do not use tabs!
-
 - Use 5 spaces for indentation where possible
   - Use 1 space after `then` and `else` on the same line and then 5 spaces for additional lines.
   - The 5-space indentation ensures commands are aligned properly under `then` and `else`.
@@ -46,7 +45,6 @@
          echo "Another line"
     fi
     ```
-
 - Use 5 spaces for indentation in functions.
   - Example:
     ```bash

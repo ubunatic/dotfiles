@@ -5,6 +5,7 @@ include bootstrap.mk
 
 help: usage-all ⚙️  ## Show this help message
 
+vars: playbook-vars
 playbook-vars: ⚙️
 	@echo "Playbook Make Variables:"
 	@echo "  PLAYBOOK:            '$(PLAYBOOK)'"
@@ -47,14 +48,15 @@ inventory: ⚙️  ## Show the current inventory (and some debug info)
 
 ## Shortcuts
 
-nas:     setup-nas-containers
-bak:     setup-nas-backup
-backup:  setup-nas-backup
-host:    setup-host-common
-ansible: setup-host-ansible
-common:  setup-host-common
-all:     setup
 containers: setup-nas-containers
+nas:        setup-nas-containers
+bak:        setup-nas-backup
+backup:     setup-nas-backup
+host:       setup-host-common
+ansible:    setup-host-ansible
+common:     setup-host-common
+all:        setup
+
 
 dev: ⚙️  ## Run the current playbook in debug mode
 	$(MAKE) debug PLAYBOOK=playbooks/nas-backup.yml

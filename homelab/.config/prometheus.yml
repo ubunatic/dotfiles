@@ -25,7 +25,6 @@ scrape_configs:
     # install prometheus-node-exporter on these machines
     static_configs:
       - targets:
-          - localhost:9100
           - pi4-admin.local:9100
           - pi4.local:9100
         labels:
@@ -41,8 +40,7 @@ scrape_configs:
             os:     linux
 
       - targets:
-          - um760-pc.local:9100
-          - otto-pc.local:9100
+          - um760.local:9100
         labels:
             system: desktop
             cpu:    ryzen-7040
@@ -56,8 +54,7 @@ scrape_configs:
             os:     linux
 
       - targets:
-          - M4-Pro.local:9100
-          - M1-Pro.local:9100
+          - mac.local:9100
         labels:
             system: desktop
             cpu:    apple-silicon
@@ -72,15 +69,16 @@ scrape_configs:
             system: rpi4
             cpu:    bcm2711
             os:     linux
+
       - targets:
           - elitedesk.local:12345
         labels:
             system: desktop
             cpu:    core-i5
             os:     linux
+
       - targets:
-          - M4-Pro.local:12345
-          - M1-Pro.local:12345
+          - mac.local:12345
         labels:
             system: desktop
             cpu:    apple-silicon

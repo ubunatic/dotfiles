@@ -1,15 +1,43 @@
 # Homelab Storage and Backup Strategy
 
+This doc covers only the Mini PC based storage solution. See [Homelab.md](./Homelab.md) for overall architecture.
+
 ## Power and Connectivity
-- Mini PC:
+### Mini PC:
   - 1x M.2 SATA, 1x NVMe, 1x NVMe (A/E Key with NVMe adapter)
-  - 1x USB-C (with PD-in), 2xUSB 2.0, 2xUSB 3.0
-- 19V PSU for Mini PC and 5V PSU for RPi4s
-- 12V PSU (with 12V barrel to 12/5V SATA power adapter) for SATA drives
-- 5V 3A PSU for powered USB hub
-- SATA bay for 3.5" drives (with 12V power supply)
+  - 1x USB-C (with PD-in, not PD-out)
+  - 2xUSB 2.0 (rear)
+  - 2xUSB 3.0 (front, can go back with short angled cable)
+
+### Storage Docks/Adapters
+- SATA bay for 3.5" drives
+  - spec: 12V 2A
+  - disk rated 12V 0.5A + 5V 0.85A
+  - min 12V 1.5A PSU recommended
 - 2x USB to SATA adapters for 2.5" drives (powered via USB)
 - 1x USB to SATA case for 2.5" drive (powered via USB)
+
+### Power Supplies
+- 19V PSU for Mini PC
+- 12V 3A PSU (common small PSU case size, bigger than mobile chargers)
+- 12V 1.66A USB-PD (mobile charger style)
+- USB-PD trigger (5V/9V/12V/15V/20V, set to 12V)
+- 5V 3A mobile charger for powered USB hub
+- 5V 2.5A mobile charger for powered RPi4 USB hub
+- more 5V USB mobile chargers for RPi4s and more
+
+## Layout Approach
+- Mini PC as main system with many M.2 drives
+  - attach SATA bay for larger 3.5" drives (cold storage, powered separately)
+  - attach powered USB hub for 2.5" drives (hot storage, powered separately)
+  - attach KVM switch for monitor/keyboard/mouse
+  - Use MergerFS to pool all drives into a single filesystem
+  - Use SnapRAID for redundancy and data integrity
+- Expected Number of Drives:
+  - Mini PC: 3x M.2 (256GB SATA + 1TB NVMe + 2TB NVMe)
+  - SATA Bay: 1x 3.5" (2TB HDD)
+  - USB Hub: 2x 2.5" (4TB SSD + 2TB HDD)
+  - Total: 6 drives, ~9.25TB raw capacity, ~8TB usable with SnapRAID
 
 ## Mini PC Storage Layout
 ```mermaid
@@ -32,25 +60,32 @@ graph LR
     end
 
     subgraph USBHub["USB Hub (powered)"]
+        subgraph SATABay[3.5 SATA Bay]
+            HDD2S[2TB Samsung HDD]
+        end
         SSD4[4TB Sandisk 3D]
         SSD2[2TB Toshiba HDD]
     end
 
     subgraph Power[Power Supplies]
-        USBPD[USB PD]
+        subgraph USBPD
+        direction TB
+        USBPD65W[USB PD 65W 2C 2A]
+        USBPD20W[USB PD 20W 1C <strike>1A</strike>] --> PSU12V.2[12V PD Trigger]
+        end
         PSU19V[19V PSU]
         PSU12V.1[12V PSU]
-        PSU12V.2[12V PSU]
         USB5V[5V3A PSU]
     end
 
+    USBPD65W --o|⚡️| other[Other Devices]
+
     KVM --> USB3.2
-    SATABay --> USB2.1
     USBHub --> USB3.1
 
     USB5V --o|⚡️| USBHub
     PSU19V --o|⚡️| Mini
-    PSU12V.2[12V PSU] --o|⚡️| SATABay
+    PSU12V.2 --o|⚡️| SATABay
 ```
 
 ## Power Supply Considerations
@@ -68,6 +103,8 @@ graph LR
 > I have many SATA drives. A real drive bay with proper power management would be better eventually.
 
 ## Backup Strategy
+DRAFT!
+
 - Primary storage on Mini PC (4TB Sandisk 3D + 2TB Samsung + 2TB Kingston NVMe)
 - Local backup on 2TB Toshiba HDD (connected to Mini PC)
 - Local backup on 2TB Samsung HDD (connected to Mini PC)
@@ -81,6 +118,8 @@ graph LR
     Primary -> Toshiba/Samsung (full)
 
 ### Backup/Storage Tools
+IDEAS!
+
   - MergerFS for pooling multiple disks into a single filesystem
   - SnapRAID for redundancy and data integrity
   - Rclone for syncing files to Google Drive
