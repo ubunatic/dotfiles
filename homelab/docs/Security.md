@@ -34,7 +34,7 @@ flowchart TD
 
     subgraph Clients[OS-based Clients 🖥️]
         Cli[CLI Tool 💻️]
-        OS[OS Integration 🖥️]  
+        OS[OS Integration 🖥️]
     end
 
     subgraph Comp[Companion Apps]
@@ -49,8 +49,11 @@ flowchart TD
     Clients -->|Store/Retrieve| O
     Comp -->|Store/Retrieve| V
 
-    V <-->|Sync, encrypted| D
-    V -->|Backup, versioned + encrypted| D
+    V <-->|"Sync (encrypted)"| D
+    V -->|"
+        Backup
+        (encrypted, versioned)
+    "| D
     V <-->|Sync| O
 ```
 
@@ -66,7 +69,9 @@ flowchart TD
 | VPN Credentials | Password Manager | Strong passwords, 2FA |
 | Application Secrets | Environment variables, Password Manager | Encrypted storage, access controls |
 
-## Overall Guidelines✨
+## Overall Guidelines ✨
+
+> [!Note] AI-crafted content, not all things may apply to your situation. Always review and adapt to your specific needs.
 
 The following guidelines should be followed to maintain a secure environment:
 

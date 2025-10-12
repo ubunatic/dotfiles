@@ -17,28 +17,38 @@ Starting to lose track of what is where, what is current, what is old, etc.
 - Fritzbox (with functional Wireguard support + HA-enabled smart home features)
 - Managed PoE Switch (VLAN support, supports all devices with GB Ethernet)
 - Eaton UPS (with USB connectivity)
-- RPi4 4GB + RPi4 8GB with a few services (mostly Docker based)
+- RPi4 4GB with monitoring + admin services (PiHole, Grafana, Prometheus, etc.)
+- RPi4 8GB with a few services (mostly Docker based)
 - RPi400 4GB (empty)
-- Mini PC AMD 760m 32GB main private machine (1xM2 NVME, 1xM2 SATA, 1xM2 A/E-Key/Wifi)
-  supports USB-C single cable mode support
+- Mini PC AMD Ryzen 7640H 32GB main private machine (1xM2 NVMe, 1xM2 SATA, 1xM2 A/E-Key/Wifi)
+  supports USB-C single cable mode
 - MacBook M4 work machine (512GB SSD)
-- 1 TB 2.5" SSD "Fotos" disk (portable mini SSD, USB3/USB-C)
-- 2 TB 2.5" HDD backup disk (Toshiba, USB3)
+- 1 TB 2.5" SSD "Fotos" disk (portable mini SSD, USB3/USB-C, backed up when connected)
+- 2 TB 2.5" HDD backup disk (Toshiba, USB3, needs powered hub or dedicated USB port)
 - 2 TB 3.5" HDD backup disk (Sammsung, 3.5" SATA bay, with 12V power supply)
-- 4 TB 2.5" SSD main storage (WD Skyhawk, SATA)
-- 2 TB 2.5" SSD main storage (Samsung, SATA)
-- 1 TB M2 NVME SSD Windows OS (unused Mini PC OS)
-- 256 GB M2 SDATA SSD (Mini PC OS)
+- 4 TB 2.5" SSD main storage (Sandisk 3D, SATA)
+- 2 TB 2.5" SSD main storage (Samsung, SATA, still blocked by Immich with a copy of all photos)
+- 2 TB M2 NVMe main storage (Kingston, M2 2230 -> A/E Key slot with adapter)
+- 1 TB M2 NVMe SSD Windows OS (Kingston, unused Mini PC OS -> can be repurposed, needs backup first)
+- 2 TB Google Drive (cloud backup, paid plan)
+- 256 GB M2 SATA SSD (Mini PC OS)
 - Bunch of older 2.5" SATA SSD (256GB, 128GB, 80GB, 64GB)
 - Bunch of SD cards (128GB, 64GB, etc.)
 - Bunch of USB sticks (64GB, 32GB, 16GB, 8GB)
+
+### Total Disk Space
+Considering the goal to have 3-2-1 backup strategy, and leaving some space for growth, the total disk space is as follows:
+- Main Storage: 6-8 TB (Sandisk 3D SATA/USB SSD 4TB + Kingston NVMe 2TB + Samsung SATA SSD 2TB later, mergerfs)
+- Backup Storage: 4-5 TB (Samsung USB HDD 2TB + Toshiba USB HDD 2TB + Kingston NVMe 1TB, snapraid)
+- Cloud Backup: 2 TB (Google Drive, will not fit all data, but important files only)
 
 ## Extra Hardware
 - M2 A/E Key to 2xSATA Adapter (not detected at boot in Mini PC)
 - 12V barrel to 12/5V SATA power adapter
 - 2x19V Powersupply (HP, Minisforum)
-- 5-12V power supply
-- Argon M2 Case for RPi4 (should be used ephemeral NVME disks only)
+- 12V Powersupply (for 3.5" HDD)
+- 6x USB PD-trigger platines (20V, 12V 15V, 9V, 5V, must be used with never-break power supplies)
+- Argon M2 Case for RPi4 (use with ephemeral M2 disks only or stick to SD cards)
 - GeeekPi 4xUSB Channel 5V PSU for (19", 1U, )
 
 ## Planned Hardware Usage
@@ -69,15 +79,15 @@ Starting to lose track of what is where, what is current, what is old, etc.
   - combination of mergerfs + snapraid to keep all files as plain files
 - Immich: self-hosted photo management
   - read-only file access to main photo storage
-  - read-write access to dedicated photo collection
-  - export dedicated photos out of immich to main storage occasionally
+  - read-write access to dedicated photo collection (later)
+  - export dedicated photos out of immich to main storage occasionally (later)
 - Media server: Jellyfin
 - Home Assistant: smart home management
 - PiHole: ad-blocking + DNS
 - Monitoring: Grafana + Prometheus
 - VPN: Wireguard server for remote access to home network (provided by Fritzbox)
-- SSH: secure remote access to all devices
-- Web Admin: web-based management of all machines and services (Cockpit, etc.)
+- SSH: secure remote access to all devices (maybe with MFA)
+- Web Admin: web-based management of all machines and services (Cockpit, etc, with MFA)
 - Password Manager: Keepass DB file share or Vaultwarden
 - CI Server: lightweight CI server for personal projects
 - LLM Server: local LLM server for personal use (e.g. private GPT instance)
@@ -92,7 +102,10 @@ graph LR
     WAN["Internet"]
     Wifi["WiFi"]
     Fritz["Fritzbox"]
-    MiniPC["Mini PC (NAS, Docker, VMs, Workstation)"]
+    MiniPC["
+      Mini PC Workstation
+      (NAS, Docker, VMs)
+    "]
     RPi4_4GB["RPi4 4GB (admin)"]
     RPi4_8GB["RPi4 8GB (services)"]
     RPi400["RPi400 (Living Room PC)"]

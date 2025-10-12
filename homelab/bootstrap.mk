@@ -1,32 +1,23 @@
 .PHONY: ⚙️  # make all non-file targets phony
 
-include .env  # if not present, the .env target will called
+include env.mk
 
 ifndef HOMELAB_DEVELOPER_OS
 $(error HOMELAB_DEVELOPER_OS not set in .env)
 endif
 
 BOOTSTRAP_URL = $(HOMELAB_BOOTSTRAP_BUCKET)/$(HOMELAB_BOOTSTRAP_FOLDER)
-SUDO = 1  # unset to disable sudo for bootstrap commands
+# unset to disable sudo for bootstrap commands
+SUDO = 1
 ifdef SUDO
 sudo = sudo
 endif
 
-with_common = source playbooks/scripts/common.sh;
-
-.env:  ## Create a .env file from the example (if it doesn't exist)
-	@cp .env .env.bak 2> /dev/null || true
-	cp .env.example .env
-	@echo "Created .env from .env.example"
-	@echo "⚠️ Please edit .env, set the correct values, and re-run"; exit 1
-
 bootstrap-vars: ⚙️ .env
-	@echo "Bootstrap Env Variables:"
-	@echo "  HOMELAB_BOOTSTRAP_BUCKET:  '$(HOMELAB_BOOTSTRAP_BUCKET)'"
-	@echo "  HOMELAB_BOOTSTRAP_PROJECT: '$(HOMELAB_BOOTSTRAP_PROJECT)'"
-	@echo "  HOMELAB_BOOTSTRAP_FOLDER:  '$(HOMELAB_BOOTSTRAP_FOLDER)'"
-	@echo "Bootstrap Make Variables:"
+	@echo "Bootstrap Make Variables (bootstrap.mk):"
 	@echo "  BOOTSTRAP_URL: '$(BOOTSTRAP_URL)'"
+	@echo "  SUDO:          '$(SUDO)' (sudo command: '$(sudo)', unset SUDO to disable sudo)"
+	@echo ""
 
 vars: bootstrap-vars
 
@@ -51,7 +42,7 @@ bootstrap-ansible-mac: ⚙️  ## Check that ansible is installed on macOS
 password_name = homelab-vault-current
 bootstrap-ansible-vault: ⚙️  ## Check that the Ansible Vault password is stored in secret-tool
 	@echo "👀 Checking Ansible Vault password '$(password_name)' in secret-tool"
-	@$(with_common) secret-tool-lookup-or-store "$(password_name)" "Homelab Vault: $(password_name)" >/dev/null
+	@playbooks/scripts/secret-tool.sh lookup-or-store "$(password_name)" "Homelab Vault: $(password_name)" >/dev/null
 	@echo "✅ Ansible Vault password '$(password_name)' is stored in secret-tool"
 
 gsutil gcloud: ⚙️  ## Check that gsutil and gcloud are installed
@@ -85,11 +76,16 @@ bootstrap-bucket-sync-force: ⚙️ .env gsutil  ## Force sync the .vault direct
 	$(gsutil) rsync -rd "$(BOOTSTRAP_URL)/" .vault/
 	@echo "✅ Force sync complete"
 
-bootstrap-rclone-sa: ⚙️ .env gsutil  ## Create a service account for rclone access (if it doesn't exist)
-	playbooks/scripts/gcloud-sa-create.sh "$(HOMELAB_BOOTSTRAP_PROJECT)" rclone .vault/rclone
-	playbooks/scripts/ansible-vault-encrypt.sh .vault/rclone/*
-	$(MAKE) bootstrap-bucket-sync
-	@echo "✅ rclone service account is ready, credentials are encrypted in .vault/rclone/ and synced to the bucket"
+bootstrap-rclone-sa: ⚙️ .env gsutil sync  ## Create a service account for rclone access (if it doesn't exist)
+	playbooks/scripts/gcloud-sa-create.sh "$(HOMELAB_BOOTSTRAP_PROJECT)" rclone .vault/google-service-account
+	$(MAKE) encrypt-rclone-sa sync
+	@echo "✅ rclone service account is ready, encrypted key file is in .vault/google-service-account/ and synced to the config bucket"
+
+encrypt-rclone-sa: ⚙️ .env  ## Encrypt the rclone service account key file
+	playbooks/scripts/vault-tool.sh encrypt .vault/google-service-account/*
+
+decrypt-rclone-sa: ⚙️ .env  ## Decrypt the rclone service account key file
+	playbooks/scripts/vault-tool.sh decrypt .vault/google-service-account/*
 
 ## Bootstrap Shortcuts
 ansible:    bootstrap-ansible            ## Shortcut for bootstrap-ansible

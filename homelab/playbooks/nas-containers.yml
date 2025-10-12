@@ -1,4 +1,4 @@
-- name: Deploy a container on localhost
+- name: Deploy containers on the NAS server
   hosts: nas
 
   tasks:

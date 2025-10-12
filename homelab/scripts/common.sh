@@ -14,7 +14,6 @@ txt()   { stderr "$@"; }
 
 __file__="${BASH_SOURCE:-$0}"
 __dir__="$(dirname "$__file__")"
-hascommon() { true; }
 
 here="$(cd "$__dir__" && pwd -P)"
 uname="$(uname -s)"
@@ -28,8 +27,6 @@ vars() {
     echo "here        = $here"
     echo "uname       = $uname"
 }
-
-source "$here/secret-tool.sh"
 
 run() {
     if "$@"

@@ -12,18 +12,18 @@ source "$(dirname "$0")/common.sh"
 
 usage() {
      echo "Usage: $0 <sa_project> <sa_name> <sa_dir>"
-     exit 1
 }
 
-manage_keys() { "$here/gcloud-sa-manage-keys.sh" "$@"; }
+manage_keys() { "$here/gcloud-sa-keys.sh" "$@"; }
 
 create_service_account() {
      local sa_project="$1"
      local sa_name="$2"
      local sa_dir="$3"
 
-     local service_account_file="$sa_dir/$sa_name-$sa_project-service-account-test.json"
-     local service_account_email="$sa_name@$sa_project.iam.gserviceaccount.com"
+     local sa_file="$sa_dir/$sa_name-$sa_project-service-account.json"
+     local sa_email="$sa_name@$sa_project.iam.gserviceaccount.com"
+     local sa_created_date="$(date +'%Y-%m-%d')"
 
      if test -z "$sa_name" ||
         test -z "$sa_project" ||
@@ -31,10 +31,10 @@ create_service_account() {
      then usage
           return 1
      else log "Creating/checking service account key file:"
-          txt "   name:   $sa_name"
+          txt "   name:    $sa_name"
           txt "   project: $sa_project"
           txt "   dir:     $sa_dir"
-          txt "   file:    $service_account_file"
+          txt "   file:    $sa_file"
      fi
 
      if mkdir -p "$sa_dir"
@@ -43,8 +43,8 @@ create_service_account() {
           return 1
      fi
 
-     if test -f "$service_account_file"
-     then inf "Service account file $service_account_file already exists. No action taken."
+     if test -f "$sa_file"
+     then inf "Service account file $sa_file already exists. No action taken."
           return 0
      fi
 
@@ -54,19 +54,19 @@ create_service_account() {
      fi
 
      # check if the service account exists
-     if gcloud iam service-accounts describe "$service_account_email" --project="$sa_project" --quiet >/dev/null 2>&1
-     then inf "Service account $service_account_email exists."
-     else log "Service account $service_account_email does not exist. Creating it now."
+     if gcloud iam service-accounts describe "$sa_email" --project="$sa_project" --quiet >/dev/null 2>&1
+     then inf "Service account $sa_email exists."
+     else log "Service account $sa_email does not exist. Creating it now."
           if gcloud iam service-accounts create "$sa_name" \
-               --display-name="$sa_name" \
+               --display-name="$sa_name ($sa_created_date)" \
                --project="$sa_project"
-          then ok  "Created service account $service_account_email"
-          else err "Failed to create service account $service_account_email."
+          then ok  "Created service account $sa_email"
+          else err "Failed to create service account $sa_email."
                return 1
           fi
      fi
 
-     manage_keys "$sa_project" "$sa_name" create "$service_account_file"
+     manage_keys create "$sa_project" "$sa_name" "$sa_file"
 }
 
 run create_service_account "$@"

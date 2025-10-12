@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 # Implementation of secret-tool SHELL function for macOS using macOS Keychain
 # Usage: same as secret-tool
 #
@@ -14,9 +13,7 @@
 # Do not propose any completions if you do not understand `test` vs. `[ <condition> ]` rule, i.e.
 # ALWAYS use `test` for conditional checks and never use `[ <condition> ]`!!!!!
 
-if ! command -v hascommon > /dev/null
-then source "$(dirname "${BASH_SOURCE:-$0}")/common.sh"
-fi
+source "$(dirname "${BASH_SOURCE:-$0}")/common.sh"
 
 # secret-tool-mac implements subset of secret-tool functionality using macOS Keychain.
 #
@@ -50,6 +47,9 @@ secret-tool-mac() {(
      while test $# -gt 0; do case "$1" in
      (--label=*)  # label arg can be at any position
           label="${1#*=}"
+          ;;
+     (--label)  # key: "--label", value: next positional arg
+          label="$2"; shift
           ;;
      (service)  # key: "service", value: next positional arg
           service="$2"; shift
@@ -86,6 +86,14 @@ secret-tool-mac() {(
                     return 1
                fi
           else err "aborted reading password for service '$service', not storing in Keychain"
+               return 1
+          fi
+          ;;
+     (clear)
+          if security delete-generic-password -a "$account" -s "$service"
+          then ok "deleted password for service '$service' from Keychain"
+               return 0
+          else err "failed to delete password for service '$service' from Keychain"
                return 1
           fi
           ;;
@@ -130,3 +138,34 @@ secret-tool-lookup-or-store() {
 if ismac && ! command -v secret-tool &> /dev/null
 then secret-tool() { secret-tool-mac "$@"; }
 fi
+
+usage() {
+     cat <<EOF
+Usage: $(basename "$0") [lookup-or-store NAME LABEL | help | ARGS...]
+Commands:
+  ARGS...                      Run secret-tool with the given ARGS
+  lookup-or-store NAME LABEL   Lookup a secret by NAME, if not found, prompt to store it with LABEL
+  help                         Show this help message
+EOF
+}
+
+main() {
+     local cmd
+     case "$1" in
+     (help)
+          usage
+          return 0
+          ;;
+     (lookup-or-store)
+          cmd="secret-tool-lookup-or-store"; shift
+          ;;
+     (*)
+          # all args are passed to secret-tool
+          cmd="secret-tool"
+          ;;
+     esac
+
+     run "$cmd" "$@"
+}
+
+main "$@"
