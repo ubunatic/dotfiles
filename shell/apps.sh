@@ -48,6 +48,11 @@ dotapps-build-app() {
 }
 
 dotapps-build() {
+    if test -d "$DOTFILES/apps/vendor"
+    then log "apps are vendored, skipping build, please remove $DOTFILES/apps/vendor to enable building apps"
+         return 0  # avoid building apps when vendored
+    fi
+
     for app in $(dotapps-find); do
         dotapps-build-app "$app"
     done
@@ -67,6 +72,7 @@ dotapps-test() {
 }
 
 dotapps-clean() {(
+    rm -rf "$DOTFILES/apps/vendor"
     for app in $(dotapps-names); do
         rm -f "$DOTFILES/bin/$app"
     done
