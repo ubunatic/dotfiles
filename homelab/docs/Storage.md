@@ -198,7 +198,7 @@ graph TD
 ## MergerFS and SnapRAID Setup Overview
 
 The basic setup for MergerFS and SnapRAID involves installing the packages, configuring the filesystems, and setting up the necessary commands for managing the storage pool and redundancy.
-Lets assume the packages are already installed and each disk has been formatted with ext4 filesystem and given a fixed mount point under `/mnt/<disk_name>`. Deduplication and compression are not handled by MergerFS or SnapRAID.
+Lets assume the packages are already installed and each disk has been formatted and given a fixed mount point under `/mnt/<disk_name>`. Deduplication and compression are not handled by MergerFS or SnapRAID.
 
 ### Disk Names and Mount Points
 - `/` Mini PC root filesystem (not part of MergerFS)
@@ -218,6 +218,10 @@ Lets assume the packages are already installed and each disk has been formatted 
 The best MergerFS mount point on an Ubuntu system that is also used as development machine
 and runs other services is `/data`. This path is commonly used for data storage and is
 easily accessible. Alternatively, you could use `/mnt/mergerfs` or `/storage`.
+
+### Compression and Deduplication
+
+See [Compression](./Compression.md) for how compression and deduplication works.
 
 ### MergerFS Configuration
 1. Create a mount point for the MergerFS pool:
