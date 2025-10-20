@@ -60,6 +60,40 @@ dctl() {(
             log "Removing containers matching pattern '$1' with '$container rm'"
             "$container" ps -a --format '{{.Names}}' | grep -E "$1" | xargs -r "$container" rm
             ;;
+        x-all|xall|pall|purge-all)
+            log "Purging all containers with '$container stop' and '$container rm'"
+            for cname in $("$container" ps -aq); do
+                cname="$("$container" inspect --format '{{.Name}}' "$cname")"
+                log "✋ Stopping container: $cname"
+                "$container" stop "$cname"
+                log "🗑️ Removing container: $cname"
+                "$container" rm "$cname"
+            done
+            log "✅ Finished purging all containers"
+            log "Containers Status:"
+            "$container" ps -a
+            ;;
+        i|interactive)
+            log "Running stop/rm interactive mode"
+            shift
+            local color_actions="\033[32ms\033[0m:stop, \033[31mr\033[0m:rm, \033[31mx\033[0m:stop+rm, \033[33mn\033[0m:next (default)"
+            local cnames=()
+            cnames=($("$container" ps -a --format '{{.Names}}'))
+            for cname in "${cnames[@]}"; do
+                local blue_cname="\033[34m$cname\033[0m"
+                echo -n "Chose action for container: $blue_cname ($color_actions)? "
+                read -r action
+                echo  # new line
+                case "$action" in
+                    [Ss]|[Ss]top)    log "Stopping container: $cname"; "$container" stop "$cname" ;;
+                    [Rr]|[Rr]m)      log "Removing container: $cname"; "$container" rm "$cname" ;;
+                    [PpXx]|[Pp]urge) log "Purging container: $cname"; "$container" stop "$cname"; "$container" rm "$cname" ;;
+                    [Nn]|[Nn]ext|"") log "Skipping container: $cname"; continue ;;
+                    *)               log "❌ Invalid action. Skipping." && continue ;;
+                esac
+                log "✅ Finished interactive stop/rm for container: $cname"
+            done
+            ;;
         container|pod*)
             shift; log "running container command: $*"
             $container "$@" ;;
