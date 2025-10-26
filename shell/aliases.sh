@@ -55,7 +55,17 @@ alias gr="gitroot"
 alias cg="gitroot"
 alias main="git checkout main && git pull"
 alias master="git checkout master && git pull"
+alias upstream="git checkout upstream && git pull"
 alias next="git checkout next && git pull"
+alias develop="git checkout develop && git pull"
+
+# VS Code aliases
+alias ai="code chat"
+
+# SSH aliases
+alias ssh-add-key="ssh-add ~/.ssh/id_ed25519"
+alias ssh-add-key-rsa="ssh-add ~/.ssh/id_rsa"
+alias ssh-agent="eval \$(ssh-agent -s) && ssh-add ~/.ssh/id_ed25519"
 
 unalias gsu 2>/dev/null
 
