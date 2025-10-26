@@ -1,5 +1,0 @@
-# vars/main.yml
-# Variables for the google-service-account role
-# File: homelab/playbooks/roles/google-service-account/vars/main.yml
-service_account_name: "my-gcp-service-account"
-service_account_project: "my-gcp-project-id"

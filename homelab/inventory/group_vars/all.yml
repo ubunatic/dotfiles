@@ -1,3 +1,0 @@
-all:
-  services:
-    - node-exporter

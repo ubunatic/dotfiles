@@ -17,8 +17,5 @@ apps/macos/appcloser/appcloser
 *.bak.*
 *.bak
 
-# Ignore plaintext config files. See homelab/.config/crypt.sh.
-homelab/.config
-homelab/.vault
 # Allow checking in any docs
 !*.md
