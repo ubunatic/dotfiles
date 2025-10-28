@@ -1,9 +1,10 @@
 
-# add Android SDK platform tools to path
-if test -d "$APPS/platform-tools"; then
-    PATH="$APPS/platform-tools:$PATH"
-fi
-
-if test -d "$DOTFILES/bin"; then
-    PATH="$DOTFILES/bin:$PATH"
-fi
+for dir in \
+    "$DOTFILES/bin" \
+    "$APPS/platform-tools" \
+    "$HOME/linuxbrew/.linuxbrew/bin"
+do  if test -d "$dir"
+    then PATH="$PATH:$dir"
+    fi
+done
+unset dir
