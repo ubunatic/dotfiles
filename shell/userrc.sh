@@ -30,7 +30,8 @@ for source_file in \
     docker.sh \
     proxmox.sh \
     completions.sh \
-    test.sh
+    test.sh \
+    assert.sh
 do
     if source "$DOTFILES/shell/$source_file"
     then dbg "sourced $source_file ✅"
