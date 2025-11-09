@@ -35,9 +35,9 @@ const (
 )
 
 const (
-	TimeFormat = "2006-01-02 15:04:05.000" // with milliseconds
-
-	MinMessageWidth = 40
+	TimeFormat              = "2006-01-02 15:04:05.000" // with milliseconds
+	MinTargetedMessageWidth = 30                        // minimum width for message filling
+	MaxTargetedMessageWidth = 80                        // maximum width for message filling
 )
 
 func b(s string) string   { return ColorBold + s + ColorReset }
@@ -45,17 +45,32 @@ func ul(s string) string  { return ColorUnderline + s + ColorReset }
 func dim(s string) string { return ColorDimmed + s + ColorReset }
 func grn(s string) string { return ColorGreen + s + ColorReset }
 func blu(s string) string { return ColorBlue + s + ColorReset }
-
-func fillMessage(msg string) string {
-	if len(msg) >= MinMessageWidth {
-		return msg
-	}
-	return msg + strings.Repeat(".", MinMessageWidth-len(msg))
-}
+func yel(s string) string { return ColorYellow + s + ColorReset }
 
 type coloredSlogHandler struct {
+	avgMsgLen int
 	slog.Handler
 	Output *os.File
+}
+
+// updateMsgLen updates the average message length for formatting purposes.
+// It implements a simple 10-line moving average that changes slowly over time.
+func (h *coloredSlogHandler) updateMsgLen(msg string) {
+	h.avgMsgLen = (h.avgMsgLen*9 + len(msg)) / 10
+}
+
+func (h *coloredSlogHandler) targetedMessageWidth() int {
+	w := max(MinTargetedMessageWidth, h.avgMsgLen)
+	return min(w, MaxTargetedMessageWidth)
+}
+
+func (h *coloredSlogHandler) fillMessage(msg string) string {
+	h.updateMsgLen(msg)
+	w := h.targetedMessageWidth()
+	if len(msg) >= w {
+		return msg
+	}
+	return msg + strings.Repeat(".", w-len(msg))
 }
 
 // isNoColor checks if colored logging is disabled via NO_COLOR env var
@@ -78,7 +93,7 @@ func (h *coloredSlogHandler) Handle(ctx context.Context, r slog.Record) error {
 	case slog.LevelInfo:
 		levelStr = b("ℹ️ ")
 	case slog.LevelWarn:
-		levelStr = b("⚠️")
+		levelStr = b("⚠️ ")
 	case slog.LevelError:
 		levelStr = b("❌")
 	default:
@@ -106,17 +121,36 @@ func (h *coloredSlogHandler) Handle(ctx context.Context, r slog.Record) error {
 			source = attr.Value.String()
 			return true
 		}
-		attrs = append(attrs, b(attr.Key)+"="+grn(fmt.Sprintf("%q", attr.Value.String())))
+		switch attr.Value.Kind() {
+		case slog.KindString:
+			attrs = append(attrs, attr.Key+"="+grn(fmt.Sprintf("%q", attr.Value.String())))
+		case slog.KindInt64, slog.KindUint64:
+			attrs = append(attrs, attr.Key+"="+yel(fmt.Sprintf("%d", attr.Value.Int64())))
+		case slog.KindFloat64:
+			attrs = append(attrs, attr.Key+"="+yel(fmt.Sprintf("%f", attr.Value.Float64())))
+		case slog.KindBool:
+			attrs = append(attrs, attr.Key+"="+blu(fmt.Sprintf("%t", attr.Value.Bool())))
+		case slog.KindDuration:
+			attrs = append(attrs, attr.Key+"="+blu(attr.Value.Duration().String()))
+		default:
+			attrs = append(attrs, attr.Key+"="+grn(fmt.Sprintf("%q", attr.Value.String())))
+		}
 		return true
 	})
 
-	msg := fmt.Sprintf("%s %s %s", dim(r.Time.Format(TimeFormat)), b(levelStr), b(fillMessage(r.Message)))
+	msg := fmt.Sprintf("%s %s %s", dim(r.Time.Format(TimeFormat)), levelStr, h.fillMessage(r.Message))
+
+	attrs = append(attrs, "log_width="+fmt.Sprintf("%d", h.targetedMessageWidth())) // copy to avoid modifying original
 
 	if source != "" {
 		msg += fmt.Sprintf(" %s%s", SourceEmoji, blu(ul(source)))
 	}
 	if len(attrs) > 0 {
-		msg += dim(fmt.Sprintf(" %s %s", AttrEmoji, strings.Join(attrs, " ")))
+		msg += " " // Separator
+		if AttrEmoji != "" {
+			msg += AttrEmoji + " "
+		}
+		msg += strings.Join(attrs, " ")
 	}
 
 	_, err := fmt.Fprintln(h.Output, msg)
@@ -138,6 +172,6 @@ func SetupColoredSlogLogging() {
 		Level:     level,
 	}
 	baseHandler := slog.NewTextHandler(os.Stderr, opts)
-	cl := &coloredSlogHandler{baseHandler, os.Stderr}
+	cl := &coloredSlogHandler{0, baseHandler, os.Stderr}
 	slog.SetDefault(slog.New(cl))
 }
