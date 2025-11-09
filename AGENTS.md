@@ -2,16 +2,40 @@
 
 This document provides coding guidelines and conventions for AI agents working on the **ubunatic/dotfiles** repository—a personal collection of shell scripts, terminal apps, and system configurations.
 
+## Agent Role
+You are a Coding Assistant specialized in helping with software development tasks.
+Your responses should be concise and focused on the technical aspects of the request.
+Always consider the context of the request and the files provided as attachments.
+Respond in markdown format, prefer files as chat output where appropriate, esp.
+when providing longer explanations, reviews, or plans.
+
+## Agent Environment
+Assume you are running in an IDE, where you have access to features exposed by the IDE integration, such as:
+- access to error logs in the "Problems" tab
+- access to project files in the "Explorer" tab
+- ability to run terminal commands in the "Terminal" tab
+- ability to run tests and see results in the "Test" tab
+- ability to propose code changes in one or more "Editor" tabs
+- Always use the IDE for file modifications (creating, editing, deleting files)
+
 ## Repository Overview
 
-- **Purpose**: Personal dotfiles collection with shell libraries and compiled Go apps
-- **Languages**: Bash (shell scripts), Go (terminal applications), Python (utilities), MicroPython (embedded)
-- **Structure**:
-  - `/shell/` - Shell script libraries and utilities
-  - `/apps/` - Terminal applications (Go, Python, Bash, MicroPython)
-  - `/config/` - Configuration files for various tools
-  - `/bin/` - Compiled binaries and symlinks
-  - `/scripts/` - Build scripts and Makefile includes
+- **Purpose**: A comprehensive collection of personal dotfiles, shell script libraries, custom-built terminal applications, and system configurations for a personalized development environment.
+- **Languages**: Primarily Bash and Go. Also includes Python, MicroPython, and AppleScript.
+- **Key Directories**:
+  - `/shell/`: A library of shell scripts providing common functions, aliases, and environment setup. Sourced by `userrc.sh`.
+  - `/apps/`: Home for various custom applications, categorized by language:
+    - `go/`: Go applications like `csvconv`, `govsbind`, `gsu`.
+    - `bash/`: Shell-based tools like `stackman` and `mclog`.
+    - `py/`: Python utilities.
+    - `micropy/`: MicroPython projects.
+    - `macos/`: macOS specific applications.
+    - `stacks/`: Docker Compose stacks for various services (e.g., Immich ML).
+    - `unix/`: Unix-specific utilities and configurations (e.g., Prometheus node_exporter).
+  - `/config/`: Contains configuration files for tools such as `alacritty`, `starship`, `gnome`, and `vscode`.
+  - `/bin/`: Destination for compiled binaries and scripts, intended to be in the user's `PATH`.
+  - `/scripts/`: Houses `Makefile` includes (`.mk` files) and other helper scripts for building and testing.
+  - `/.forgejo/`: Contains Forgejo CI/CD workflow definitions for continuous integration and testing.
 
 ## General Instructions
 
@@ -37,10 +61,20 @@ This document provides coding guidelines and conventions for AI agents working o
 
 ## Project-Specific Guidelines
 
+### Installation
+- The main entry point for setting up the dotfiles is the `install.sh` script in the root directory.
+- The `Makefile` in the root provides various targets for installation, testing, and management of the dotfiles and applications. Run `make` to see available targets.
+
 ### Build System
 - The project uses **GNU Make** as the primary build tool.
 - Include files in `/scripts/` provide reusable Makefile targets.
 - Use `make test` to run all tests before committing.
+
+### CI/CD
+- This project uses **Forgejo** for its CI/CD pipelines.
+- Workflow definitions are located in `/.forgejo/workflows/`.
+- The `develop.yml` workflow runs on pushes to the main branch.
+- The `pull-request-test.yml` workflow runs on pull requests.
 
 ### Shell Library (`/shell/`)
 - All shell scripts must be **sourceable** (no direct execution unless in `/apps/bash/`).
