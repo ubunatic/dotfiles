@@ -17,7 +17,7 @@ inf() {
 }
 dbg() {
   local code=$?
-  if test -n "$DEBUG"
+  if test -n "$DOTFILES_DEBUG"
   then echo -n "DBG: " 1>&2; echo "$@" 1>&2;
   fi
   return $code
