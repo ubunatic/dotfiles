@@ -7,7 +7,7 @@ include scripts/ai.mk
 include scripts/go.mk
 
 # use login shell to source dotfiles
-SHELL = bash -il
+SHELL = bash -l
 
 test: dotfiles-testall  ## run all tests
 dotfiles-testall: ⚙️  ## run all shell tests
