@@ -1,27 +1,37 @@
 .PHONY: ⚙️  # make all non-file targets phony
 
-# AI Chat command, set this variable to change the command used for AI interactions
-ai_chat = code chat
+# assign skill based on target name
+ai-%: CHAT_SKILL=$*
 
-ai-init: ⚙️  ## Initialize AI environment
-	$(ai_chat) "create or update my AGENTS.md file based on the current project \
-		structure and goals"
+chat = echo "Asking AI with skill=$(CHAT_SKILL) and prompt:" && \
+	./scripts/ai-prompt.sh preview $(chat_prompt_args) && \
+	./scripts/ai-prompt.sh vars $(chat_prompt_args) && \
+	./scripts/ai-prompt.sh run $(chat_prompt_args) && \
+	echo "AI Request sent successfully."
 
-ai-files: ⚙️  ## Ensure AI agent files match provider-recommended structure
-	$(ai_chat) "also make sure the .github/ or equivalent directory has the \
-		necessary files to comply with best practices for AI agents in this \
-		repository"
+chat_prompt_args = -s $(CHAT_SKILL)
+ifdef DEBUG
+chat_prompt_args += -d
+endif
 
-ai-review: ⚙️  ## Use AI to review recent changes in the repository
-	$(ai_chat) "review the recent changes in this repository and provide \
-		feedback on code quality, style, and potential improvements"
+CHAT_PROMPT =
+export CHAT_PROMPT
 
-ai-tech-only: ⚙️  ## Use AI to identify and remove of non-technical content
-	$(ai_chat) "analyze the repository and identify any non-technical content \
-		esp. social, cultural, or political statements, advice, rules, and \
-		similar. This is a purely technical repository and should not take any \
-		position on such matters. Suggest removal of such content."
+ai-%: ⚙️  ## Use AI to assist with the specified CHAT_SKILL (e.g. make ai-docs)
+	@$(chat)
 
-ai-update-docs: ⚙️  ## Use AI to update documentation based on code changes
-	$(ai_chat) "analyze the code changes in this repository and update the \
-		documentation accordingly to reflect the latest codebase"
+ai-chat: CHAT_SKILL=assist
+ai-chat: ⚙️  ## General AI chat interface
+	@echo "Enter your message for the AI:"
+	@{ test -n "$$CHAT_PROMPT" || read -r CHAT_PROMPT; } && $(chat)
+
+## AI Shortcuts
+
+ai:     ai-assist   ## General AI assistance (let the AI decide the skill)
+chat:   ai-chat     ## General AI chat interface
+skills: ai-skills   ## List AI agent skills based on current project structure
+init:   ai-init     ## Initialize AI environment
+files:  ai-files    ## Ensure AI agent files match provider-recommended structure
+review: ai-review   ## Use AI to review recent changes in the repository
+tech:   ai-tech     ## Use AI to identify and remove of non-technical content
+docs:   ai-docs     ## Use AI to update documentation based on code changes
