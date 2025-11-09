@@ -4,7 +4,7 @@
 # command targets for common Go dev tasks. Copy this file into your project as
 # `scripts/go.mk`, customize it, and include it in your main Makefile. Or use
 # as your initial Makefile and customize it as needed.
-# 
+#
 # Also see `scripts/usage.mk` for getting 'usage' and 'usage-all' targets that
 # will, detect the '##' comments and print help for all Makefile targets.
 
@@ -12,63 +12,75 @@
 
 ## Sources and Binaries
 
-project := $(notdir $(CURDIR))
-main = $(project).go
-binary = bin/$(project)
-binary_args = --help
-source_patterns = *.go go.* *.mk Makefile
-source_cmd = find . -name $(main) $(foreach p,$(source_patterns),-o -name "$(p)")
+# variables that can be set immediately after including this file
+project         := $(notdir $(CURDIR))
+main            := $(project).go
+binary          := bin/$(project)
+binary_args     := --help
+source_patterns := *.go go.* *.mk Makefile
+source_cmd      := find . -name "$(main)" $(foreach p,$(source_patterns),-o -name "$(p)")
+
+# dynamically vars (use '=', not ':=')
+# dynamically read the list of source files (everytime this variable is used)
 sources = $(shell $(source_cmd))
 
-## Default Build Target
+# add Go tarets to common and targets
+all:       go-build
+default:   go-build
+test:      go-test
+clean:     go-clean
+vars:      go-vars
+lint:      go-lint
+generate:  go-generate
+install:   go-install
+update:    go-update
 
-all:       ⚙️ build                             ## Default: build the project binary
-build:     ⚙️ $(binary)                         ## Build the project binary
+## Go Build
+
+go-build:     ⚙️ $(binary)       ## Build the project binary
 $(binary): $(sources); go build -o $@ $(main)
 
-## Common Go Build Targets
-
-test: ⚙️ build                ## Run tests (with race detection)
+go-test: ⚙️ build                ## Run tests (with race detection)
 	go test -race ./...
 
-debug: ⚙️ build               ## Run tests in verbose mode
+go-debug: ⚙️ build               ## Run tests in verbose mode
 	go test -v -race ./...
 
-run: ⚙️ build                 ## Build and run the binary with args: $(binary_args)
+go-run: ⚙️ build                 ## Build and run the binary with args: $(binary_args)
 	$(binary) $(binary_args)
 
-clean: ⚙️                     ## Clean build files
+go-clean: ⚙️                     ## Clean build files
 	rm -f $(binary)
 
 ## Advanced Go Targets
 
-generate: ⚙️                  ## Run Go code generation
+go-generate: ⚙️                  ## Run Go code generation
 	go generate .
-install:   ⚙️ build           ## Build and install the binary
+go-install:   ⚙️ build           ## Build and install the binary
 	go install .
-update: ⚙️                    ## Update dependencies
+go-update: ⚙️                    ## Update dependencies
 	go get -u
-tag: ⚙️                       ## Create a new git tag
+go-tag: ⚙️                       ## Create a new git tag
 	# not implemented
-docs: ⚙️                      ## Generate documentation
+go-docs: ⚙️                      ## Generate documentation
 	# not implemented
-precommit: ⚙️                 ## Run pre-commit checks
+go-precommit: ⚙️                 ## Run pre-commit checks
 	# not implemented
 
 ## Advanced Go Testing Targets
 
-lint: ⚙️                      ## Run linters
+go-lint: ⚙️                      ## Run linters
 	# not implemented
-cover: ⚙️                     ## Run test coverage
+go-cover: ⚙️                     ## Run test coverage
 	# not implemented
-vet: ⚙️                       ## Run go vet
+go-vet: ⚙️                       ## Run go vet
 	# not implemented
-bench: ⚙️                     ## Run benchmarks
+go-bench: ⚙️                     ## Run benchmarks
 	# not implemented
 
 ## Help and Debug Targets
 
-vars: ⚙️  ## Show Makefile variables
+go-vars: ⚙️  ## Show Makefile variables
 	# project  $(project)
 	# main:    $(main)
 	# binary:  $(binary)
