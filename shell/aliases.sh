@@ -44,6 +44,7 @@ alias main="git checkout main"
 alias gaa="git add --all"
 alias ga="git add"
 alias gc="git commit"
+alias gc-m="git commit -m"
 alias gp="git push"
 alias gpf="git push --force"
 alias gcamd="git status --short && git commit --amend --no-edit --allow-empty && echo 'commit ammended'"
@@ -61,6 +62,8 @@ alias develop="git checkout develop && git pull"
 
 # VS Code aliases
 alias ai="code chat"
+alias cai="code chat"
+alias gai="gemini -i"
 
 # SSH aliases
 alias ssh-add-key="ssh-add ~/.ssh/id_ed25519"
