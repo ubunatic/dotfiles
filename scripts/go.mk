@@ -13,16 +13,23 @@
 ## Sources and Binaries
 
 # variables that can be set immediately after including this file
-project         := $(notdir $(CURDIR))
-main            := $(project).go
-binary          := bin/$(project)
-binary_args     := --help
-source_patterns := *.go go.* *.mk Makefile
-source_cmd      := find . -name "$(main)" $(foreach p,$(source_patterns),-o -name "$(p)")
+go_project_dir  ?= $(CURDIR)
+go_project      ?= $(notdir $(go_project_dir))
+go              ?= cd $(go_project_dir) && go
+go_main         ?= $(shell \
+	cd $(go_project_dir); \
+	for f in cmd/$(go_project)/main.go cmd/$(go_project).go main.go $(go_project).go; \
+	do if test -f "$$f"; then echo "$$f"; exit 0; fi; \
+	done; echo "." \
+)
+go_binary       ?= $(CURDIR)/bin/$(go_project)
+go_binary_args  ?= --help
+go_source_patterns ?= *.go go.* *.mk
+go_source_cmd      ?= find . -wholename ./Makefile -o -name "$(go_main)" $(foreach p,$(go_source_patterns),-o -name '$(p)')
 
 # dynamically vars (use '=', not ':=')
 # dynamically read the list of source files (everytime this variable is used)
-sources = $(shell $(source_cmd))
+go_sources ?= $(shell $(go_source_cmd))
 
 # add Go tarets to common and targets
 all:       go-build
@@ -34,32 +41,34 @@ lint:      go-lint
 generate:  go-generate
 install:   go-install
 update:    go-update
+build:     go-build
 
 ## Go Build
 
-go-build:     ⚙️ $(binary)       ## Build the project binary
-$(binary): $(sources); go build -o $@ $(main)
+go-build: ⚙️ $(go_binary)        ## Build the project binary
+$(go_binary): $(go_sources)
+	$(go) build -o $@ $(go_main)
 
-go-test: ⚙️ build                ## Run tests (with race detection)
-	go test -race ./...
+go-test: ⚙️ go-build             ## Run tests (with race detection)
+	$(go) test -race ./...
 
-go-debug: ⚙️ build               ## Run tests in verbose mode
-	go test -v -race ./...
+go-debug: ⚙️ go-build            ## Run tests in verbose mode
+	$(go) test -v -race ./...
 
-go-run: ⚙️ build                 ## Build and run the binary with args: $(binary_args)
-	$(binary) $(binary_args)
+go-run: ⚙️ go-build              ## Build and run the binary with args: $(go_binary_args)
+	$(go_binary) $(go_binary_args)
 
 go-clean: ⚙️                     ## Clean build files
-	rm -f $(binary)
+	rm -f $(go_binary)
 
 ## Advanced Go Targets
 
 go-generate: ⚙️                  ## Run Go code generation
-	go generate .
-go-install:   ⚙️ build           ## Build and install the binary
-	go install .
+	$(go) generate .
+go-install:   ⚙️ go-build        ## Build and install the binary
+	$(go) install .
 go-update: ⚙️                    ## Update dependencies
-	go get -u
+	$(go) get -u
 go-tag: ⚙️                       ## Create a new git tag
 	# not implemented
 go-docs: ⚙️                      ## Generate documentation
@@ -81,10 +90,10 @@ go-bench: ⚙️                     ## Run benchmarks
 ## Help and Debug Targets
 
 go-vars: ⚙️  ## Show Makefile variables
-	# project  $(project)
-	# main:    $(main)
-	# binary:  $(binary)
-	# sources: $(sources)
+	# project  $(go_project)
+	# main:    $(go_main)
+	# binary:  $(go_binary)
+	# sources: $(go_sources)
 	#
-	# source_patterns: $(source_patterns)
-	# source_cmd:      $(source_cmd)
+	# source_patterns: $(go_source_patterns)
+	# source_cmd:      $(go_source_cmd)
