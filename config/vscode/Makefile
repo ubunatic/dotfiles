@@ -9,7 +9,7 @@ PREFIX = ${HOME}/Library/Application Support
 endif
 
 CODES = VSCodium code-oss code code-insiders Code
-MERGETOOL = bash -ic "dotapps build" && govsbind
+MERGETOOL = bash -ilc "dotapps build" && govsbind
 
 CODE   := $(shell for c in $(CODES); do test -d "$(PREFIX)/$$c" && echo "$$c" && break; done)
 PREFIX := $(PREFIX)/$(CODE)/User

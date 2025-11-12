@@ -65,6 +65,7 @@
       "command": "editor.action.clipboardPasteAction",
       "when": ""
    },
+
    // {
    //    "key": "alt+x",
    //    "command": "editor.action.clipboardCutAction",
@@ -98,12 +99,12 @@
       "command": "redo",
       "when": ""
    },
+
    // {
    //    "key": "shift+alt+y",
    //    "command": "redo",
    //    "when": ""
    // },
-
    // Ctrl+Z/Y are undo, redo not needed
    // because we can use Ctrl+Shift+Z/Y
    {
@@ -292,6 +293,21 @@
    {
       "key": "ctrl+0",
       "command": "workbench.action.zoomReset",
+      "when": ""
+   },
+   // {
+   //    "key": "shift+alt+y",
+   //    "command": "redo",
+   //    "when": ""
+   // },
+   {
+      "key": "shift+cmd+d",
+      "command": "-workbench.view.debug",
+      "when": "viewContainer.workbench.view.debug.enabled"
+   },
+   {
+      "key": "shift+cmd+d",
+      "command": "workbench.action.toggleLightDarkThemes",
       "when": ""
    }
 ]
