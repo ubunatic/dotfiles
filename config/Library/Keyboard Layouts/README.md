@@ -1,5 +1,13 @@
 MacOS Keylayouts
 ================
+
+> [!NOTE]
+> When MacOS asks you to identify your keyboard you should press the key next to the left of the left Shift key.
+> This is usually the `<` key on a German PC keyboard. However MacOS may think you pressed the `^` key instead.
+> In this case repeat the keyboard identification and press `^` instead. This will fix most issues.
+>
+> If this does not help, try to use my layouts to fix your issues.
+
 I am using a German PC keyboard on a Mac and Apple's support for this is very bad. Here is a keyboard layout to fix this!
 
 Meet the **German - PC** MacOS Keylayout.
@@ -23,3 +31,9 @@ You can select the keyboard layout in System Preferences > Keyboard > Input Sour
 Development
 -----------
 See [Makefile](Makefile) for details how to develop layouts.
+
+Learnings
+---------
+When MacOS asks you to identify your keyboard you should press the key next to the left of the left Shift key.
+This is usually the `<` key on a German PC keyboard. However MacOS may think you pressed the `^` key instead.
+In this case repeat the keyboard identification and press `^` instead. This will fix most issues.

@@ -65,11 +65,11 @@
       "command": "editor.action.clipboardPasteAction",
       "when": ""
    },
-   {
-      "key": "alt+x",
-      "command": "editor.action.clipboardCutAction",
-      "when": ""
-   },
+   // {
+   //    "key": "alt+x",
+   //    "command": "editor.action.clipboardCutAction",
+   //    "when": ""
+   // },
    {
       "key": "alt+a",
       "command": "editor.action.selectAll",
@@ -83,11 +83,11 @@
 
    // Alt+Y/Z are undo
    // Alt+Shift+Z/Y are redo
-   {
-      "key": "alt+y",
-      "command": "undo",
-      "when": ""
-   },
+   // {
+   //    "key": "alt+y",
+   //    "command": "undo",
+   //    "when": ""
+   // },
    {
       "key": "alt+z",
       "command": "undo",
@@ -98,11 +98,11 @@
       "command": "redo",
       "when": ""
    },
-   {
-      "key": "shift+alt+y",
-      "command": "redo",
-      "when": ""
-   },
+   // {
+   //    "key": "shift+alt+y",
+   //    "command": "redo",
+   //    "when": ""
+   // },
 
    // Ctrl+Z/Y are undo, redo not needed
    // because we can use Ctrl+Shift+Z/Y
