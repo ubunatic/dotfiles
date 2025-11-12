@@ -19,3 +19,6 @@ apps/macos/appcloser/appcloser
 
 # Allow checking in any docs
 !*.md
+
+# Test files
+test-report.xml

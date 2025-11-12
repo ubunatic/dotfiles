@@ -16,6 +16,7 @@
 go_project_dir  ?= $(CURDIR)
 go_project      ?= $(notdir $(go_project_dir))
 go              ?= cd $(go_project_dir) && go
+gotestsum	    ?= cd $(go_project_dir) && gotestsum --format-icons=hivis --junitfile $(CURDIR)/test-report.xml
 go_main         ?= $(shell \
 	cd $(go_project_dir); \
 	for f in cmd/$(go_project)/main.go cmd/$(go_project).go main.go $(go_project).go; \
@@ -30,6 +31,8 @@ go_source_cmd      ?= find . -wholename ./Makefile -o -name "$(go_main)" $(forea
 # dynamically vars (use '=', not ':=')
 # dynamically read the list of source files (everytime this variable is used)
 go_sources ?= $(shell $(go_source_cmd))
+
+go_testargs ?= -race ./...
 
 # add Go tarets to common and targets
 all:       go-build
@@ -50,10 +53,14 @@ $(go_binary): $(go_sources)
 	$(go) build -o $@ $(go_main)
 
 go-test: ⚙️ go-build             ## Run tests (with race detection)
-	$(go) test -race ./...
+	$(go) test $(go_testargs)
+
+go-testsum: ⚙️ go-build          ## Run tests with test summary
+	go install gotest.tools/gotestsum@latest
+	$(gotestsum) -- $(go_testargs)
 
 go-debug: ⚙️ go-build            ## Run tests in verbose mode
-	$(go) test -v -race ./...
+	$(go) test -v $(go_testargs)
 
 go-run: ⚙️ go-build              ## Build and run the binary with args: $(go_binary_args)
 	$(go_binary) $(go_binary_args)
