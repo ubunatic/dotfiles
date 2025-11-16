@@ -1,38 +1,125 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"log/slog"
 	"os"
+	"slices"
 	"strings"
 )
 
-type AutoloadConfig struct {
-	Autoload map[string]string `json:"autoload"`
+type Device struct {
+	name string
+	pos  int
 }
 
-func (c *AutoloadConfig) GetDevice() string {
-	for key := range c.Autoload {
-		return key
+func (k Device) MarshalText() ([]byte, error) {
+	return []byte(k.Name()), nil
+}
+
+func (k Device) String() string { return fmt.Sprintf("Device{name: %s, pos: %d}", k.name, k.pos) }
+func (k Device) Name() string   { return k.name }
+func (k Device) Pos() int       { return k.pos }
+
+type Config struct {
+	Autoload map[Device]string `json:"autoload"`
+}
+
+func (c *Config) DeviceByPos(i int) string {
+	for device := range c.Autoload {
+		if i == device.Pos() {
+			return device.Name()
+		}
 	}
 	return ""
 }
 
-func loadConfig(filePath string) (AutoloadConfig, error) {
+func (c *Config) DeviceByName(name string) string {
+	for device := range c.Autoload {
+		if device.Name() == name {
+			return device.Name()
+		}
+	}
+	return ""
+}
+
+func (c *Config) Preset(device string) string {
+	for dev, preset := range c.Autoload {
+		if dev.Name() == device {
+			return preset
+		}
+	}
+	return ""
+}
+
+func (c *Config) SetPreset(device string, preset string) {
+	for dev := range c.Autoload {
+		if dev.Name() == device {
+			c.Autoload[dev] = preset
+			return
+		}
+	}
+	c.Autoload[Device{name: device, pos: len(c.Autoload)}] = preset
+}
+
+func (c *Config) UnmarshalJSON(data []byte) error {
+	// unmarshal into a temporary map to extract autoload section
+	m := map[string]any{}
+	err := json.Unmarshal(data, &m)
+	if err != nil {
+		return err
+	}
+	autoload := m["autoload"].(map[string]any)
+
+	// find positions of device names in the original JSON data
+	// they should be unique and in the order defined by the system
+	indexes := []int{}
+	tmp := &Config{
+		Autoload: make(map[Device]string),
+	}
+	for k, v := range autoload {
+		idx := bytes.Index(data, []byte(k))
+		if idx == -1 {
+			return fmt.Errorf("failed to find device name in JSON data")
+		}
+		indexes = append(indexes, idx)
+		// temporarily store with position as index
+		tmp.Autoload[Device{name: k, pos: idx}] = v.(string)
+	}
+
+	// sort devices by their positions in the JSON data
+	slices.Sort(indexes)
+
+	for i, idx := range indexes {
+		name := tmp.DeviceByPos(idx)
+		preset := tmp.Preset(name)
+		if name == "" {
+			return fmt.Errorf("failed to find device for index %d", idx)
+		}
+		c.Autoload[Device{name: name, pos: i}] = preset
+	}
+
+	return nil
+}
+
+func loadConfig(filePath string) (Config, error) {
 	contents, err := os.ReadFile(filePath)
 	if err != nil {
-		return AutoloadConfig{
-			Autoload: make(map[string]string),
-		}, err
+		return Config{}, err
 	}
-	var config AutoloadConfig
+	// slog.Info("Read config file", "path", filePath, "contents", string(contents))
+
+	config := Config{
+		Autoload: make(map[Device]string),
+	}
 	err = json.Unmarshal(contents, &config)
 	return config, err
 }
 
-func saveConfig(filePath string, config AutoloadConfig) error {
+func saveConfig(filePath string, config Config) error {
 	data, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return err
@@ -51,10 +138,11 @@ func exitOnError(err error) {
 
 func main() {
 	var configFile = flag.String("config", "~/.config/input-remapper-2/config.json", "Path to the JSON config file")
-	var getDevice = flag.Bool("get-device", false, "Get autoload device name from config file")
+	var getDevice = flag.Int("get-device", -1, "Get autoload device name by position from config file")
 	var setPreset = flag.String("set-preset", "", "Set autoload device name in config file")
 	var showPreset = flag.String("show-preset", "", "Show current autoload preset")
 	var deviceName = flag.String("device", "", "Device name to set as autoload")
+	var showConfig = flag.Bool("show-config", false, "Show loaded config and exit")
 	flag.Parse()
 
 	*configFile = strings.Replace(*configFile, "~", os.Getenv("HOME"), 1)
@@ -62,20 +150,25 @@ func main() {
 	exitOnError(err)
 	slog.Info("Loaded config", "config", cfg)
 
+	if *showConfig {
+		fmt.Println(cfg)
+		return
+	}
+
 	if *showPreset != "" {
 		dev := getIputDevice(deviceName, cfg)
-		preset, _ := cfg.Autoload[dev]
+		preset := cfg.Preset(dev)
 		slog.Info("Current autoload preset", "device", dev, "preset", preset)
 		printBindings(*showPreset)
 		return
 	}
 
 	switch {
-	case *getDevice:
-		fmt.Println(cfg.GetDevice())
+	case *getDevice >= 0:
+		fmt.Println(cfg.DeviceByPos(*getDevice))
 	case *setPreset != "":
 		dev := getIputDevice(deviceName, cfg)
-		cfg.Autoload[dev] = *setPreset
+		cfg.SetPreset(dev, *setPreset)
 		err = saveConfig(*configFile, cfg)
 		exitOnError(err)
 		slog.Info("Updated config", "config", cfg)
@@ -86,11 +179,11 @@ func main() {
 	}
 }
 
-func getIputDevice(deviceName *string, cfg AutoloadConfig) string {
+func getIputDevice(deviceName *string, cfg Config) string {
 	dev := *deviceName
 	if dev == "" {
 		slog.Info("Device name not provided, using existing autoload device if available")
-		dev = cfg.GetDevice()
+		dev = cfg.DeviceByName(dev)
 	}
 	if dev == "" {
 		exitOnError(fmt.Errorf("no device found in config"))

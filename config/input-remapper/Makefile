@@ -5,7 +5,8 @@ help: usage  ## Show this help message
 PREFIX ?= $(HOME)/.config/input-remapper-2
 PRESET ?= $(PREFIX)/presets/$(device)
 
-device   = $(shell $(goremapper) -get-device 2> /dev/null || echo "unknown")
+device_num = 1
+device   = $(shell $(goremapper) -get-device $(device_num) 2> /dev/null || echo "unknown")
 autoload = $(shell jq -r '.autoload' config.json)
 active   = $(shell jq -r '.autoload' "$(PREFIX)/config.json" 2> /dev/null || echo "{}")
 services = input-remapper.service input-remapper-daemon.service
@@ -17,7 +18,7 @@ vars:  ## Show variables
 	# device:   $(device)"
 	# autoload: $(autoload)"
 	# active:   $(active)"
-	# services: $(services)"
+	# services: $(services)
 
 install:  ## Install input-remapper bindings
 	@echo "Installing input-remapper bindings..."
@@ -25,9 +26,9 @@ install:  ## Install input-remapper bindings
 	cp -r macstyle.json "$(PRESET)/"
 
 set-preset:  ## Set input-remapper preset for active device
-	$(goremapper) -get-device
-	$(goremapper) -set-preset macstyle
-	echo "✅ Set preset 'macstyle' for device '$(device)'"
+	$(goremapper) -get-device $(device_num)
+	$(goremapper) -set-preset macstyle -device '$(device)'
+	@echo "✅ Set preset 'macstyle' for device '$(device)'"
 	@$(MAKE) autoload
 
 import:  ## Import existing input-remapper preset
