@@ -1,0 +1,7 @@
+{
+    "autoload": {
+        "Cherry GmbH CHERRY Corded Device": "macstyle",
+        "Sharkoon Pure Writer TKL RGB": "macstyle"
+    },
+    "version": "2.0.1"
+}

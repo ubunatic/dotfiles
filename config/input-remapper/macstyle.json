@@ -106,24 +106,6 @@
             },
             {
                 "type": 1,
-                "code": 8,
-                "origin_hash": "8af886b99884d1c352a6829d578dde9d"
-            }
-        ],
-        "target_uinput": "keyboard",
-        "output_symbol": "ISO_Level3_Shift + 7",
-        "name": "Iso: Super + 7 >> Iso3 + 7 (\ud83c\udde9\ud83c\uddea Curly L)",
-        "mapping_type": "key_macro"
-    },
-    {
-        "input_combination": [
-            {
-                "type": 1,
-                "code": 125,
-                "origin_hash": "8af886b99884d1c352a6829d578dde9d"
-            },
-            {
-                "type": 1,
                 "code": 9,
                 "origin_hash": "8af886b99884d1c352a6829d578dde9d"
             }
@@ -367,6 +349,60 @@
         "target_uinput": "keyboard",
         "output_symbol": "ISO_Level3_Shift + 7",
         "name": "umlaut:  \u2934\ufe0f+Super + \u00f6 >> {  (\ud83e\uddd1\u200d\ud83d\udcbb Coding)",
+        "mapping_type": "key_macro"
+    },
+    {
+        "input_combination": [
+            {
+                "type": 1,
+                "code": 56,
+                "origin_hash": "8af886b99884d1c352a6829d578dde9d"
+            },
+            {
+                "type": 1,
+                "code": 105,
+                "origin_hash": "8af886b99884d1c352a6829d578dde9d"
+            }
+        ],
+        "target_uinput": "keyboard",
+        "output_symbol": "Super_L + Left",
+        "name": "nav: Alt + \u2b05\ufe0f >> Super + \u2b05\ufe0f (go back)",
+        "mapping_type": "key_macro"
+    },
+    {
+        "input_combination": [
+            {
+                "type": 1,
+                "code": 56,
+                "origin_hash": "8af886b99884d1c352a6829d578dde9d"
+            },
+            {
+                "type": 1,
+                "code": 106,
+                "origin_hash": "8af886b99884d1c352a6829d578dde9d"
+            }
+        ],
+        "target_uinput": "keyboard",
+        "output_symbol": "Super_L + Right",
+        "name": "nav: Alt + \u27a1\ufe0f >> Super + \u27a1\ufe0f (go forward)",
+        "mapping_type": "key_macro"
+    },
+    {
+        "input_combination": [
+            {
+                "type": 1,
+                "code": 125,
+                "origin_hash": "8af886b99884d1c352a6829d578dde9d"
+            },
+            {
+                "type": 1,
+                "code": 8,
+                "origin_hash": "8af886b99884d1c352a6829d578dde9d"
+            }
+        ],
+        "target_uinput": "keyboard",
+        "output_symbol": "ISO_Level3_Shift + 7",
+        "name": "Iso: Super + 7 >> Iso3 + 7 (\ud83c\udde9\ud83c\uddea Curly L)",
         "mapping_type": "key_macro"
     }
 ]
