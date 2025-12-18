@@ -54,6 +54,7 @@ alias gpsup='git push --set-upstream origin $(git branch --show-current)'
 alias gpsupu='git push --set-upstream "$USER" "$(git branch --show-current)"'
 alias gr="gitroot"
 alias cg="gitroot"
+alias mai="git checkout main && git pull"
 alias main="git checkout main && git pull"
 alias master="git checkout master && git pull"
 alias upstream="git checkout upstream && git pull"
