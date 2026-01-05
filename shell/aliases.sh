@@ -73,6 +73,8 @@ alias ssh-agent="eval \$(ssh-agent -s) && ssh-add ~/.ssh/id_ed25519"
 
 # Tool aliases
 alias lzd='lazydocker'
+alias lg='lazygit'
+alias k='kubectl'
 
 unalias gsu 2>/dev/null
 
