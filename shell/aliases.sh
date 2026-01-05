@@ -71,6 +71,9 @@ alias ssh-add-key="ssh-add ~/.ssh/id_ed25519"
 alias ssh-add-key-rsa="ssh-add ~/.ssh/id_rsa"
 alias ssh-agent="eval \$(ssh-agent -s) && ssh-add ~/.ssh/id_ed25519"
 
+# Tool aliases
+alias lzd='lazydocker'
+
 unalias gsu 2>/dev/null
 
 if test "$SYSTEM_UNAME" = "Darwin"
