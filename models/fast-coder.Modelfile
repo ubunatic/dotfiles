@@ -1,0 +1,6 @@
+# shockingly smart for its size and fits entirely in the M4's high-speed cache
+FROM phi4
+# 8k context is plenty for single-file edits and is much faster than 32k
+PARAMETER num_ctx 8192
+# Temperature 0.1 makes code generation deterministic and faster (less sampling overhead)
+PARAMETER temperature 0.1

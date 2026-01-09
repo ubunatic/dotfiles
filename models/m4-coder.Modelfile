@@ -1,0 +1,4 @@
+# good all-around coding model
+FROM qwq
+# larger context helps with bigger files and multi-file projects but is slower
+PARAMETER num_ctx 32768
