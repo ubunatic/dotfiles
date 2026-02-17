@@ -49,8 +49,9 @@ for line in sys.stdin:
 '
 }
 
-export GIT_PRIVATE_EMAIL=""
-export GIT_CORPORATE_EMAIL=""
+export GIT_PRIVATE_EMAIL="$GIT_PRIVATE_EMAIL"
+export GIT_CORPORATE_EMAIL="$GIT_CORPORATE_EMAIL"
+
 gitmail_indicator() {
     local mail=""
     mail="$(git config user.email)" 2> /dev/null
@@ -76,25 +77,37 @@ gitmail() {
 }
 
 gitmail_switch() {
-    local where="--local"    
+    local where="--local"
     local email=""
     local switch_email=""
 
+    # parse arguments: local/global or email to switch to
     for arg in "$@"; do case "$arg" in
-    local|--local)   where="--local"  ;;
-    global|--global) where="--global" ;;
-    *)               email="$arg"     ;;
+    (local|--local)   where="--local"  ;;
+    (global|--global) where="--global" ;;
+    (*)               switch_email="$arg" ;; # any other argument is the email to switch to
     esac; done
 
-    log "switching gitmail $where"
-    case "$(git config user.email)" in
-    "$GIT_CORPORATE_EMAIL") switch_email="$GIT_PRIVATE_EMAIL" ;;
-    "$GIT_PRIVATE_EMAIL")   switch_email="$GIT_CORPORATE_EMAIL" ;;
-    "$email")               ;; # no change
-    "")                     switch_email="$email" ;;    
-    *) err "failed to determine email for git" ;;
-    esac
-    git config "$where" user.email "$email"
+    # get current email for the given scope (local/global)
+    email="$(git config "$where" user.email)" || true
+
+    # define the email to switch to based on the current email and the provided argument
+    if test -n "$switch_email"
+    then log "using explicit email $switch_email for gitmail $where"
+    else
+        log "getting corporate/private counterpart for gitmail $where from $email"
+        case "$email" in
+        ("$GIT_CORPORATE_EMAIL") switch_email="$GIT_PRIVATE_EMAIL" ;;
+        ("$GIT_PRIVATE_EMAIL")   switch_email="$GIT_CORPORATE_EMAIL" ;;
+        (*)                      log "no change for gitmail $where: $email"
+        esac
+    fi
+
+    if test -n "$switch_email"
+    then log "switching gitmail $where from $email to $switch_email"
+         git config "$where" user.email "$switch_email"
+    fi
+
     gitmail
 }
 
