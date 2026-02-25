@@ -1,26 +1,55 @@
-.PHONY: ⚙️ sync
+.PHONY: ⚙️  # make all non-file targets phony
 
-ROOT          := $(shell git rev-parse --show-toplevel)
-BOILER        := ${ROOT}/README.md ${ROOT}/AGENTS.md ${ROOT}/Makefile
-BOILER_ORIGIN := ${DOTFILES}/templates/md/docs
+SHELL  := bash
+ORIGIN := $(shell source .docsrepo && echo "$$DOCSREPO_ORIGIN")
 
-info: ⚙️ ## show help and variable values
+info: ⚙️  ## show help and variable values
 	@echo "Usage: make [target]"
 	@echo "Targets:"
 	@# extract target before ":" and description after "##"
 	@awk -F ':|##' '/^[a-zA-Z0-9_-]+:/{printf "  \033[36m%-15s\033[0m %s\n", $$1, $$3}' Makefile
+	@echo
 	@echo "Variables:"
-	@awk -F ':=' '/^[A-Z_]+/{printf "  \033[33m%-15s\033[0m %s\n", $$1, $$2}' Makefile
+	@echo "  ORIGIN = ${ORIGIN}"
+	@echo "  DOTFILES = ${DOTFILES}"
+	@echo "  GOOGLE_DL = ${GOOGLE_DL}"
+	@echo "  URL = ${URL}"
+	@echo "  REF_DIR = ${REF_DIR}"
+	@echo "  REF_NAME = ${REF_NAME}"
 
-dotfiles: ⚙️  ## ensure dotfiles repo is available
-	test -d ${DOTFILES} || (echo "Error: DOTFILES environment variable is not set or points to a non-existent directory." && exit 1)
-	mkdir -p ${DOTFILES}/templates/md/docs
+help: ⚙️ info  ## alias for info
 
-sync: ⚙️ dotfiles  ## sync boilerplate files like AGENTS.md, etc.
-	cd ${DOTFILES} && git checkout main && git pull
-	cp ${BOILER_ORIGIN}/* ${ROOT}/
+origin: ⚙️  ## ensure origin repo is available
+	# Creating ORIGIN=${ORIGIN}, see .docsrepo config for details
+	mkdir -p "${ORIGIN}"
 
-save: ⚙️ dotfiles  ## save boilerplate files back to dotfiles
-	cp ${BOILER} ${BOILER_ORIGIN}/
-	cd ${DOTFILES} && git add templates/md/docs/AGENTS.md
-	@echo "Updated AGENTS.md in ${DOTFILES}. Please review and create a PR to merge it back to main."
+pull: ⚙️ origin  ## pull latest changes from origin
+	cd ${ORIGIN} && git checkout main && git pull
+
+sync: ⚙️ origin  ## sync generic tools and guides from origin
+	.code/scripts/sync-docsrepo.sh sync
+
+save: ⚙️ origin  ## save generic tools and guides back to origin
+	.code/scripts/sync-docsrepo.sh save
+
+commit: ⚙️  ## commit changes locally
+	git add . && git commit -m "Update docs"
+	@echo "Don't forget to push your changes to a backup remote repo"
+
+# Google Workspace download tool
+GOOGLE_DL := .code/bin/google-dl
+URL		   =
+REF_DIR    =
+REF_NAME   =
+
+build: ⚙️  ## build the Google Workspace download tool
+	cd .code && go build -o bin/google-dl ./cmd/google-dl
+
+${GOOGLE_DL}:
+	${MAKE} build
+
+google-read: ${GOOGLE_DL}  ## export a Google Workspace doc to stdout  (URL=...)
+	${GOOGLE_DL} read ${URL}
+
+google-copy: ${GOOGLE_DL}  ## copy a Google Workspace doc to a ref dir  (URL=... REF_DIR=... REF_NAME=...)
+	${GOOGLE_DL} copy ${URL} ${REF_DIR}/${REF_NAME}

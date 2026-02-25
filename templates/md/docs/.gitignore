@@ -1,0 +1,5 @@
+# project binaries
+.code/bin/
+
+# fallback dir for boilerplate syncs
+.origin/

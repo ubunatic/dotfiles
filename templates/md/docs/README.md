@@ -1,43 +1,34 @@
 # My Docs in Git/IDEs
 
-In this repo, I keep my personal notes and documentation.
-It serves as a central place for me to organize and access information on various topics needed for my projects and learning.
+This repo holds my personal notes and documentation — a central place to organise
+and access information across projects and learning topics.
 
 ## Why Git/IDEs?
-- use version control to track changes
-- use AI to write fast
-- use AI to create diagrams as text (Mermaid)
-- use AI agents to brainstorm and organize information
-- force myself to write in a clear and concise way with Markdown as common format that encourages condensation of information
+- Version control tracks changes and enables rollback
+- AI writes and formats fast
+- AI creates diagrams as text (Mermaid)
+- AI agents brainstorm and organise information
+- Markdown enforces clear, concise writing
 
 ## Overall Structure
 
 - Each topic has its own folder with a README.md file that contains the main documentation for that topic.
 - Each topic folder may have a `ref` subfolder that contains references, such as links, articles, and other resources related to the topic.
 - The topic README.md must link and summarize the contents of the `ref` subfolder.
-- The topic README.md must also link and breifly summarize all subdocs in the topic folder, if any.
+- The topic README.md must also link and briefly summarize all subdocs in the topic folder, if any.
 - Topic folder can have subtopic folders, which follow the same structure as the main topic folder.
 
-Example structure:
+Actual top-level structure:
 
 ```
-- topic1/
-  - README.md       # contains the main documentation for topic1, and links to all subdocs and references
-  - ref/            # contains references for topic1
-    - article1.md
-    - article2.md
-  - subdoc1.md
-  - subdoc2.md
-- topic2/
-  - README.md
-  - subtopic1/
-    - README.md
-    - ref/
-      - article3.md
-  - subtopic2/
-    - README.md
+docs/
+├── Docs/         # general notes: goals, meetings, progress, career, etc.
+├── People/       # people management: 1-on-1s, onboarding, team info, hiring, reviews
+├── Private/      # personal / private notes (access-restricted for AI agents)
+└── Projects/     # project documentation: load testing, data pipeline, schema design, etc.
 ```
 
 ## Topics Covered
 
-See [Topics](./TOPICS.md) for a list of topics covered in this docs repo.
+See [Topics](./Docs/Topics.md) for a list of topics covered in this docs repo.
+See [Context](./Docs/Context.md) for the current working context.
