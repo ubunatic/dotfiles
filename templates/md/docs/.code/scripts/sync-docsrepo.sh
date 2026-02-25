@@ -18,7 +18,7 @@ DIRS="${DOCSREPO_DIRS}"
 REPO="$(git rev-parse --show-toplevel || pwd)"
 
 # RSYNC_FILES are files and dirs that can be copied recursively with rsync.
-RSYNC_FILES="${FILES} .code .gitignore"
+RSYNC_FILES="${FILES} .code .gitignore .docsrepo"
 RSYNC="rsync -av --exclude=.code/spec/ --exclude=.code/bin/ --relative"
 
 if test -n "${DIRS}"
