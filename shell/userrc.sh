@@ -31,7 +31,8 @@ for source_file in \
     proxmox.sh \
     completions.sh \
     test.sh \
-    assert.sh
+    assert.sh \
+    tmux.sh
 do
     if source "$DOTFILES/shell/$source_file"
     then dbg "sourced $source_file ✅"

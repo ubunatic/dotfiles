@@ -1,0 +1,24 @@
+#!/bin/bash
+# shellcheck disable=SC2034
+
+# DOCSREPO_FILES are the files to be kept free of project-specific information and boilerplate for the repo.
+# These files must be free of company- or project-specific information so that they can be copied as-is to new repos.
+# Use a bash array to handle filenames with spaces correctly.
+DOCSREPO_FILES=(README.md AGENTS.md CLAUDE.md Makefile DocsRepo.md)
+
+# DOCSREPO_DIRS are the directories that hold project-specific content.
+# Only the README.md of each dir is treated as boilerplate and synced.
+DOCSREPO_DIRS="Docs People Projects"
+
+# DOCSREPO_TREES are directories synced in full — every file in the tree is boilerplate.
+DOCSREPO_TREES="Guides .claude/agents"
+
+# DOCSREPO_ORIGIN is the directory where the boilerplate files (ROOT_FILES and DOCS_DIRS with their README.md) are stored.
+# This is typically a templates directory in a dotfiles repo, but can be any directory as long as it contains the necessary files and directories.
+DOCSREPO_ORIGIN="${DOTFILES:-.origin}/templates/docsrepo"
+
+# DOCSREPO_SLACKBOT_URL is the URL to open a chat with Slackbot in the Slack app. This is used by the Makefile to send prompts to Slackbot.
+DOCSREPO_SLACKBOT_URL="slack://user?team=T6BG7DYVC&id=USLACKBOT"
+
+# DOCSREPO_SLACKBOT_HINT is the hint to be used by Slackbot when sending prompts. This is used by the Makefile to provide context to Slackbot.
+DOCSREPO_SLACKBOT_HINT="Output Format: CODE section with Markdown code using heading-level 3+, do not use :<emoji>: but pure unicode"

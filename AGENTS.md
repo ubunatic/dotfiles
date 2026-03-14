@@ -59,6 +59,13 @@ Assume you are running in an IDE, where you have access to features exposed by t
 - Read referenced documents or files to gather relevant information.
 - Check existing code patterns before implementing new features.
 
+## Running Commands
+- Avoid running long scripts as terminal commands. Instead, create a script file in the appropriate directory and run it from there.
+  - avoid `python3 -c "import this; print(this.s)"`; write a script in `/apps/py/` and run it with `python3 /apps/py/script.py`.
+- Consider using Go (esp. a solution can be implemented using the standard library)
+- Consider using Python for very specific tasks where a good python library exists, but prefer Go for general utilities and CLI apps.
+- Stick to Bash for simple scripts and utilities that don't require complex logic or external dependencies or when many shell utilities are involved.
+
 ## Project-Specific Guidelines
 
 ### Installation
@@ -117,63 +124,132 @@ Assume you are running in an IDE, where you have access to features exposed by t
 - Forget that `[ ... ]` and `[[ ... ]]` even exist for conditionals in bash.
 
 ### Indentation
-- Do not use tabs!
-- Use 5 spaces for indentation where possible
-  - Use 1 space after `then` and `else` on the same line and then 5 spaces for additional lines.
-  - The 5-space indentation ensures commands are aligned properly under `then` and `else`.
-  - Put `then`/`else` on new lines with the command on the same line.
-  - Example:
-    ```bash
-    if test -z "$var"
-    then echo "Variable is empty"
-         echo "Another line"
-    else echo "Variable is set"
-         echo "Another line"
-    fi
-    ```
-- Use 5 spaces for indentation in functions.
-  - Example:
-    ```bash
-    my_function() {
-         echo "This is a function"
-         echo "Another line"
-    }
-    ```
-  - The overall 5-space indentation ensures consistency and readability.
-    And the IDE will detect the files tab-width correctly.
+> [!Important]
+> Unlearn what you think you know about indentation in bash, because it is all wrong!
 
-- Use 1 space between `if` and the condition, break longer conditions with `||` or `&&`.
-  - Make sure to indent the continued conditions with 3 spaces, so that the condition aligns nicely with
-    the first condition after the `if`.
+Follow these rules instead for indentation in bash scripts:
+- Do not use tabs!
+- Do not fallback to 2/4/8 space indentation. If unclear, stop and ask!
+- For best readability, bash needs to be used with context-specific spaces for indentation.
+
+#### After `if`
+- Use 1 space to separate the `if` from the condition, and then break longer conditions with `||` or `&&`.
+- Align logical conditions with previous conditions, so that they are easy to read and understand.
+  As a result, additional conditions must be indented with 3 spaces (relative to the start of the `if`):
+  ```bash
+  if test -z "$var" &&
+     test -z "$var2" &&
+     test -z "$var3"
+  then echo "Variable is empty"
+  else echo "Variable is set"
+  fi
+  ```
+
+#### After `then`/`else`
+- Use 1 space to separate `then`/`else` from the command. The first command must be on the same line as `then`/`else`.
+- Align subsequent lines with the first command after `then`/`else` for better readability.
+  As a result, subsequent lines must be indented with 5 spaces (relative to the start of the `then`/`else`):
   - Example:
     ```bash
-    if test -z "$var1" ||
-       test -z "$var2"
-    then echo "One of the variables is empty"
-    else echo "Both variables are set"
+    if test -z "$var" &&
+       test -z "$var2"              ## 3-space indentation for continued conditions
+    then echo "Variable is empty"   ## 1 space after then, and the command is on the same line
+         echo "Another line"        ## 5-space indentation for commands after then/else
+    else echo "Variable is set"     ## 1 space after else, and the command is on the same line
+         echo "Another line"        ## 5-space indentation for commands after then/else
     fi
     ```
+
+#### Function Bodies
+- Use 4 spaces for indentation in functions.
+  This is a special case and reflects how most IDEs will fallback to.
+- Example:
+  ```bash
+  my_function() {
+      echo "This is a function"  ## 4-space indentation for function body
+      echo "Another line"
+  }
+  ```
+
+#### `for` Loops
 - Use 1 spaces between `for` and the loop variable.
-  - Put `do` on a new line.
-  - Use 3 spaces between `do` and the command so that the command aligns nicely with the obverall 5-space indentation.
-  - Example:
-    ```bash
-    for item in list
-    do   echo "Item: $item  (aligned with 5-space indentation)"
-         echo "Another line (5-space indentation)"
-    done
-    ```
+- Put `do` on a new line and avoid using semicolons.
+- Separate the `do` from the first command with 1 space, and put the first command on the same line as `do`.
+- For subsequent commands, use 3 spaces indentation relative to the `do` for better readability.
+- Example:
+  ```bash
+  for item in list
+  do echo "Item: $item  (aligned with 5-space indentation)"
+     echo "Another line (5-space indentation)"
+  done
+  ```
+
+#### `case` Statements
 - Allow other indentation for `case` statements, to align the case and the commands.
-  - Put `;;` on the same line as the command.
-  - Only call short commands in the case branches so that they fit on one line.
-  - Create functions for longer commands.
-  - Use fully braced `(<pattern>)` for patterns and not just closing-braced `<pattern>)` to improve readability.
-  - Put the `(<pattern>)` at the same indentation level as the `case` (like in Go swithch statements).
-    - Example:
-      ```bash
-      case "$var" in
-      (value1) echo "Value is 1";;
-      (value2) echo "Value is 2";;
-      (*)      echo "Other value";;
-      esac
-      ```
+- Put `;;` on the same line as the command.
+- Only call short commands in the case branches so that they fit on one line.
+- Create functions for longer commands. Ask to refactor if the command is too long to fit on one line!
+- Use fully braced `(<pattern>)` for patterns and not just closing-braced ones.
+- Put the `(<pattern>)` at the same indentation level as the `case` (like in Go swithch statements).
+- Align patterns and commands as a table. There are no general indentation rules here.
+  It depends on the length of the patterns and commands.
+- Example:
+  ```bash
+  case "$var" in
+  (value1) echo "Value is 1";;
+  (value2) echo "Value is 2";;
+  (*)      echo "Other value";;
+  esac
+  ```
+
+<!--
+Example Program:
+
+```bash
+#!/bin/bash
+set -o errexit
+set -o pipefail
+
+err() { echo -n "ERR: " >&2; echo "$@" >&2; }
+inf() { echo -n "INF: " >&2; echo "$@" >&2; }
+dbg() { echo -n "DBG: " >&2; echo "$@" >&2; }
+
+task_a() { ... }
+task_b() { ... }
+
+run_tasks() {
+    inf "Running tasks: $@"
+    for arg in "$@"
+    do case "$arg" in
+       (a) task_a || return 1 ;;
+       (b) task_b || return 1 ;;
+       (*) err "Unknown task: $arg"; return 1 ;;
+       esac
+    done
+}
+
+main() {
+    inf "Starting tasks
+    if test -z "$1" &&
+       test -z "$2"
+    then inf "No arguments provided"; return 1;
+    else inf "Arguments provided: $1, $2"
+         if run_tasks "$1" "$2"
+         then inf "Tasks completed successfully"
+         else err "Tasks failed"; return 1;
+         fi
+    fi
+}
+
+main "$@"
+```
+
+The above example demonstrates the indentation rules for conditionals, function bodies, loops, and case statements in bash scripts as outlined in the guidelines.
+Recap:
+- Use 1 space after `if`, `then`, and `else` before the first command/condition on the same line.
+- Use 3 spaces for continued conditions after `if`.
+- Use 5 spaces for continued commands after `then` and `else`.
+- Use 4 spaces for function bodies (base indentation). Then again apply all rules for the indentated commands inside the function.
+- Always focus on code alignment!
+- Forget any other dogma you have learned about bash indentation!
+-->

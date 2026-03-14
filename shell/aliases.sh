@@ -76,6 +76,10 @@ alias lzd='lazydocker'
 alias lg='lazygit'
 alias k='kubectl'
 
+# Vim cmd as terminal cmd
+alias q="exit 1"
+alias :q="exit 1"
+
 unalias gsu 2>/dev/null
 
 if test "$SYSTEM_UNAME" = "Darwin"

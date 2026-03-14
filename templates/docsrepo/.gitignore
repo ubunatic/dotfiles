@@ -1,0 +1,14 @@
+# project binaries
+.code/bin/
+
+# fallback dir for boilerplate syncs
+.origin/
+
+# AI assistant data
+.claude
+
+# Random debug files
+.debug
+Projects/AI/results/runs
+
+*.tmp

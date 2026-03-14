@@ -10,7 +10,6 @@ go_project_dir := apps/go/gololog
 go_project	   := gololog
 
 include scripts/usage.mk
-include scripts/ai.mk
 include scripts/go.mk
 
 test: dotfiles-testall  ## run all tests
