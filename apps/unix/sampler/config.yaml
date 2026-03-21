@@ -1,0 +1,56 @@
+# Sampler config for rpi-exporter metrics
+# Docs: https://github.com/sqshq/sampler
+#
+# Usage: RPI_HOST=raspberrypi sampler -c config.yaml
+#
+# Layout: position: [[x, y], [w, h]]
+#   - Values are percentages of terminal dimensions (not screen).
+#   - The usable width is ~80 units (not 100) — sampler reserves ~20% as
+#     internal right margin regardless of terminal size.
+#   - The usable height is ~40 units — sampler reserves the rest for the
+#     status bar and internal padding.
+#   - Panels tile by placing x = sum of previous widths, y = sum of previous heights.
+#   - Row 1: 3 panels across, each ~27 wide, total 80
+#   - Row 2: 2 panels across, each 40 wide, total 80
+#   - Each row is 20 units tall, 2 rows = 40 total
+
+runcharts:
+  - title: Temperature (°C)
+    position: [[0, 0], [27, 20]]   # row 1, col 1
+    rate-ms: 5000
+    scale: 1
+    items:
+      - label: SoC
+        sample: curl -sf http://${RPI_HOST}:9101/metrics | grep 'rpi_temperature_celsius ' | awk '{print $2}'
+
+  - title: ARM Clock (GHz)
+    position: [[27, 0], [27, 20]]  # row 1, col 2
+    rate-ms: 5000
+    scale: 3
+    items:
+      - label: arm
+        sample: curl -sf http://${RPI_HOST}:9101/metrics | grep 'rpi_clock_frequency_hertz{id="arm"}' | awk '{printf "%.3f\n", $2/1e9}'
+
+  - title: Core Clock (GHz)
+    position: [[54, 0], [26, 20]]  # row 1, col 3 (26 to stay within 80)
+    rate-ms: 5000
+    scale: 3
+    items:
+      - label: core
+        sample: curl -sf http://${RPI_HOST}:9101/metrics | grep 'rpi_clock_frequency_hertz{id="core"}' | awk '{printf "%.3f\n", $2/1e9}'
+
+  - title: Core Voltage (V)
+    position: [[0, 20], [40, 20]]  # row 2, col 1
+    rate-ms: 5000
+    scale: 4
+    items:
+      - label: core
+        sample: curl -sf http://${RPI_HOST}:9101/metrics | grep 'rpi_voltage_volts{port="core"}' | awk '{print $2}'
+
+  - title: ARM Memory (MB)
+    position: [[40, 20], [40, 20]] # row 2, col 2
+    rate-ms: 5000
+    scale: 0
+    items:
+      - label: arm
+        sample: curl -sf http://${RPI_HOST}:9101/metrics | grep 'rpi_memory_bytes{id="arm"}' | awk '{printf "%.0f\n", $2/1024/1024}'

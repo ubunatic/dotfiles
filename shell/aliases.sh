@@ -62,12 +62,20 @@ alias next="git checkout next && git pull"
 alias develop="git checkout develop && git pull"
 alias save="git add --all && git status --short && git commit -m 'save' && echo 'staged and committed all changes with message \"save\"' && echo 'make sure you know what you just committed and push when ready'"
 alias amend="git commit --amend"
+alias ammend="git commit --amend"
 alias empty="git commit --allow-empty -m 'empty commit'"
 
-# VS Code aliases
-alias ai="code chat"
-alias cai="code chat"
-alias gai="gemini -i"
+# AI aliases
+alias chat="code chat"
+alias gemi="gemini -i"
+
+for name in ai computer claudia \
+            klaus peter frank albert steven \
+            dude guru sensei impa omni
+do
+    # shellcheck disable=SC2139
+    alias "$name"="claude"
+done
 
 # SSH aliases
 alias ssh-add-key="ssh-add ~/.ssh/id_ed25519"

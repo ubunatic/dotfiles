@@ -1,0 +1,55 @@
+{
+  "version": "v1",
+  "datasources": {
+    "prometheus": {
+      "prometheus": {
+        "address": "http://localhost:9090"
+      }
+    }
+  },
+  "dashboard": {
+    "grid": { "maxWidth": 100 },
+    "widgets": [
+      {
+        "title": "Temperature (°C)",
+        "gridpos": { "x": 0, "y": 0, "w": 50, "h": 10 },
+        "graph": {
+          "queries": [
+            { "datasourceID": "prometheus", "expr": "rpi_temperature_celsius", "legend": "temp" }
+          ]
+        }
+      },
+      {
+        "title": "CPU Clock (GHz)",
+        "gridpos": { "x": 50, "y": 0, "w": 50, "h": 10 },
+        "graph": {
+          "queries": [
+            { "datasourceID": "prometheus", "expr": "rpi_clock_frequency_hertz{id='arm'} / 1e9", "legend": "arm" },
+            { "datasourceID": "prometheus", "expr": "rpi_clock_frequency_hertz{id='core'} / 1e9", "legend": "core" }
+          ]
+        }
+      },
+      {
+        "title": "Voltage (V)",
+        "gridpos": { "x": 0, "y": 10, "w": 50, "h": 10 },
+        "graph": {
+          "queries": [
+            { "datasourceID": "prometheus", "expr": "rpi_voltage_volts{port='core'}", "legend": "core" },
+            { "datasourceID": "prometheus", "expr": "rpi_voltage_volts{port='sdram_c'}", "legend": "sdram_c" }
+          ]
+        }
+      },
+      {
+        "title": "Throttled (now)",
+        "gridpos": { "x": 50, "y": 10, "w": 50, "h": 10 },
+        "graph": {
+          "queries": [
+            { "datasourceID": "prometheus", "expr": "rpi_throttled{period='now',condition='under_voltage'}", "legend": "under_voltage" },
+            { "datasourceID": "prometheus", "expr": "rpi_throttled{period='now',condition='throttled'}", "legend": "throttled" },
+            { "datasourceID": "prometheus", "expr": "rpi_throttled{period='now',condition='freq_capped'}", "legend": "freq_capped" }
+          ]
+        }
+      }
+    ]
+  }
+}

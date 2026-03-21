@@ -51,9 +51,11 @@ func runVCGenCmd(args ...string) (string, error) {
 		case "measure_temp":
 			return "temp=45.0'C", nil
 		case "measure_clock":
-			return fmt.Sprintf("%s=%d", args[1], 700000000), nil // Dummy frequency
+			return fmt.Sprintf("frequency(0)=%d", 700000000), nil // Dummy frequency
 		case "get_mem":
 			return fmt.Sprintf("%s=%dM", args[1], 512), nil // Dummy memory
+		case "get_rsts":
+			return "get_rsts=1", nil // Dummy reset reason (power-on)
 		default:
 			return "", fmt.Errorf("unsupported dummy command: %s", args[0])
 		}
@@ -146,8 +148,8 @@ func GetClock(id string) (float64, error) {
 		return 0, err
 	}
 
-	// Example output: arm=700000000
-	re := regexp.MustCompile(fmt.Sprintf(`%s=(\d+)`, regexp.QuoteMeta(id)))
+	// Example output: frequency(48)=900228544
+	re := regexp.MustCompile(`frequency\(\d+\)=(\d+)`)
 	matches := re.FindStringSubmatch(output)
 	if len(matches) < 2 {
 		return 0, fmt.Errorf("could not parse clock frequency for %s from output: %s", id, output)
@@ -184,4 +186,26 @@ func GetMemory(id string) (float64, error) {
 	}
 
 	return memMB * 1024 * 1024, nil // Convert MB to Bytes
+}
+
+// GetResetReason runs vcgencmd get_rsts and returns the reset reason bitmask.
+func GetResetReason() (float64, error) {
+	output, err := runVCGenCmd("get_rsts")
+	if err != nil {
+		return 0, err
+	}
+
+	// Example output: get_rsts=1000
+	re := regexp.MustCompile(`get_rsts=(\d+)`)
+	matches := re.FindStringSubmatch(output)
+	if len(matches) < 2 {
+		return 0, fmt.Errorf("could not parse reset reason from output: %s", output)
+	}
+
+	v, err := strconv.ParseFloat(matches[1], 64)
+	if err != nil {
+		return 0, fmt.Errorf("could not parse float from reset reason '%s': %w", matches[1], err)
+	}
+
+	return v, nil
 }
