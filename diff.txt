@@ -1,0 +1,2821 @@
+diff --git a/.ai/README.md b/.ai/README.md
+deleted file mode 100644
+index 3f6f5fb..0000000
+--- a/.ai/README.md
++++ /dev/null
+@@ -1,12 +0,0 @@
+-# Folder for AI Reviews and AI Projects planning
+-
+-This folder contains documentation, resources, results, and reports from
+-AI-assisted reviews, project planning, agentic coding.
+-
+-## Structure
+-> [!Note]
+-> This is a suggested structure and can be adapted based on specific needs.
+-
+-- `current/`: Projects and reviews that are currently active.
+-- `archive/`: Projects and reviews that have been completed or are no longer active.
+-- `instructions`: Code/path/context-specific AI assisstant instructions
+diff --git a/.ai/archive/.gitkeep b/.ai/archive/.gitkeep
+deleted file mode 100644
+index 9a6cfb2..0000000
+--- a/.ai/archive/.gitkeep
++++ /dev/null
+@@ -1 +0,0 @@
+-# Archived AI Reviews, Plans, and Reports
+\ No newline at end of file
+diff --git a/.gitignore b/.gitignore
+index 145843e..eb18510 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -24,3 +24,4 @@ apps/macos/appcloser/appcloser
+ # Test files
+ test-report.xml
+ .aider*
++.claude/*.json
+diff --git a/AGENTS.md b/AGENTS.md
+index 7df72bc..6d969a1 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -59,6 +59,13 @@ Assume you are running in an IDE, where you have access to features exposed by t
+ - Read referenced documents or files to gather relevant information.
+ - Check existing code patterns before implementing new features.
+ 
++## Running Commands
++- Avoid running long scripts as terminal commands. Instead, create a script file in the appropriate directory and run it from there.
++  - avoid `python3 -c "import this; print(this.s)"`; write a script in `/apps/py/` and run it with `python3 /apps/py/script.py`.
++- Consider using Go (esp. a solution can be implemented using the standard library)
++- Consider using Python for very specific tasks where a good python library exists, but prefer Go for general utilities and CLI apps.
++- Stick to Bash for simple scripts and utilities that don't require complex logic or external dependencies or when many shell utilities are involved.
++
+ ## Project-Specific Guidelines
+ 
+ ### Installation
+@@ -117,63 +124,132 @@ Assume you are running in an IDE, where you have access to features exposed by t
+ - Forget that `[ ... ]` and `[[ ... ]]` even exist for conditionals in bash.
+ 
+ ### Indentation
++> [!Important]
++> Unlearn what you think you know about indentation in bash, because it is all wrong!
++
++Follow these rules instead for indentation in bash scripts:
+ - Do not use tabs!
+-- Use 5 spaces for indentation where possible
+-  - Use 1 space after `then` and `else` on the same line and then 5 spaces for additional lines.
+-  - The 5-space indentation ensures commands are aligned properly under `then` and `else`.
+-  - Put `then`/`else` on new lines with the command on the same line.
++- Do not fallback to 2/4/8 space indentation. If unclear, stop and ask!
++- For best readability, bash needs to be used with context-specific spaces for indentation.
++
++#### After `if`
++- Use 1 space to separate the `if` from the condition, and then break longer conditions with `||` or `&&`.
++- Align logical conditions with previous conditions, so that they are easy to read and understand.
++  As a result, additional conditions must be indented with 3 spaces (relative to the start of the `if`):
++  ```bash
++  if test -z "$var" &&
++     test -z "$var2" &&
++     test -z "$var3"
++  then echo "Variable is empty"
++  else echo "Variable is set"
++  fi
++  ```
++
++#### After `then`/`else`
++- Use 1 space to separate `then`/`else` from the command. The first command must be on the same line as `then`/`else`.
++- Align subsequent lines with the first command after `then`/`else` for better readability.
++  As a result, subsequent lines must be indented with 5 spaces (relative to the start of the `then`/`else`):
+   - Example:
+     ```bash
+-    if test -z "$var"
+-    then echo "Variable is empty"
+-         echo "Another line"
+-    else echo "Variable is set"
+-         echo "Another line"
++    if test -z "$var" &&
++       test -z "$var2"              ## 3-space indentation for continued conditions
++    then echo "Variable is empty"   ## 1 space after then, and the command is on the same line
++         echo "Another line"        ## 5-space indentation for commands after then/else
++    else echo "Variable is set"     ## 1 space after else, and the command is on the same line
++         echo "Another line"        ## 5-space indentation for commands after then/else
+     fi
+     ```
+-- Use 5 spaces for indentation in functions.
+-  - Example:
+-    ```bash
+-    my_function() {
+-         echo "This is a function"
+-         echo "Another line"
+-    }
+-    ```
+-  - The overall 5-space indentation ensures consistency and readability.
+-    And the IDE will detect the files tab-width correctly.
+ 
+-- Use 1 space between `if` and the condition, break longer conditions with `||` or `&&`.
+-  - Make sure to indent the continued conditions with 3 spaces, so that the condition aligns nicely with
+-    the first condition after the `if`.
+-  - Example:
+-    ```bash
+-    if test -z "$var1" ||
+-       test -z "$var2"
+-    then echo "One of the variables is empty"
+-    else echo "Both variables are set"
+-    fi
+-    ```
++#### Function Bodies
++- Use 4 spaces for indentation in functions.
++  This is a special case and reflects how most IDEs will fallback to.
++- Example:
++  ```bash
++  my_function() {
++      echo "This is a function"  ## 4-space indentation for function body
++      echo "Another line"
++  }
++  ```
++
++#### `for` Loops
+ - Use 1 spaces between `for` and the loop variable.
+-  - Put `do` on a new line.
+-  - Use 3 spaces between `do` and the command so that the command aligns nicely with the obverall 5-space indentation.
+-  - Example:
+-    ```bash
+-    for item in list
+-    do   echo "Item: $item  (aligned with 5-space indentation)"
+-         echo "Another line (5-space indentation)"
+-    done
+-    ```
++- Put `do` on a new line and avoid using semicolons.
++- Separate the `do` from the first command with 1 space, and put the first command on the same line as `do`.
++- For subsequent commands, use 3 spaces indentation relative to the `do` for better readability.
++- Example:
++  ```bash
++  for item in list
++  do echo "Item: $item  (aligned with 5-space indentation)"
++     echo "Another line (5-space indentation)"
++  done
++  ```
++
++#### `case` Statements
+ - Allow other indentation for `case` statements, to align the case and the commands.
+-  - Put `;;` on the same line as the command.
+-  - Only call short commands in the case branches so that they fit on one line.
+-  - Create functions for longer commands.
+-  - Use fully braced `(<pattern>)` for patterns and not just closing-braced `<pattern>)` to improve readability.
+-  - Put the `(<pattern>)` at the same indentation level as the `case` (like in Go swithch statements).
+-    - Example:
+-      ```bash
+-      case "$var" in
+-      (value1) echo "Value is 1";;
+-      (value2) echo "Value is 2";;
+-      (*)      echo "Other value";;
+-      esac
+-      ```
+\ No newline at end of file
++- Put `;;` on the same line as the command.
++- Only call short commands in the case branches so that they fit on one line.
++- Create functions for longer commands. Ask to refactor if the command is too long to fit on one line!
++- Use fully braced `(<pattern>)` for patterns and not just closing-braced ones.
++- Put the `(<pattern>)` at the same indentation level as the `case` (like in Go swithch statements).
++- Align patterns and commands as a table. There are no general indentation rules here.
++  It depends on the length of the patterns and commands.
++- Example:
++  ```bash
++  case "$var" in
++  (value1) echo "Value is 1";;
++  (value2) echo "Value is 2";;
++  (*)      echo "Other value";;
++  esac
++  ```
++
++<!--
++Example Program:
++
++```bash
++#!/bin/bash
++set -o errexit
++set -o pipefail
++
++err() { echo -n "ERR: " >&2; echo "$@" >&2; }
++inf() { echo -n "INF: " >&2; echo "$@" >&2; }
++dbg() { echo -n "DBG: " >&2; echo "$@" >&2; }
++
++task_a() { ... }
++task_b() { ... }
++
++run_tasks() {
++    inf "Running tasks: $@"
++    for arg in "$@"
++    do case "$arg" in
++       (a) task_a || return 1 ;;
++       (b) task_b || return 1 ;;
++       (*) err "Unknown task: $arg"; return 1 ;;
++       esac
++    done
++}
++
++main() {
++    inf "Starting tasks
++    if test -z "$1" &&
++       test -z "$2"
++    then inf "No arguments provided"; return 1;
++    else inf "Arguments provided: $1, $2"
++         if run_tasks "$1" "$2"
++         then inf "Tasks completed successfully"
++         else err "Tasks failed"; return 1;
++         fi
++    fi
++}
++
++main "$@"
++```
++
++The above example demonstrates the indentation rules for conditionals, function bodies, loops, and case statements in bash scripts as outlined in the guidelines.
++Recap:
++- Use 1 space after `if`, `then`, and `else` before the first command/condition on the same line.
++- Use 3 spaces for continued conditions after `if`.
++- Use 5 spaces for continued commands after `then` and `else`.
++- Use 4 spaces for function bodies (base indentation). Then again apply all rules for the indentated commands inside the function.
++- Always focus on code alignment!
++- Forget any other dogma you have learned about bash indentation!
++-->
+diff --git a/CLAUDE.md b/CLAUDE.md
+new file mode 120000
+index 0000000..47dc3e3
+--- /dev/null
++++ b/CLAUDE.md
+@@ -0,0 +1 @@
++AGENTS.md
+\ No newline at end of file
+diff --git a/DOCS.md b/DOCS.md
+index c195819..51371b2 100644
+--- a/DOCS.md
++++ b/DOCS.md
+@@ -1,54 +1,82 @@
+ # Documentation Index
+ 
+-This document provides an index of the documentation files within the `ubunatic/dotfiles` repository, along with a brief summary of their content and purpose.
++This document provides an index of documentation files in the
++`ubunatic/dotfiles` repository.
+ 
+ ## General Documentation
+ 
+-*   [README.md](README.md): The main entry point for the repository, providing a general overview, usage instructions, contribution guidelines, and licensing information.
+-*   [CONTRIBUTING.md](CONTRIBUTING.md): Guidelines for contributing to the dotfiles repository, including coding standards, testing procedures, build system information, and the pull request process.
+-*   [SECURITY.md](SECURITY.md): Outlines the security policy for the repository, covering supported versions, vulnerability reporting, security considerations, and best practices.
+-*   [AGENTS.md](AGENTS.md): Comprehensive coding guidelines and conventions for AI agents working on the repository, including agent role, environment, repository overview, general instructions, project-specific guidelines, and detailed Bash coding guidelines.
+-*   [.github/copilot-instructions.md](.github/copilot-instructions.md): :warning: *Outdated - Duplicate of `AGENTS.md`* - Provides coding guidelines and conventions for AI agents (specifically Copilot) working on the repository.
++- [README.md](README.md): Main entry point — overview, usage, and licensing.
++- [CONTRIBUTING.md](CONTRIBUTING.md): Coding standards, testing, build system,
++  and pull request process.
++- [SECURITY.md](SECURITY.md): Security policy, vulnerability reporting, and
++  best practices.
++- [AGENTS.md](AGENTS.md): Coding guidelines and conventions for AI agents,
++  including Bash style rules and project structure.
++- [CLAUDE.md](CLAUDE.md): Claude Code-specific instructions (extends AGENTS.md
++  with Claude Code CLI conventions).
+ 
+-## AI-Related Documentation
++## AI Documentation
+ 
+-*   [PROMTING.md](PROMTING.md): Provides an overview of the AI prompting system in the repository, explaining `ai-prompt.sh`, `ai.mk`, how to use them, and how to define new AI skills.
+-*   [.ai/README.md](.ai/README.md): Explains the purpose and structure of the `.ai/` folder, which is dedicated to AI reviews, project planning, and agentic coding.
+-*   [.ai/current/PROJECT_202511_AgenticCoding.md](.ai/current/PROJECT_202511_AgenticCoding.md): Outlines the setup and configuration for an agentic coding environment using AI tools.
+-*   [.ai/instructions/README.md](.ai/instructions/README.md): States that this directory contains basic AI instructions and suggests symlinking it to `.github/instructions`.
++All AI-related documentation lives under [docs/ai/](docs/ai/).
++
++- [docs/ai/README.md](docs/ai/README.md): Overview of the AI docs folder
++  and how to use it.
++- [docs/ai/prompting.md](docs/ai/prompting.md): How to use skills and
++  structure prompts for AI assistants.
++- [docs/ai/instructions/README.md](docs/ai/instructions/README.md): Notes on
++  the AI instructions directory.
+ 
+ ### AI Skill Definitions
+ 
+-*   [.ai/instructions/simple/assist.md](.ai/instructions/simple/assist.md): Defines the "Simple Assist" skill, outlining various options for general AI assistance.
+-*   [.ai/instructions/simple/docs.md](.ai/instructions/simple/docs.md): Defines the "Documentation Update" skill, outlining a multi-step process for updating documentation.
+-*   [.ai/instructions/simple/help.md](.ai/instructions/simple/help.md): A simple instruction file for general assistance.
+-*   [.ai/instructions/simple/init.md](.ai/instructions/simple/init.md): Defines the "Init AI Environment" skill, for setting up and updating AI-related configurations.
+-*   [.ai/instructions/simple/review.md](.ai/instructions/simple/review.md): Defines the "Review AI Code Review Instructions" skill, focusing on code quality and improvements based on recent changes.
+-*   [.ai/instructions/simple/skills.md](.ai/instructions/simple/skills.md): Defines the "List Agentic Skills" skill, for listing and comparing AI skills.
+-*   [.ai/instructions/simple/tech.md](.ai/instructions/simple/tech.md): Defines the "Technology Focus" skill, for identifying and suggesting removal of non-technical content.
++Located in [docs/ai/instructions/simple/](docs/ai/instructions/simple/):
++
++| Skill    | File                           | Purpose                            |
++|----------|--------------------------------|------------------------------------|
++| assist   | `instructions/simple/assist.md`| General assistance                 |
++| docs     | `instructions/simple/docs.md`  | Update documentation               |
++| review   | `instructions/simple/review.md`| Review recent code changes         |
++| init     | `instructions/simple/init.md`  | Initialize/update AI config files  |
++| skills   | `instructions/simple/skills.md`| List skills available in context   |
++| tech     | `instructions/simple/tech.md`  | Remove non-technical content       |
++| help     | `instructions/simple/help.md`  | General help                       |
++
++### AI Projects
++
++- [docs/ai/projects/AgenticCoding.md](docs/ai/projects/AgenticCoding.md):
++  Agentic coding environment setup plan.
+ 
+ ## Template Files
+ 
+-*   [.forgejo/ISSUE_TEMPLATE/bug_report.md](.forgejo/ISSUE_TEMPLATE/bug_report.md): Template for reporting bugs in the Forgejo environment.
+-*   [.forgejo/ISSUE_TEMPLATE/feature_request.md](.forgejo/ISSUE_TEMPLATE/feature_request.md): Template for requesting new features or enhancements in the Forgejo environment.
+-*   [.forgejo/PULL_REQUEST_TEMPLATE.md](.forgejo/PULL_REQUEST_TEMPLATE.md): Template for pull requests in the Forgejo environment.
+-*   [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md): Template for pull requests in the GitHub environment.
+-*   [.github/README.md](.github/README.md): Explains the purpose of GitHub files and their relation to Forgejo counterparts.
++- [.forgejo/ISSUE_TEMPLATE/bug_report.md](.forgejo/ISSUE_TEMPLATE/bug_report.md):
++  Bug report template (Forgejo).
++- [.forgejo/ISSUE_TEMPLATE/feature_request.md](.forgejo/ISSUE_TEMPLATE/feature_request.md):
++  Feature request template (Forgejo).
++- [.forgejo/PULL_REQUEST_TEMPLATE.md](.forgejo/PULL_REQUEST_TEMPLATE.md):
++  Pull request template (Forgejo).
++- [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md):
++  Pull request template (GitHub).
++- [.github/README.md](.github/README.md): GitHub files and Forgejo relation.
+ 
+-## Application-Specific Documentation
++## Application Documentation
+ 
+-*   [apps/bash/stackman/README.md](apps/bash/stackman/README.md): Documentation for the "Stackmanager" tool.
+-*   [apps/macos/appcloser/DEVNOTES.md](apps/macos/appcloser/DEVNOTES.md): Development notes for the MacOS `appcloser` service.
+-*   [apps/macos/appcloser/README.md](apps/macos/appcloser/README.md): Documentation for the MacOS `appcloser` application.
+-*   [apps/micropy/AI.md](apps/micropy/AI.md): Gemini project configuration and coding conventions for MicroPython applications.
+-*   [apps/micropy/EP-0249/README.md](apps/micropy/EP-0249/README.md): Setup instructions for the EP-2049 Pico.
+-*   [apps/stacks/immich.ml/README.md](apps/stacks/immich.ml/README.md): Instructions for setting up the Immich ML Container.
++- [apps/bash/stackman/README.md](apps/bash/stackman/README.md): Stackmanager
++  tool.
++- [apps/macos/appcloser/README.md](apps/macos/appcloser/README.md): macOS
++  appcloser application.
++- [apps/macos/appcloser/DEVNOTES.md](apps/macos/appcloser/DEVNOTES.md):
++  appcloser development notes.
++- [apps/micropy/AI.md](apps/micropy/AI.md): MicroPython coding conventions.
++- [apps/micropy/EP-0249/README.md](apps/micropy/EP-0249/README.md): EP-2049
++  Pico setup.
++- [apps/stacks/immich.ml/README.md](apps/stacks/immich.ml/README.md): Immich
++  ML container setup.
+ 
+-## Configuration-Specific Documentation
++## Configuration Documentation
+ 
+-*   [config/Library/Keyboard Layouts/README.md](config/Library/Keyboard Layouts/README.md): Documentation for the custom "German - PC" MacOS Keylayout.
+-*   [config/vscode/README.md](config/vscode/README.md): Documentation for VSCode keybindings.
++- [config/Library/Keyboard Layouts/README.md](config/Library/Keyboard%20Layouts/README.md):
++  Custom "German - PC" macOS keylayout.
++- [config/vscode/README.md](config/vscode/README.md): VSCode keybindings.
+ 
+ ## Shell Library Documentation
+ 
+-*   [shell/README.md](shell/README.md): Overview and usage instructions for the shell micro libraries.
+\ No newline at end of file
++- [shell/README.md](shell/README.md): Shell micro-library overview and usage.
+diff --git a/Makefile b/Makefile
+index 76f2cb7..0f9038e 100644
+--- a/Makefile
++++ b/Makefile
+@@ -10,7 +10,6 @@ go_project_dir := apps/go/gololog
+ go_project	   := gololog
+ 
+ include scripts/usage.mk
+-include scripts/ai.mk
+ include scripts/go.mk
+ 
+ test: dotfiles-testall  ## run all tests
+diff --git a/PROMTING.md b/PROMTING.md
+deleted file mode 100644
+index b8ee27a..0000000
+--- a/PROMTING.md
++++ /dev/null
+@@ -1,53 +0,0 @@
+-# AI Prompting System Overview
+-
+-This document explains how the AI prompting system is structured and used within the `ubunatic/dotfiles` repository, based on the `AGENTS.md`, `Makefile`, `scripts/ai-prompt.sh`, and `scripts/ai.mk` files.
+-
+-## Core Components
+-
+-1.  **`scripts/ai-prompt.sh`**: This is the central script for constructing and executing AI prompts.
+-    *   It gathers context from various sources:
+-        *   `CHAT_SKILL`: The name of the AI skill to be used (e.g., `assist`, `docs`).
+-        *   `CHAT_SKILL_FILE`: The markdown file defining the skill's instructions (e.g., `.ai/instructions/simple/assist.md`).
+-        *   `CHAT_FILES`: A list of additional files whose content should be included as context for the AI.
+-        *   `CHAT_INVOKER`: The path to the script that invoked the AI (e.g., `scripts/ai-prompt.sh`).
+-        *   `CHAT_PROMPT`: The user's specific query or instructions.
+-    *   It formats all this information into a structured prompt (including `<!-- context -->` and `<!-- prompt -->` markers) suitable for an AI model.
+-    *   It then executes a `CHAT_CMD` (by default `gemini --prompt-interactive`) with the constructed prompt.
+-
+-2.  **`scripts/ai.mk`**: This Makefile include provides a convenient interface for invoking AI skills using `make`.
+-    *   **Dynamic Skill Invocation**: It defines a pattern rule `ai-%` that allows users to call any skill by its name (e.g., `make ai-assist`, `make ai-docs`). The `CHAT_SKILL` variable is automatically set to the part after `ai-`.
+-    *   **`chat` Variable**: This Makefile variable encapsulates the logic for running `ai-prompt.sh`. It first shows a preview, then the variables, and finally executes the AI command.
+-    *   **Shortcuts**: It provides aliases for common skills:
+-        *   `make ai`: Invokes `ai-assist` for general assistance.
+-        *   `make chat`: Invokes `ai-chat`, which prompts the user for a `CHAT_PROMPT` before sending it to the AI.
+-        *   Other shortcuts like `make skills`, `make init`, `make files`, `make review`, `make tech`, `make docs` are also defined, each mapping to a specific `ai-<skill>` target.
+-
+-## How to Use
+-
+-1.  **General Assistance**:
+-    ```bash
+-    make ai
+-    ```
+-    This will use the `assist` skill (defined in `.ai/instructions/simple/assist.md`) to provide general help based on the current context.
+-
+-2.  **Specific Skill Invocation**:
+-    ```bash
+-    make ai-<skill_name>
+-    ```
+-    Replace `<skill_name>` with the desired skill (e.g., `make ai-docs` to use the `docs` skill).
+-
+-3.  **Interactive Chat**:
+-    ```bash
+-    make chat
+-    ```
+-    This will prompt you to enter a message, which will then be sent to the AI using the `assist` skill.
+-
+-4.  **Adding Context Files**:
+-    The `CHAT_FILES` variable can be extended to include more files in the AI's context. This is typically done by modifying the `Makefile` or by passing arguments to `ai-prompt.sh` directly (though `ai.mk` simplifies this).
+-
+-## Defining New AI Skills
+-
+-To add a new AI skill:
+-
+-1.  **Create a Skill Definition File**: Create a new markdown file (e.g., `.ai/instructions/simple/my_new_skill.md`) that describes the purpose and instructions for your new skill.
+-2.  **Invoke via Makefile**: You can then invoke this skill using `make ai-my-new_skill`. The `ai.mk` system will automatically find and use your skill definition file.
+diff --git a/apps/macos/extract_layout/.gitignore b/apps/macos/extract_layout/.gitignore
+new file mode 100644
+index 0000000..3fd8a75
+--- /dev/null
++++ b/apps/macos/extract_layout/.gitignore
+@@ -0,0 +1,3 @@
++*.ucdata
++*.keylayout
++extract_layout
+diff --git a/apps/macos/extract_layout/main.swift b/apps/macos/extract_layout/main.swift
+new file mode 100644
+index 0000000..1f6f0e7
+--- /dev/null
++++ b/apps/macos/extract_layout/main.swift
+@@ -0,0 +1,36 @@
++import Carbon
++import Foundation
++
++// Retrieve all available input sources (installed + built-in)
++let sources = TISCreateInputSourceList(nil, true).takeRetainedValue() as! [TISInputSource]
++
++var found = 0
++for src in sources {
++    guard let namePtr = TISGetInputSourceProperty(src, kTISPropertyLocalizedName) else { continue }
++    let name = Unmanaged<CFString>.fromOpaque(namePtr).takeUnretainedValue() as String
++
++    guard name.lowercased().contains("german") else { continue }
++
++    guard let dataPtr = TISGetInputSourceProperty(src, kTISPropertyUnicodeKeyLayoutData) else {
++        print("[\(name)] no UCKeyboardLayout data")
++        continue
++    }
++    let data = Unmanaged<CFData>.fromOpaque(dataPtr).takeUnretainedValue() as Data
++
++    let safeName = name.replacingOccurrences(of: "/", with: "-")
++                       .replacingOccurrences(of: " ", with: "_")
++    let outPath = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
++        .appendingPathComponent("\(safeName).ucdata")
++
++    do {
++        try data.write(to: outPath)
++        print("Saved \(name)  →  \(outPath.path)  (\(data.count) bytes)")
++        found += 1
++    } catch {
++        print("Error writing \(name): \(error)")
++    }
++}
++
++if found == 0 {
++    print("No German layouts found.")
++}
+diff --git a/apps/py/plist-decode/extract_layout.py b/apps/py/plist-decode/extract_layout.py
+new file mode 100644
+index 0000000..60a774f
+--- /dev/null
++++ b/apps/py/plist-decode/extract_layout.py
+@@ -0,0 +1,174 @@
++#!/usr/bin/env python3
++"""Convert a .ucdata file (raw UCKeyboardLayout binary) to .keylayout XML.
++
++Usage:
++  python3 extract_layout.py <layout.ucdata> [output.keylayout]
++
++  layout.ucdata:  raw binary extracted by the Swift extract_layout tool
++  output:         output file path (default: <input-stem>.keylayout)
++
++Example:
++  python3 extract_layout.py "German_–_Standard.ucdata"
++  python3 extract_layout.py "German_–_Standard.ucdata" german-standard.keylayout
++"""
++
++import sys
++import struct
++from pathlib import Path
++
++# ---------------------------------------------------------------------------
++# Parse UCKeyboardLayout binary
++# UCKeyboardLayout binary format (big-endian):
++#   uint16 keyLayoutHeaderFormat
++#   uint16 keyLayoutDataVersion
++#   uint32 keyLayoutFeatureInfoOffset  (0 if absent)
++#   uint32 keyboardTypeCount
++#   [keyboardTypeList]: keyboardTypeCount * 24 bytes
++#     uint32 lastKeyboardType
++#     uint32 keyModifiersToTableNumOffset
++#     uint32 keyToCharTableIndexOffset
++#     uint32 keyStateRecordsIndexOffset
++#     uint32 keyStateTerminatorsOffset
++#     uint32 keySequenceDataIndexOffset
++# ---------------------------------------------------------------------------
++
++def parse_uchr(data: bytes) -> dict:
++    """Parse UCKeyboardLayout binary. Returns a dict with modifier tables and char tables."""
++    be = "<"  # UCKeyboardLayout is stored in host byte order (little-endian on modern Macs)
++    offset = 0
++
++    fmt, ver, feat_off, kb_type_count = struct.unpack_from(f"{be}HHII", data, offset)
++    offset += 12
++
++    print(f"  format={fmt} version={ver} keyboardTypeCount={kb_type_count}")
++
++    # Each entry: firstKeyboardType(4) + lastKeyboardType(4) + 5 offsets(4 each) = 28 bytes
++    entries = []
++    for _ in range(kb_type_count):
++        first_kb, last_kb, mod_off, ktc_off, ksr_off, kst_off, ksd_off = struct.unpack_from(f"{be}IIIIIII", data, offset)
++        entries.append((first_kb, last_kb, mod_off, ktc_off, ksr_off, kst_off, ksd_off))
++        offset += 28
++
++    # Use the first entry (covers most physical keyboards)
++    first_kb, last_kb, mod_off, ktc_off, ksr_off, kst_off, ksd_off = entries[0]
++
++    # Parse UCKeyModifiersToTableNum
++    # uint16 format, uint16 defaultTableNum, uint32 modifiersCount, uint8 tableNum[modifiersCount]
++    _fmt_m, def_table, mod_count = struct.unpack_from(f"{be}HHI", data, mod_off)
++    mod_map = list(struct.unpack_from(f"{mod_count}B", data, mod_off + 8))
++
++    # Parse UCKeyToCharTableIndex
++    # uint16 format, uint16 keyToCharTableSize, uint32 keyToCharTableCount, uint32 offsets[count]
++    _fmt_t, tbl_size, tbl_count = struct.unpack_from(f"{be}HHI", data, ktc_off)
++    tbl_offsets = list(struct.unpack_from(f"{be}{tbl_count}I", data, ktc_off + 8))
++
++    # For each table, read keyToCharTableSize uint16 entries (UCKeyOutput is UInt16)
++    tables = []
++    for toff in tbl_offsets:
++        entries_raw = struct.unpack_from(f"{be}{tbl_size}H", data, toff)
++        tables.append(list(entries_raw))
++
++    return {
++        "default_table": def_table,
++        "mod_count": mod_count,
++        "mod_map": mod_map,
++        "tbl_size": tbl_size,
++        "tbl_count": tbl_count,
++        "tables": tables,
++    }
++
++# ---------------------------------------------------------------------------
++# Render as .keylayout XML
++# ---------------------------------------------------------------------------
++
++MODIFIER_NAMES = {
++    0x000: "",
++    0x002: "anyShift",
++    0x004: "anyOption",
++    0x006: "anyShift anyOption",
++    0x008: "anyControl",
++    0x00A: "anyShift anyControl",
++    0x00C: "anyOption anyControl",
++    0x00E: "anyShift anyOption anyControl",
++    0x020: "caps",
++}
++
++def uchr_char(val: int) -> str | None:
++    """Convert a UCKeyOutput value to a character or None."""
++    if val & 0x4000:
++        return None  # dead key sequence (bit 14 in UCKeyOutput uint16)
++    if val == 0xFFFE or val == 0xFFFF or val == 0:
++        return None
++    try:
++        ch = chr(val & 0x3FFF)
++        if ch.isprintable() and ch != " ":
++            return ch
++        if val == 0x0020:
++            return " "
++        return None
++    except (ValueError, OverflowError):
++        return None
++
++def xml_char(ch: str) -> str:
++    return (ch.replace("&", "&amp;")
++              .replace("<", "&lt;")
++              .replace(">", "&gt;")
++              .replace('"', "&quot;"))
++
++def render_keylayout(name: str, parsed: dict) -> str:
++    tables = parsed["tables"]
++    mod_map = parsed["mod_map"]
++
++    lines = []
++    lines.append('<?xml version="1.1" encoding="UTF-8"?>')
++    lines.append('<!DOCTYPE keyboard SYSTEM "file://localhost/System/Library/DTDs/KeyboardLayout.dtd">')
++    lines.append(f'<keyboard group="0" id="-1" name="{xml_char(name)}" maxout="1">')
++    lines.append('  <layouts>')
++    lines.append('    <layout first="0" last="207" mapSet="0" modifiers="m"/>')
++    lines.append('  </layouts>')
++
++    # Collect unique modifier_bits → table_index groups
++    seen: dict[int, list[int]] = {}
++    for mod_bits, tbl_idx in enumerate(mod_map):
++        seen.setdefault(tbl_idx, []).append(mod_bits)
++
++    lines.append('  <modifierMap id="m" defaultIndex="0">')
++    for tbl_idx in sorted(seen):
++        lines.append(f'    <keyMapSelect mapIndex="{tbl_idx}">')
++        for mod_bits in seen[tbl_idx]:
++            mod_name = MODIFIER_NAMES.get(mod_bits, f"<!-- bits={mod_bits:#04x} -->")
++            lines.append(f'      <modifier keys="{mod_name}"/>')
++        lines.append('    </keyMapSelect>')
++    lines.append('  </modifierMap>')
++
++    lines.append('  <keyMapSet id="0">')
++    for ti, table in enumerate(tables):
++        lines.append(f'    <keyMap index="{ti}">')
++        for key_code, val in enumerate(table):
++            ch = uchr_char(val)
++            if ch is not None:
++                lines.append(f'      <key code="{key_code}" output="{xml_char(ch)}"/>')
++        lines.append('    </keyMap>')
++    lines.append('  </keyMapSet>')
++    lines.append('</keyboard>')
++    return "\n".join(lines)
++
++# ---------------------------------------------------------------------------
++# Main
++# ---------------------------------------------------------------------------
++if __name__ == "__main__":
++    if len(sys.argv) < 2:
++        print(__doc__)
++        sys.exit(1)
++
++    in_path = Path(sys.argv[1])
++    out_path = Path(sys.argv[2]) if len(sys.argv) > 2 else in_path.with_suffix(".keylayout")
++    name = in_path.stem.replace("_", " ")
++
++    raw = in_path.read_bytes()
++    print(f"Parsing {in_path} ({len(raw)} bytes)...")
++    parsed = parse_uchr(raw)
++    xml = render_keylayout(name, parsed)
++
++    out_path.write_text(xml, encoding="utf-8")
++    print(f"Written to: {out_path}")
+diff --git a/config/Library/Keyboard Layouts/.spec/EXTRACT_LAYOUT.md b/config/Library/Keyboard Layouts/.spec/EXTRACT_LAYOUT.md
+new file mode 100644
+index 0000000..f2a43f6
+--- /dev/null
++++ b/config/Library/Keyboard Layouts/.spec/EXTRACT_LAYOUT.md	
+@@ -0,0 +1,132 @@
++# Extracting macOS Built-in Keyboard Layouts
++
++## Goal
++
++Extract the **German – Standard** keyboard layout (built into macOS) as a `.keylayout`
++XML file, so it can be compared to the custom **German - PC** layout in
++`config/Library/Keyboard Layouts/German-PC.keylayout`.
++
++## Background
++
++Apple's built-in layouts (including German Standard) are **not stored as individual
++`.keylayout` files**. They live inside a compiled binary bundle:
++
++```
++/System/Library/Keyboard Layouts/AppleKeyboardLayouts.bundle/
++  Contents/Resources/AppleKeyboardLayouts-L.dat   ← all layouts compiled in here
++```
++
++The bundle does contain `.lproj` folders for localized names (`de.lproj`, `en.lproj`, …)
++but no XML keylayout files.
++
++Searching that `.dat` for `"German"` reveals three entries:
++- `German` (offset 269252) — the Standard layout, locale `de`
++- `Swiss German` (offset 345930) — locale `de_CH`
++- `German-DIN-2137` (offset 613072) — the DIN 2137 variant
++
++## Extraction Approach: TIS API
++
++The correct way to extract the raw key map data is via Apple's **Text Input Services (TIS)** API:
++
++```c
++// Carbon / HIToolbox
++CFArrayRef  TISCreateInputSourceList(CFDictionaryRef filter, Boolean includeAllInstalled)
++CFTypeRef   TISGetInputSourceProperty(TISInputSourceRef source, CFStringRef key)
++
++// relevant property keys:
++kTISPropertyLocalizedName          // → CFString  e.g. "German – Standard"
++kTISPropertyInputSourceID          // → CFString  e.g. "com.apple.keylayout.German"
++kTISPropertyUnicodeKeyLayoutData   // → CFData    raw UCKeyboardLayout binary
++```
++
++The `CFData` returned by `kTISPropertyUnicodeKeyLayoutData` contains the
++`UCKeyboardLayout` struct (big-endian), which is the same binary format that
++`.keylayout` XML files describe.
++
++### UCKeyboardLayout binary layout
++
++```
++uint16  keyLayoutHeaderFormat
++uint16  keyLayoutDataVersion
++uint32  keyLayoutFeatureInfoOffset
++uint32  keyboardTypeCount
++[keyboardTypeList]:           // keyboardTypeCount entries × 24 bytes
++    uint32  lastKeyboardType
++    uint32  keyModifiersToTableNumOffset
++    uint32  keyToCharTableIndexOffset
++    uint32  keyStateRecordsIndexOffset      (dead keys)
++    uint32  keyStateTerminatorsOffset
++    uint32  keySequenceDataIndexOffset
++
++UCKeyModifiersToTableNum @ keyModifiersToTableNumOffset:
++    uint16  defaultTableNum
++    uint16  modifiersCount
++    uint8   tableNum[modifiersCount]        // modifier_bits → table index
++
++UCKeyToCharTableIndex @ keyToCharTableIndexOffset:
++    uint16  keyToCharTableSize              // number of key codes per table
++    uint16  keyToCharTableCount            // number of modifier tables
++    uint32  offset[keyToCharTableCount]    // absolute offsets into data
++
++Each table @ offset[i]:
++    uint32  entry[keyToCharTableSize]      // key code → UCKeyOutput value
++
++UCKeyOutput value encoding:
++    bit 31 set  → dead key sequence state index
++    0xFFFE/0xFFFF/0x0000 → no output
++    lower 16 bits → Unicode code point
++```
++
++## What Failed: Python ctypes
++
++Calling `TISCreateInputSourceList` via `ctypes` causes a **segfault** on macOS 15+
++because TIS requires an active Cocoa run loop / autorelease pool. Simply loading
++Carbon via `ctypes.cdll` is not sufficient.
++
++`pyobjc-framework-Carbon` was installed in `.venv` but the package only ships a
++stub with no TIS bindings (`pkgutil` shows only `_metadata` as a submodule).
++
++## Recommended Next Steps
++
++### Option A — Swift CLI (recommended)
++
++Swift has full access to HIToolbox and can extract the layout in ~30 lines.
++Suggested location: `apps/macos/extract_layout/main.swift`
++
++```swift
++import Carbon
++
++let sources = TISCreateInputSourceList(nil, false).takeRetainedValue() as! [TISInputSource]
++for src in sources {
++    let name = TISGetInputSourceProperty(src, kTISPropertyLocalizedName)
++        .map { Unmanaged<CFString>.fromOpaque($0).takeUnretainedValue() as String } ?? ""
++    guard name.contains("German") else { continue }
++    guard let dataPtr = TISGetInputSourceProperty(src, kTISPropertyUnicodeKeyLayoutData) else { continue }
++    let data = Unmanaged<CFData>.fromOpaque(dataPtr).takeUnretainedValue() as Data
++    // write data to file, then parse UCKeyboardLayout → XML
++    try! data.write(to: URL(fileURLWithPath: "\(name).ucdata"))
++    print("Saved \(name) (\(data.count) bytes)")
++}
++```
++
++Then parse the `.ucdata` with the Python UCKeyboardLayout parser already in
++`extract_layout.py` (`parse_uchr` + `render_keylayout` are complete).
++
++### Option B — AppleScript + system_profiler
++
++Limited option: `system_profiler SPInputSourceDataType` lists installed input sources
++but does not expose key mapping data.
++
++### Option C — Ukulele / open-source layouts
++
++The **German Standard** layout is available as open-source XML, shared by the
++Ukulele keyboard editor community. Search for `keylayout German Standard` on
++GitHub or the Ukulele forums.
++
++## Files in This Directory
++
++| File | Purpose |
++|---|---|
++| `extract_layout.py` | Python: list sources, parse UCKeyboardLayout binary, render `.keylayout` XML |
++| `decode.py` | Python: decode/inspect/clean `.plist` `<data>` fields |
++| `EXTRACT_LAYOUT.md` | This document |
+diff --git a/config/Library/Keyboard Layouts/.spec/FIX_PLAN.md b/config/Library/Keyboard Layouts/.spec/FIX_PLAN.md
+new file mode 100644
+index 0000000..c6a3eeb
+--- /dev/null
++++ b/config/Library/Keyboard Layouts/.spec/FIX_PLAN.md	
+@@ -0,0 +1,35 @@
++# German-PC.keylayout — Fix Plan
++
++## Bug 1: Dead circumflex (state 1) is unreachable
++
++Action `id="0"` (→ state 1) is defined but no key triggers it — key 10 was fixed to output `^` directly.
++
++**Decision needed:** pick one:
++- **A)** Re-enable dead `^` on key 10 (move `<` permanently to key 50, `>` on Shift+50)
++- **B)** Remove action 0 and all state 1 `<when>` entries from actions 6–15 — circumflex dead key gone
++
++## Bug 2: Tilde state (5) incomplete for e, i, u
++
++Actions 7/8/10/12/13/15 are missing a `<when state="5" .../>` entry.
++Add these six lines in the `<actions>` section:
++
++| Action | Key | Add |
++|--------|-----|-----|
++| 7  | e | `<when state="5" output="ẽ"/>` |
++| 8  | i | `<when state="5" output="ĩ"/>` |
++| 10 | u | `<when state="5" output="ũ"/>` |
++| 12 | E | `<when state="5" output="Ẽ"/>` |
++| 13 | I | `<when state="5" output="Ĩ"/>` |
++| 15 | U | `<when state="5" output="Ũ"/>` |
++
++## Minor: Caps Lock key 10 inconsistency
++
++- Shift+key10 → `°` (degree)
++- Caps+key10 → `^` (same as unshifted)
++
++Fix keyMap index 2, key code 10: change output to `°` to match Shift.
++
++## Cleanup: remove commented-out alternatives
++
++Lines 80–128 and similar blocks have leftover `<!-- ... -->` alternative mappings
++for key 10 and key 50. Once Bug 1 is decided, delete the losers.
+diff --git a/config/alacritty.toml b/config/alacritty.toml
+deleted file mode 100644
+index 0124d05..0000000
+--- a/config/alacritty.toml
++++ /dev/null
+@@ -1,54 +0,0 @@
+-# See here https://alacritty.org/config-alacritty.html
+-
+-[general]
+-
+-[env]
+-
+-[window]
+-dimensions = { columns = 120, lines = 50 }
+-
+-[font]
+-size = 15
+-bold = { style = "Bold" }
+-offset = { x = 1, y = 1 }
+-
+-[scrolling]
+-
+-[colors]
+-[colors.primary]
+-[colors.search]
+-[colors.hints]
+-[colors.normal]
+-[colors.bright]
+-[colors.dim]
+-
+-[bell]
+-
+-[selection]
+-
+-[cursor]
+-
+-[terminal]
+-
+-[mouse]
+-
+-[hints]
+-
+-[keyboard]
+-bindings = [
+-  # Commands
+-  { key = "N", mods = "Command", action = "CreateNewWindow" },
+-  { key = "O", mods = "Command", action = "Open" },
+-
+-  # Umlaut Umleitung
+-  { key = "ö",                            chars = "[" },
+-  { key = "ä",                            chars = "]" },
+-  { key = "ö", mods = "Shift",            chars = "{" },
+-  { key = "ä", mods = "Shift",            chars = "}" },
+-  { key = "ö", mods = "Alt|Option",       chars = "ö" },
+-  { key = "ä", mods = "Alt|Option",       chars = "ä" },
+-  { key = "ö", mods = "Alt|Option|Shift", chars = "Ö" },
+-  { key = "ä", mods = "Alt|Option|Shift", chars = "Ä" },
+-]
+-
+-[debug]
+diff --git a/config/starship.toml b/config/starship.toml
+deleted file mode 100644
+index 6f78ef9..0000000
+--- a/config/starship.toml
++++ /dev/null
+@@ -1,11 +0,0 @@
+-# config for https://starship.rs
+-# also see ../shell/prompt.sh
+-
+-[python]
+-# only using one venv, no need to tag versions, etc.
+-# see here for more format options https://starship.rs/config/#python
+-format = 'via $symbol'
+-
+-[gcloud]
+-symbol = '⬣'
+-format = 'on [$symbol:$account]($style)'
+diff --git a/config/tmux.conf b/config/tmux.conf
+new file mode 100644
+index 0000000..23aa84a
+--- /dev/null
++++ b/config/tmux.conf
+@@ -0,0 +1,122 @@
++# =============================================================================
++# Tmux Configuration
++# =============================================================================
++
++# Default prefix is C-b (unchanged)
++# Second prefix: C-w
++set -g prefix2 C-w
++bind C-w send-prefix -2
++
++# =============================================================================
++# True color support
++# =============================================================================
++
++set -g default-terminal "tmux-256color"
++set -ga terminal-overrides ",*256col*:Tc"
++
++# Text selection highlight — macOS-style blue
++set -g mode-style "bg=#b4d5ff,fg=default"
++
++# =============================================================================
++# Status Bar — two lines
++# =============================================================================
++
++set -g status on
++set -g status-position bottom
++set -g status-style "bg=colour253,fg=colour238"
++
++# Line 0: session name | window list | clock
++set -g status-format[0] "#[align=left,bg=colour253,fg=colour25,bold] #S #[fg=colour238,nobold][⎇ ]#[fg=colour196,bold]#(git -C #{pane_current_path} branch --show-current 2>/dev/null)#[fg=colour238,nobold]#{?client_prefix, #[fg=colour196,bold][PREFIX]#[fg=colour238,nobold] , }#[align=centre]#{W:#{E:window-status-format},#{E:window-status-current-format}}#[align=right]%H:%M %d-%b "
++
++# Line 1: cheatsheet (V2 — emoji per action)
++#
++# All keys require the prefix first: press C-b, release, then press the key.
++#
++# WINDOWS  (a window = a named tab within a session)
++#   ➕ c        — create a new window
++#   ◀ p        — go to the previous window
++#   ▶ n        — go to the next window
++#   ✏️  ,       — rename the current window
++#   📋 w        — open an interactive window list / picker
++#   ❌ &        — kill (close) the current window (asks for confirmation)
++#
++# PANES  (a pane = a split within a window)
++#   ▄ "        — split current pane horizontally → new pane appears below
++#   ▐ %        — split current pane vertically   → new pane appears to the right
++#   ✖ x        — kill the current pane (asks for confirmation)
++#   🔍 z        — zoom: toggle current pane fullscreen and back
++#   ← ↑ ↓ →   — move focus between panes (hold prefix, then arrow key)
++#
++# SESSIONS  (a session = a top-level workspace; survives terminal close)
++#   📂 s        — open an interactive session list / picker (switch sessions)
++#   🚪 d        — detach: leave tmux running in background, return to plain shell
++#                 re-attach later with: tmux attach -t <session-name>
++#   🏷  $       — rename the current session
++#
++set -g status-format[1] "#[align=centre,bg=colour252,fg=colour238] ^b:  W:❲c q | p n ㆔w❳  P:❲v h x | z ←↑↓→❳  S:❲d ㆔s❳"
++
++set -g status 2
++
++# Window list (in line 0) — centred
++set -g window-status-format         "#[default,fg=colour244] #I:#W "
++set -g window-status-current-format "#[default,fg=colour255,bold] #I:#W "
++set -g window-status-separator      ""
++
++# =============================================================================
++# Usability
++# =============================================================================
++
++# Mouse support
++set -g mouse on
++
++# Heavier pane borders give the mouse a larger target for drag-to-resize
++set -g pane-border-lines double
++
++# Scroll wheel enters copy mode but exits automatically when scrolling back to bottom
++bind -T root WheelUpPane if -F "#{pane_in_mode}" "send -X scroll-up" "copy-mode -e"
++
++# Start windows/panes at 1
++set -g base-index 1
++set -g pane-base-index 1
++set-window-option -g pane-base-index 1
++set-option -g renumber-windows on
++
++# Intuitive pane split shortcuts (alternatives to " and %)
++bind v split-window -h  # C-b v → vertical split   (new pane to the right)
++bind h split-window -v  # C-b h → horizontal split (new pane below)
++
++# Kill shortcuts
++bind q confirm-before -p "Kill window? (y/n)" kill-window  # C-b q → kill window (with confirmation)
++bind x kill-pane                                            # C-b x → kill pane (no confirmation)
++bind X kill-window                                          # C-b X → kill window (no confirmation)
++
++# Run a shell command via popup — reusable alias
++set -s command-alias[100] run-cmd="
++    # set current time
++    # Open a popup, run the command, and keep the popup open until the user presses Enter.
++    display-popup -k -T '$ '$TMUX_RUN_CMD \
++        -E 'clear; bash -c \"$TMUX_RUN_CMD\"; echo; echo Press Enter to close; read'
++"
++
++unbind .
++unbind ,
++bind . command-prompt -p "Run:" "set-environment -g TMUX_RUN_CMD '%%'; run-cmd"
++bind , command-prompt -p "Run:" "set-environment -g TMUX_RUN_CMD '%%'; run-cmd"
++
++# Reload config
++set -g message-style "bg=#b4d5ff,fg=default"
++bind r source-file ~/.tmux.conf \; display "Config reloaded"
++
++# Faster key repetition
++# tmux waits after receiving Escape to check if it's the start of an escape sequence
++# (e.g. arrow keys). The default is 500ms, which causes a noticeable delay in editors
++# like Vim/Neovim when pressing Escape to leave insert mode. Setting it to 0 removes
++# that delay. This is safe because modern terminals send escape sequences fast enough
++# that tmux can distinguish them without a delay.
++# Note: status-keys (for rename/command prompts) defaults to emacs mode, where Escape
++# acts as a meta prefix, not a cancel key — so this setting does not affect prompt
++# behaviour. Use C-c or C-g to cancel prompts.
++set -s escape-time 0
++
++# Increase scrollback
++set -g history-limit 10000
+diff --git a/docs/ai/README.md b/docs/ai/README.md
+new file mode 100644
+index 0000000..8411f63
+--- /dev/null
++++ b/docs/ai/README.md
+@@ -0,0 +1,24 @@
++# AI Documentation
++
++> **Work in progress.** Everything in this folder is experimental and
++> evolving — don't take it too seriously.
++
++This folder contains documentation, resources, and instructions for
++AI-assisted work on the `ubunatic/dotfiles` repository.
++
++## Structure
++
++- `instructions/`: AI assistant skill definitions and context-specific
++  instructions for use with Claude Code or similar CLI tools.
++- `projects/`: Project plans and notes for AI-assisted work (active and
++  archived).
++- `prompting.md`: Overview of how to structure prompts and skills for
++  AI assistants.
++
++## Usage
++
++The main AI instructions for this repository live in
++[AGENTS.md](../../AGENTS.md) and [CLAUDE.md](../../CLAUDE.md) at the root.
++
++Skill definitions in `instructions/simple/` can be referenced when prompting
++an AI assistant to perform a specific task (e.g. code review, docs update).
+diff --git a/.ai/instructions/README.md b/docs/ai/instructions/README.md
+similarity index 100%
+rename from .ai/instructions/README.md
+rename to docs/ai/instructions/README.md
+diff --git a/.ai/instructions/simple/assist.md b/docs/ai/instructions/simple/assist.md
+similarity index 100%
+rename from .ai/instructions/simple/assist.md
+rename to docs/ai/instructions/simple/assist.md
+diff --git a/.ai/instructions/simple/docs.md b/docs/ai/instructions/simple/docs.md
+similarity index 100%
+rename from .ai/instructions/simple/docs.md
+rename to docs/ai/instructions/simple/docs.md
+diff --git a/.ai/instructions/simple/help.md b/docs/ai/instructions/simple/help.md
+similarity index 100%
+rename from .ai/instructions/simple/help.md
+rename to docs/ai/instructions/simple/help.md
+diff --git a/.ai/instructions/simple/init.md b/docs/ai/instructions/simple/init.md
+similarity index 100%
+rename from .ai/instructions/simple/init.md
+rename to docs/ai/instructions/simple/init.md
+diff --git a/.ai/instructions/simple/review.md b/docs/ai/instructions/simple/review.md
+similarity index 100%
+rename from .ai/instructions/simple/review.md
+rename to docs/ai/instructions/simple/review.md
+diff --git a/.ai/instructions/simple/skills.md b/docs/ai/instructions/simple/skills.md
+similarity index 100%
+rename from .ai/instructions/simple/skills.md
+rename to docs/ai/instructions/simple/skills.md
+diff --git a/.ai/instructions/simple/tech.md b/docs/ai/instructions/simple/tech.md
+similarity index 100%
+rename from .ai/instructions/simple/tech.md
+rename to docs/ai/instructions/simple/tech.md
+diff --git a/.ai/current/PROJECT_202511_AgenticCoding.md b/docs/ai/projects/AgenticCoding.md
+similarity index 100%
+rename from .ai/current/PROJECT_202511_AgenticCoding.md
+rename to docs/ai/projects/AgenticCoding.md
+diff --git a/docs/ai/prompting.md b/docs/ai/prompting.md
+new file mode 100644
+index 0000000..183e37e
+--- /dev/null
++++ b/docs/ai/prompting.md
+@@ -0,0 +1,44 @@
++# AI Prompting Guide
++
++This document explains how AI skills and prompts are structured in the
++`ubunatic/dotfiles` repository.
++
++## Overview
++
++AI assistants (Claude Code, Gemini CLI, etc.) are invoked directly via their
++CLI interfaces. No Make targets are needed.
++
++The main instruction files the AI reads on startup are:
++
++- `AGENTS.md` — coding guidelines and conventions (used by most AI tools)
++- `CLAUDE.md` — Claude Code-specific instructions (used by Claude Code CLI)
++
++## Skill Definitions
++
++Skill files are Markdown documents in `docs/ai/instructions/simple/`. Each
++file defines a named task an AI assistant can perform. Pass the skill file
++as context when prompting the AI.
++
++### Available Skills
++
++| Skill      | File                                       | Purpose                              |
++|------------|--------------------------------------------|--------------------------------------|
++| `assist`   | `instructions/simple/assist.md`            | General assistance                   |
++| `docs`     | `instructions/simple/docs.md`              | Update documentation                 |
++| `review`   | `instructions/simple/review.md`            | Review recent code changes           |
++| `init`     | `instructions/simple/init.md`              | Initialize/update AI config files    |
++| `skills`   | `instructions/simple/skills.md`            | List skills available in context     |
++| `tech`     | `instructions/simple/tech.md`              | Remove non-technical content         |
++| `help`     | `instructions/simple/help.md`              | General help                         |
++
++## Defining New Skills
++
++Create a Markdown file in `docs/ai/instructions/simple/` that describes the
++purpose and step-by-step instructions for the skill. Name it after the skill
++(e.g. `my-skill.md`).
++
++## Projects
++
++Project plans and notes from AI-assisted work are stored in
++`docs/ai/projects/`. Active work goes there; completed work stays for
++reference.
+diff --git a/models/Makefile b/models/Makefile
+deleted file mode 100644
+index fb2361a..0000000
+--- a/models/Makefile
++++ /dev/null
+@@ -1,42 +0,0 @@
+-all: start
+-
+-models:
+-	ollama create m4-coder -f m4-coder.Modelfile
+-	ollama create fast-coder -f fast-coder.Modelfile
+-
+-env:
+-	launchctl setenv OLLAMA_FLASH_ATTENTION 1 || true
+-
+-DEBUG=
+-ifeq ($(DEBUG),)
+-detached = >/dev/null 2>&1 & \# run detached
+-else
+-detached = \# run in foreground for debugging
+-endif
+-
+-ollama: models
+-	killall ollama || true
+-	OLLAMA_FLASH_ATTENTION=1 ollama serve $(detached)
+-	@echo "Starting ollama serve in background..."
+-	@sleep 1
+-	@echo "Available models:"
+-	@ollama list
+-
+-export OLLAMA_API_BASE=http://127.0.0.1:11434
+-MODEL=fast-coder
+-aider:
+-	@echo "Using OLLAMA_API_BASE=$(OLLAMA_API_BASE)"
+-	curl -s ${OLLAMA_API_BASE}/v1/models | jq .data[].id
+-	@echo "Starting aider with model MODEL=$(MODEL)"
+-	cd .. && aider --model ollama_chat/$(MODEL) --watch-files
+-
+-restart: stop ollama aider
+-
+-aider_pids=$(shell pgrep -f "aider --model ollama_chat/$(MODEL)")
+-stop:
+-	@echo "Stopping aider and ollama processes..."
+-	@killall ollama || true
+-	@test -z "$(aider_pids)" || kill $(aider_pids)
+-	@echo "Remaining aider processes (should be none):"
+-	@pgrep -f "aider" || true
+-	@pgrep -f "ollama" || true
+diff --git a/models/fast-coder.Modelfile b/models/fast-coder.Modelfile
+deleted file mode 100644
+index df625c0..0000000
+--- a/models/fast-coder.Modelfile
++++ /dev/null
+@@ -1,6 +0,0 @@
+-# shockingly smart for its size and fits entirely in the M4's high-speed cache
+-FROM phi4
+-# 8k context is plenty for single-file edits and is much faster than 32k
+-PARAMETER num_ctx 8192
+-# Temperature 0.1 makes code generation deterministic and faster (less sampling overhead)
+-PARAMETER temperature 0.1
+diff --git a/models/m4-coder.Modelfile b/models/m4-coder.Modelfile
+deleted file mode 100644
+index e64ece1..0000000
+--- a/models/m4-coder.Modelfile
++++ /dev/null
+@@ -1,4 +0,0 @@
+-# good all-around coding model
+-FROM qwq
+-# larger context helps with bigger files and multi-file projects but is slower
+-PARAMETER num_ctx 32768
+diff --git a/scripts/ai.mk b/scripts/ai.mk
+deleted file mode 100644
+index 4f67529..0000000
+--- a/scripts/ai.mk
++++ /dev/null
+@@ -1,90 +0,0 @@
+-.PHONY: 🤖  # make all non-file targets phony
+-
+-# assign skill based on target name
+-ai-%: CHAT_SKILL=$*
+-ai-%: SHELL=$$SHELL -l
+-
+-# CHAT_PROMPT is used as env var to avoid shell quoting issues
+-CHAT_PROMPT =
+-export CHAT_PROMPT
+-
+-chat = CHAT_PROMPT="$(chat_context) $${CHAT_PROMPT:-$(chat_prompt_fallback)}"; \
+-	   echo "Asking AI with skill:$(CHAT_SKILL) model:$(chat_model) and prompt: '$$CHAT_PROMPT'"; \
+-	   $(chat_cmd) $(chat_cmd_args) "$$CHAT_PROMPT"
+-
+-# Default fallback prompt if CHAT_PROMPT is not set
+-chat_prompt_fallback = Assist me using your '$(CHAT_SKILL)' skill.
+-
+-# Files to always include in the chat context
+-chat_files = AGENTS.md README.md CONTRIBUTING.md DOCS.md '$(chat_skill_file)'
+-
+-# Construct the chat context with files and skill instructions.
+-# NOTE: Do not use any double quotes! This will be become part of the quoted prompt.
+-chat_context = context: $(chat_files) \
+-	skill=$(CHAT_SKILL) \
+-	skills_dir='$(chat_skills_dir)' \
+-	skill_file='$(chat_skill_file)' \
+-	-- \
+-	Read the skill_file, follow its instructions, and adhere to the following prompt:
+-
+-# Gemini sometimes confuses workspace path, so we set it explicitly
+-export GEMINI_CLI_IDE_WORKSPACE_PATH=$(CURDIR)
+-
+-chat_skills_dir = .ai/instructions/simple
+-chat_skill_file = $(chat_skills_dir)/$(CHAT_SKILL).md
+-
+-# AI chat command configuration
+-# Set this to 'gemini' or 'code chat' or other AI CLI tool as needed
+-chat_cmd := $(shell which gemini 2>/dev/null || echo "code chat")
+-
+-ifeq ($(chat_cmd),gemini) # Use interactive-prompt mode for gemini CLI
+-chat_vscode_ext = google.gemini-cli-vscode-ide-companion
+-# chat_model = auto
+-# chat_cmd_args = -m $(chat_model)
+-ifdef DEBUG
+-chat_cmd_args += -d
+-endif
+-chat_cmd_args += -i
+-endif
+-
+-ai-%: 🤖  ## Use AI to assist with the specified CHAT_SKILL (e.g. make ai-docs)
+-ifdef DEBUG
+-	# Debug mode enabled, see chat command below:
+-	# $(chat)
+-endif
+-	@# Run the chat command with the specified skill
+-	@$(chat)
+-
+-
+-## AI Commands
+-
+-ai-chat: CHAT_SKILL=assist
+-ai-chat: 🤖  ## General AI chat interface
+-	@echo "Enter your message for the AI:"
+-	@{ test -n "$$CHAT_PROMPT" || read -r CHAT_PROMPT; } && $(chat)
+-
+-ai-init:   🤖  ## Initialize AI environment
+-ai-docs:   🤖  ## Use AI to update documentation based on code changes
+-ai-update: 🤖  ## Update AI tools
+-	@brew upgrade || echo "Skipping upgrade: Homebrew not installed."
+-
+-ai-ext: 🤖  ## Install VSCode extension for AI
+-	@code --install-extension $(chat_vscode_ext) --force || echo "VSCode extension installation failed. Is VSCode installed?"
+-	@echo "Getting information about the Gemini CLI IDE server..."
+-	@echo GEMINI_CLI_IDE_SERVER_PORT=$$GEMINI_CLI_IDE_SERVER_PORT
+-	@echo GEMINI_CLI_IDE_WORKSPACE_PATH=$$GEMINI_CLI_IDE_WORKSPACE_PATH
+-	@echo "You may need to restart VSCode for the extension to take effect."
+-
+-ai-files: CHAT_SKILL=assist
+-ai-files: 🤖  ## Open the main AI instructions files
+-	@code $(foreach file,$(chat_files),-g $(file))
+-
+-## AI Shortcuts
+-
+-ai:      🤖 ai-assist   ## General AI assistance (let the AI decide the skill)
+-chat:    🤖 ai-chat     ## General AI chat interface
+-skills:  🤖 ai-skills   ## List AI agent skills based on current project structure
+-files:   🤖 ai-files    ## Ensure AI agent files match provider-recommended structure
+-review:  🤖 ai-review   ## Use AI to review recent changes in the repository
+-tech:    🤖 ai-tech     ## Use AI to identify and remove of non-technical content
+-ext:     🤖 ai-ext      ## Install VSCode extension for AI
+diff --git a/shell/aliases.sh b/shell/aliases.sh
+index bfe1375..4d6b8e0 100644
+--- a/shell/aliases.sh
++++ b/shell/aliases.sh
+@@ -76,6 +76,10 @@ alias lzd='lazydocker'
+ alias lg='lazygit'
+ alias k='kubectl'
+ 
++# Vim cmd as terminal cmd
++alias q="exit 1"
++alias :q="exit 1"
++
+ unalias gsu 2>/dev/null
+ 
+ if test "$SYSTEM_UNAME" = "Darwin"
+diff --git a/shell/tmux.sh b/shell/tmux.sh
+new file mode 100644
+index 0000000..c785a39
+--- /dev/null
++++ b/shell/tmux.sh
+@@ -0,0 +1,29 @@
++
++# AI Assistant Notes
++# ------------------
++# The funcs in this file must work in Bash and Zsh.
++# Always use `test`, never `[` or `[[`.
++
++# tmux-setup: link the dotfiles tmux config to ~/.tmux.conf
++tmux-setup() {
++    local src="${DOTFILES}/config/tmux.conf"
++    local dst="$HOME/.tmux.conf"
++    if test -L "$dst"
++    then echo "tmux config already linked: $dst -> $(readlink "$dst")"
++    elif test -e "$dst" &&
++         test "$1" != "--force"
++    then echo "tmux config exists but is not a symlink: $dst"
++         echo "run 'tmux-setup --force' to replace it"
++    else ln -sf "$src" "$dst" &&
++         echo "tmux config linked: $dst -> $src"
++    fi
++}
++
++# tmux-autostart: attach to or create a session named after the current directory.
++# Call this from ~/.userrc to opt in to auto-starting tmux on shell login.
++tmux-autostart() {
++    if test -z "$TMUX" &&
++       test -n "$PS1"
++    then tmux new-session -A -s "$(basename "$PWD")"
++    fi
++}
+diff --git a/shell/userrc.sh b/shell/userrc.sh
+index 53c9ab7..1bd497e 100644
+--- a/shell/userrc.sh
++++ b/shell/userrc.sh
+@@ -31,7 +31,8 @@ for source_file in \
+     proxmox.sh \
+     completions.sh \
+     test.sh \
+-    assert.sh
++    assert.sh \
++    tmux.sh
+ do
+     if source "$DOTFILES/shell/$source_file"
+     then dbg "sourced $source_file ✅"
+diff --git a/templates/README.md b/templates/README.md
+new file mode 100644
+index 0000000..fd5397e
+--- /dev/null
++++ b/templates/README.md
+@@ -0,0 +1 @@
++# Templates
+\ No newline at end of file
+diff --git a/templates/md/docs/.code/AGENTS.md b/templates/docsrepo/.code/AGENTS.md
+similarity index 99%
+rename from templates/md/docs/.code/AGENTS.md
+rename to templates/docsrepo/.code/AGENTS.md
+index 1e828ae..82a76e1 100644
+--- a/templates/md/docs/.code/AGENTS.md
++++ b/templates/docsrepo/.code/AGENTS.md
+@@ -1,5 +1,6 @@
+ # Coding Guidelines
+ 
++
+ ## Folder Structure
+ 
+ ```
+diff --git a/templates/md/docs/.code/GOOGLE_SETUP.md b/templates/docsrepo/.code/GOOGLE_SETUP.md
+similarity index 100%
+rename from templates/md/docs/.code/GOOGLE_SETUP.md
+rename to templates/docsrepo/.code/GOOGLE_SETUP.md
+diff --git a/templates/md/docs/.code/README.md b/templates/docsrepo/.code/README.md
+similarity index 100%
+rename from templates/md/docs/.code/README.md
+rename to templates/docsrepo/.code/README.md
+diff --git a/templates/md/docs/.code/go.mod b/templates/docsrepo/.code/go.mod
+similarity index 86%
+rename from templates/md/docs/.code/go.mod
+rename to templates/docsrepo/.code/go.mod
+index 0f700bb..379c720 100644
+--- a/templates/md/docs/.code/go.mod
++++ b/templates/docsrepo/.code/go.mod
+@@ -2,6 +2,12 @@ module ubunatic.com/docsrepo
+ 
+ go 1.25.4
+ 
++require (
++	github.com/lmittmann/tint v1.1.3
++	github.com/spf13/cobra v1.8.1
++	golang.org/x/term v0.39.0
++)
++
+ require (
+ 	cloud.google.com/go/auth v0.18.1 // indirect
+ 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
+@@ -14,6 +20,8 @@ require (
+ 	github.com/google/uuid v1.6.0 // indirect
+ 	github.com/googleapis/enterprise-certificate-proxy v0.3.11 // indirect
+ 	github.com/googleapis/gax-go/v2 v2.17.0 // indirect
++	github.com/inconshreveable/mousetrap v1.1.0 // indirect
++	github.com/spf13/pflag v1.0.9 // indirect
+ 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
+ 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.61.0 // indirect
+ 	go.opentelemetry.io/otel v1.39.0 // indirect
+diff --git a/templates/md/docs/.code/go.sum b/templates/docsrepo/.code/go.sum
+similarity index 73%
+rename from templates/md/docs/.code/go.sum
+rename to templates/docsrepo/.code/go.sum
+index 3b15f02..7a3760f 100644
+--- a/templates/md/docs/.code/go.sum
++++ b/templates/docsrepo/.code/go.sum
+@@ -6,6 +6,8 @@ cloud.google.com/go/compute/metadata v0.9.0 h1:pDUj4QMoPejqq20dK0Pg2N4yG9zIkYGdB
+ cloud.google.com/go/compute/metadata v0.9.0/go.mod h1:E0bWwX5wTnLPedCKqk3pJmVgCBSM6qQI1yTBdEb3C10=
+ github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
+ github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
++github.com/cpuguy83/go-md2man/v2 v2.0.4/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
++github.com/cpuguy83/go-md2man/v2 v2.0.6/go.mod h1:oOW0eioCTA6cOiMLiUPZOpcVxMig6NIQQ7OS05n1F4g=
+ github.com/felixge/httpsnoop v1.0.4 h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2Wg=
+ github.com/felixge/httpsnoop v1.0.4/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
+ github.com/go-logr/logr v1.2.2/go.mod h1:jdQByPbusPIv2/zmleS9BjJVeZ6kBagPoEUsqbVz/1A=
+@@ -21,6 +23,18 @@ github.com/googleapis/enterprise-certificate-proxy v0.3.11 h1:vAe81Msw+8tKUxi2Dq
+ github.com/googleapis/enterprise-certificate-proxy v0.3.11/go.mod h1:RFV7MUdlb7AgEq2v7FmMCfeSMCllAzWxFgRdusoGks8=
+ github.com/googleapis/gax-go/v2 v2.17.0 h1:RksgfBpxqff0EZkDWYuz9q/uWsTVz+kf43LsZ1J6SMc=
+ github.com/googleapis/gax-go/v2 v2.17.0/go.mod h1:mzaqghpQp4JDh3HvADwrat+6M3MOIDp5YKHhb9PAgDY=
++github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
++github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
++github.com/lmittmann/tint v1.1.3 h1:Hv4EaHWXQr+GTFnOU4VKf8UvAtZgn0VuKT+G0wFlO3I=
++github.com/lmittmann/tint v1.1.3/go.mod h1:HIS3gSy7qNwGCj+5oRjAutErFBl4BzdQP6cJZ0NfMwE=
++github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
++github.com/spf13/cobra v1.8.1 h1:e5/vxKd/rZsfSJMUX1agtjeTDf+qv1/JdBF8gg5k9ZM=
++github.com/spf13/cobra v1.8.1/go.mod h1:wHxEcudfqmLYa8iTfL+OuZPbBZkmvliBWKIezN3kD9Y=
++github.com/spf13/cobra v1.10.2 h1:DMTTonx5m65Ic0GOoRY2c16WCbHxOOw6xxezuLaBpcU=
++github.com/spf13/cobra v1.10.2/go.mod h1:7C1pvHqHw5A4vrJfjNwvOdzYu0Gml16OCs2GRiTUUS4=
++github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
++github.com/spf13/pflag v1.0.9 h1:9exaQaMOCwffKiiiYk6/BndUBv+iRViNW+4lEMi0PvY=
++github.com/spf13/pflag v1.0.9/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
+ go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
+ go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
+ go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.61.0 h1:F7Jx+6hwnZ41NSFTO5q4LYDtJRXBf2PD0rNBkeB/lus=
+@@ -31,6 +45,7 @@ go.opentelemetry.io/otel/metric v1.39.0 h1:d1UzonvEZriVfpNKEVmHXbdf909uGTOQjA0HF
+ go.opentelemetry.io/otel/metric v1.39.0/go.mod h1:jrZSWL33sD7bBxg1xjrqyDjnuzTUB0x1nBERXd7Ftcs=
+ go.opentelemetry.io/otel/trace v1.39.0 h1:2d2vfpEDmCJ5zVYz7ijaJdOF59xLomrvj7bjt6/qCJI=
+ go.opentelemetry.io/otel/trace v1.39.0/go.mod h1:88w4/PnZSazkGzz/w84VHpQafiU4EtqqlVdxWy+rNOA=
++go.yaml.in/yaml/v3 v3.0.4/go.mod h1:DhzuOOF2ATzADvBadXxruRBLzYTpT36CKvDb3+aBEFg=
+ golang.org/x/crypto v0.47.0 h1:V6e3FRj+n4dbpw86FJ8Fv7XVOql7TEwpHapKoMJ/GO8=
+ golang.org/x/crypto v0.47.0/go.mod h1:ff3Y9VzzKbwSSEzWqJsJVBnWmRwRSHt/6Op5n9bQc4A=
+ golang.org/x/net v0.49.0 h1:eeHFmOGUTtaaPSGNmjBKpbng9MulQsJURQUAfUwY++o=
+@@ -39,6 +54,8 @@ golang.org/x/oauth2 v0.35.0 h1:Mv2mzuHuZuY2+bkyWXIHMfhNdJAdwW3FuWeCPYN5GVQ=
+ golang.org/x/oauth2 v0.35.0/go.mod h1:lzm5WQJQwKZ3nwavOZ3IS5Aulzxi68dUSgRHujetwEA=
+ golang.org/x/sys v0.40.0 h1:DBZZqJ2Rkml6QMQsZywtnjnnGvHza6BTfYFWY9kjEWQ=
+ golang.org/x/sys v0.40.0/go.mod h1:OgkHotnGiDImocRcuBABYBEXf8A9a87e/uXjp9XT3ks=
++golang.org/x/term v0.39.0 h1:RclSuaJf32jOqZz74CkPA9qFuVTX7vhLlpfj/IGWlqY=
++golang.org/x/term v0.39.0/go.mod h1:yxzUCTP/U+FzoxfdKmLaA0RV1WgE0VY7hXBwKtY/4ww=
+ golang.org/x/text v0.33.0 h1:B3njUFyqtHDUI5jMn1YIr5B0IE2U0qck04r6d4KPAxE=
+ golang.org/x/text v0.33.0/go.mod h1:LuMebE6+rBincTi9+xWTY8TztLzKHc/9C1uBCG27+q8=
+ google.golang.org/api v0.267.0 h1:w+vfWPMPYeRs8qH1aYYsFX68jMls5acWl/jocfLomwE=
+@@ -49,3 +66,5 @@ google.golang.org/grpc v1.78.0 h1:K1XZG/yGDJnzMdd/uZHAkVqJE+xIDOcmdSFZkBUicNc=
+ google.golang.org/grpc v1.78.0/go.mod h1:I47qjTo4OKbMkjA/aOOwxDIiPSBofUtQUI5EfpWvW7U=
+ google.golang.org/protobuf v1.36.11 h1:fV6ZwhNocDyBLK0dj+fg8ektcVegBBuEolpbTQyBNVE=
+ google.golang.org/protobuf v1.36.11/go.mod h1:HTf+CrKn2C3g5S8VImy6tdcUvCska2kB7j23XfzDpco=
++gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
++gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+diff --git a/templates/docsrepo/.code/scripts/info.sh b/templates/docsrepo/.code/scripts/info.sh
+new file mode 100755
+index 0000000..bf770e5
+--- /dev/null
++++ b/templates/docsrepo/.code/scripts/info.sh
+@@ -0,0 +1,68 @@
++#!/usr/bin/env bash
++# info.sh — show help and repo structure based on current config
++
++set -o errexit
++
++REPO="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
++MAKEFILE="${REPO}/Makefile"
++
++# Colours
++CYAN='\033[36m'
++BOLD='\033[1m'
++DIM='\033[2m'
++RESET='\033[0m'
++
++# Load docsrepo config
++if source "${REPO}/.docsrepo" 2>/dev/null
++then ORIGIN="${DOCSREPO_ORIGIN}"
++     FILES="${DOCSREPO_FILES}"
++     DIRS="${DOCSREPO_DIRS}"
++else ORIGIN="(not set)"
++     FILES=""
++     DIRS=""
++fi
++
++echo -e "${BOLD}Usage:${RESET} make [target]"
++echo
++echo -e "${BOLD}Targets:${RESET}"
++awk -F ':|##' \
++    '/^[a-zA-Z0-9_-]+:/{printf "  \033[36m%-18s\033[0m %s\n", $1, $3} \
++     /^##[^#]/{printf "\n\033[1m%s\033[0m\n", substr($0,3)}' \
++    "${MAKEFILE}"
++
++echo
++echo -e "${BOLD}Config (from .docsrepo):${RESET}"
++echo -e "  ${CYAN}ORIGIN${RESET}  = ${ORIGIN}"
++
++echo
++echo -e "${BOLD}Synced files:${RESET}"
++for f in ${FILES}; do
++    if test -f "${REPO}/${f}"
++    then echo -e "  ${CYAN}✓${RESET}  ${f}"
++    else echo -e "  ${DIM}✗  ${f}${RESET}"
++    fi
++done
++
++echo
++echo -e "${BOLD}Synced dirs:${RESET}"
++for d in ${DIRS}; do
++    if test -d "${REPO}/${d}"
++    then echo -e "  ${CYAN}✓${RESET}  ${d}/"
++    else echo -e "  ${DIM}✗  ${d}/${RESET}"
++    fi
++done
++
++echo
++echo -e "${BOLD}Repo structure:${RESET}"
++for entry in "${REPO}"/*/; do
++    name="${entry%/}"
++    name="${name##*/}"
++    # skip hidden dirs
++    [[ "${name}" == .* ]] && continue
++    echo -e "  ${CYAN}${name}/${RESET}"
++done
++shopt -s nullglob
++for entry in "${REPO}"/*.md "${REPO}"/*.yaml "${REPO}"/*.yml; do
++    echo -e "  ${entry##*/}"
++done
++shopt -u nullglob
+diff --git a/templates/docsrepo/.code/scripts/slackbot.applescript b/templates/docsrepo/.code/scripts/slackbot.applescript
+new file mode 100755
+index 0000000..932cded
+--- /dev/null
++++ b/templates/docsrepo/.code/scripts/slackbot.applescript
+@@ -0,0 +1,31 @@
++#!/usr/bin/osascript
++on run argv
++    if (count of argv) is not 1 then
++        error "Usage: osascript slackbot.applescript <message>"
++    end if
++    set theMessage to item 1 of argv
++
++    -- safely read env var: DOCSREPO_SLACKBOT_URL
++    set slackbotURL to do shell script "echo \"$DOCSREPO_SLACKBOT_URL\""
++
++    if slackbotURL is "" then
++        error "Environment variable DOCSREPO_SLACKBOT_URL is not set. Please set it to the URL to open a chat with Slackbot in the Slack app."
++    end if
++
++    -- use 'open URL' to open the Slackbot chat in the Slack app
++    do shell script "open \"" & slackbotURL & "\""
++    delay 1 -- Wait for app to open
++
++    -- ensure Slack is the frontmost app
++    if application "Slack" is not frontmost then
++        error "Failed to open Slackbot chat. Please make sure the Slack app is installed and the URL in DOCSREPO_SLACKBOT_URL is correct."
++    end if
++
++    -- send message to Slackbot using System Events to simulate keystrokes
++    tell application "System Events"
++        keystroke theMessage
++        delay 0.3
++        -- send CMD+Enter to send the message (this is the default shortcut for sending messages in Slack)
++        keystroke return using {command down}
++    end tell
++end run
+\ No newline at end of file
+diff --git a/templates/docsrepo/.code/scripts/sync-docsrepo.sh b/templates/docsrepo/.code/scripts/sync-docsrepo.sh
+new file mode 100755
+index 0000000..a69212f
+--- /dev/null
++++ b/templates/docsrepo/.code/scripts/sync-docsrepo.sh
+@@ -0,0 +1,126 @@
++#!/usr/bin/env bash
++# DocsRepo sync script to copy boilerplate files and directories from the origin to the current repo
++
++set -o errexit
++
++err() { echo -n "ERR: "; echo "$@" >&2; }
++wrn() { echo -n "WRN: "; echo "$@" >&2; }
++inf() { echo -n "INF: "; echo "$@" >&2; }
++
++vars() {
++    inf "REPO:        ${REPO}"
++    inf "ORIGIN:      ${ORIGIN}"
++    inf "FILES:       ${FILES[*]}"
++    inf "DIRS:        ${DIRS}"
++    inf "TREES:       ${TREES}"
++    inf "RSYNC_FILES: ${RSYNC_FILES[*]}"
++    inf "RSYNC:       ${RSYNC}"
++}
++
++source_docsrepo() {
++    if ! test -f .docsrepo
++    then err "No .docsrepo file found in the current directory. Please create one to configure the sync."
++         return 1
++    fi
++
++    # shellcheck disable=SC1091
++    if source .docsrepo
++    then inf "Loaded configuration from .docsrepo"
++    else err "Failed to load .docsrepo configuration. Please ensure the file is properly formatted."
++        return 1
++    fi
++
++    REPO="$(git rev-parse --show-toplevel || pwd)"
++
++    ORIGIN="${DOCSREPO_ORIGIN}"
++    FILES=( "${DOCSREPO_FILES[@]}" )
++    DIRS="${DOCSREPO_DIRS}"
++    TREES="${DOCSREPO_TREES}"
++
++    # RSYNC_FILES are files and dirs that can be copied recursively with rsync.
++    # Use a bash array so filenames with spaces are handled correctly.
++    RSYNC_FILES=( "${FILES[@]}" .code .gitignore .docsrepo )
++    RSYNC="rsync -av --exclude=.code/spec/ --exclude=.code/bin/ --relative"
++
++    # DIRS: only the README.md of each dir is boilerplate
++    if test -n "${DIRS}"
++    then for dir in ${DIRS}
++        do if test -e "${dir}/README.md"
++            then RSYNC_FILES+=( "${dir}/README.md" )
++            else wrn "Expected README.md in ${dir} but it does not exist. Please update your .docsrepo configuration."
++            fi
++        done
++    fi
++
++    # TREES: the entire directory tree is boilerplate
++    if test -n "${TREES}"
++    then for tree in ${TREES}
++        do RSYNC_FILES+=( "${tree}" )
++        done
++    fi
++}
++
++check_origin() {
++    # Check if ORIGIN variable is set and points to a valid directory
++    if test -n "${ORIGIN}" && test -d "${ORIGIN}"
++    then return 0
++    fi
++
++    err "ORIGIN variable is not set or points to a non-existent directory. Please update your .docsrepo configuration."
++    return 1
++}
++
++copy_from_origin() {
++    inf "Copying boilerplate files and directories from ${ORIGIN} to ${REPO}..."
++    # cd into ORIGIN so all paths in RSYNC_FILES resolve relative to the source root.
++    # rsync flags:
++    #   -a   archive mode: recursive + preserves permissions, timestamps, symlinks
++    #   -v   verbose: print each transferred file
++    #   --relative  preserve the path structure in the destination
++    #               e.g. People/README.md lands at REPO/People/README.md, not REPO/README.md
++    (cd "${ORIGIN}" && ${RSYNC} "${RSYNC_FILES[@]}" "${REPO}/")
++}
++
++list_from_origin() {
++    inf "Files that would be synced from ${ORIGIN} to ${REPO} (dry run)..."
++    (cd "${ORIGIN}" && ${RSYNC} --dry-run "${RSYNC_FILES[@]}" "${REPO}/")
++}
++
++save_to_origin() {
++    inf "Saving boilerplate files and directories from current repo to ${ORIGIN}..."
++    # rsync flags:
++    #   -a   archive mode: recursive + preserves permissions, timestamps, symlinks
++    #   -v   verbose: print each transferred file
++    #   --relative  preserve the path structure in the destination
++    #               e.g. People/README.md lands at ORIGIN/People/README.md, not ORIGIN/README.md
++    (cd "${REPO}" && ${RSYNC} "${RSYNC_FILES[@]}" "${ORIGIN}/")
++}
++
++list_to_origin() {
++    check_origin || exit 1
++    inf "Files that would be saved from ${REPO} to ${ORIGIN} (dry run)..."
++    (cd "${REPO}" && ${RSYNC} --dry-run "${RSYNC_FILES[@]}" "${ORIGIN}/")
++}
++
++main() {
++    source_docsrepo || exit 1
++    check_origin || exit 1
++
++    cmd="$1"
++    case "$cmd" in
++        (vars)       vars ;;
++        (list-sync)  list_from_origin ;;
++        (sync)       copy_from_origin ;;
++        (list-save)  list_to_origin ;;
++        (save)       save_to_origin ;;
++        ("") err "No command provided. Available commands: vars, list-sync, sync, list-save, save"
++             exit 1
++             ;;
++        *)
++             err "Unknown command: '$cmd'. Available commands: vars, list-sync, sync, list-save, save"
++             exit 1
++             ;;
++    esac
++}
++
++main "$@"
+\ No newline at end of file
+diff --git a/templates/docsrepo/.docsrepo b/templates/docsrepo/.docsrepo
+new file mode 100644
+index 0000000..4479657
+--- /dev/null
++++ b/templates/docsrepo/.docsrepo
+@@ -0,0 +1,24 @@
++#!/bin/bash
++# shellcheck disable=SC2034
++
++# DOCSREPO_FILES are the files to be kept free of project-specific information and boilerplate for the repo.
++# These files must be free of company- or project-specific information so that they can be copied as-is to new repos.
++# Use a bash array to handle filenames with spaces correctly.
++DOCSREPO_FILES=(README.md AGENTS.md CLAUDE.md Makefile DocsRepo.md)
++
++# DOCSREPO_DIRS are the directories that hold project-specific content.
++# Only the README.md of each dir is treated as boilerplate and synced.
++DOCSREPO_DIRS="Docs People Projects"
++
++# DOCSREPO_TREES are directories synced in full — every file in the tree is boilerplate.
++DOCSREPO_TREES="Guides .claude/agents"
++
++# DOCSREPO_ORIGIN is the directory where the boilerplate files (ROOT_FILES and DOCS_DIRS with their README.md) are stored.
++# This is typically a templates directory in a dotfiles repo, but can be any directory as long as it contains the necessary files and directories.
++DOCSREPO_ORIGIN="${DOTFILES:-.origin}/templates/docsrepo"
++
++# DOCSREPO_SLACKBOT_URL is the URL to open a chat with Slackbot in the Slack app. This is used by the Makefile to send prompts to Slackbot.
++DOCSREPO_SLACKBOT_URL="slack://user?team=T6BG7DYVC&id=USLACKBOT"
++
++# DOCSREPO_SLACKBOT_HINT is the hint to be used by Slackbot when sending prompts. This is used by the Makefile to provide context to Slackbot.
++DOCSREPO_SLACKBOT_HINT="Output Format: CODE section with Markdown code using heading-level 3+, do not use :<emoji>: but pure unicode"
+diff --git a/templates/docsrepo/.gitignore b/templates/docsrepo/.gitignore
+new file mode 100644
+index 0000000..5f0b67d
+--- /dev/null
++++ b/templates/docsrepo/.gitignore
+@@ -0,0 +1,14 @@
++# project binaries
++.code/bin/
++
++# fallback dir for boilerplate syncs
++.origin/
++
++# AI assistant data
++.claude
++
++# Random debug files
++.debug
++Projects/AI/results/runs
++
++*.tmp
+\ No newline at end of file
+diff --git a/templates/docsrepo/AGENTS.md b/templates/docsrepo/AGENTS.md
+new file mode 100644
+index 0000000..52d8e41
+--- /dev/null
++++ b/templates/docsrepo/AGENTS.md
+@@ -0,0 +1,82 @@
++# Agentic AI Instructions
++
++See [README.md](./README.md) for the overall structure and purpose of this repo.
++
++---
++
++## Auto Session Agents
++
++> **IMPORTANT: Execute automatically on every session — do not wait to be asked.**
++
++This repo uses two background agents that run alongside the main conversation:
++
++| Agent | Role | Tools | Invocation |
++|---|---|---|---|
++| `personal-assistant` | Active watcher — steps in with advice, focus checks, coaching | Read-only + Agent | Auto-start on first message |
++| `note-taker` | Passive worker — captures summaries, files notes, keeps repo tidy | Read + Write + Edit | Background, after substantive exchanges |
++
++### Session Start
++
++On the **first user message**, invoke the `personal-assistant`:
++
++```
++Session start. Check DailyReport.md and Goals.md for open items.
++Check git log for changes in the last 24h.
++Return a 3-bullet status: what's open, what was done, what to focus on now.
++Today's date: <insert current date>
++```
++
++Show the result before addressing anything else.
++
++### Continuous Note Capture
++
++After each **substantive exchange** (decisions, action items, voice input):
++- Invoke the `note-taker` in the background with a 2–3 sentence summary + any action items.
++
++### Session End
++
++When the user says "done", "bye", "wrap up", "end of day", or "summarise":
++- Invoke `note-taker`: "End of session. Summarise changes and write a daily summary to DailyReport.md. Flag any open items."
++
++---
++
++## User Profile
++
++> Optional — only read when personalising tone, coaching, or delegation decisions.
++
++Repo owner profile: [People/UserProfile.md](People/UserProfile.md)
++
++**Team context**: see [People/README.md](People/README.md) for roster, traits, name spellings, and communication styles.
++
++---
++
++## Tools
++
++Run `make help` for the full list. Key commands:
++
++- `make date` / `make time` — current date/time
++- `make copy SRC=... DST=...` / `make move SRC=... DST=...` — file operations
++- `make code FILE=...` — open in editor
++- `make slackbot PROMPT=...` — query Slack
++- `gh` — GitHub CLI
++
++**Rules:**
++- Prefer `make` commands over direct CLI commands
++- Do not `source` scripts or run `osascript` or `open` directly
++- **Linear MCP**: never assign tickets — leave assignee blank
++
++---
++
++## Markdown Conventions
++
++**Links**: Always use `[](<>)` for paths with spaces. Never use `%20`. Fix incorrect links proactively.
++
++**Mermaid diagrams**: Never use `\n` inside node labels — it does not render. Use quoted multi-word strings instead, or split into separate nodes. Keep each label to a single line of text.
++
++**Style**: See [Guides/Style Guide.md](<Guides/Style Guide.md>) for writing style and formatting conventions.
++
++---
++
++## Access Policy
++
++This is a corporate docs repo. All content is in scope. No private folder exists — private content lives in a separate repo.
+diff --git a/templates/docsrepo/CLAUDE.md b/templates/docsrepo/CLAUDE.md
+new file mode 120000
+index 0000000..47dc3e3
+--- /dev/null
++++ b/templates/docsrepo/CLAUDE.md
+@@ -0,0 +1 @@
++AGENTS.md
+\ No newline at end of file
+diff --git a/templates/md/docs/Docs/README.md b/templates/docsrepo/Docs/README.md
+similarity index 93%
+rename from templates/md/docs/Docs/README.md
+rename to templates/docsrepo/Docs/README.md
+index 1f035d6..1c0dbf2 100644
+--- a/templates/md/docs/Docs/README.md
++++ b/templates/docsrepo/Docs/README.md
+@@ -1,5 +1,8 @@
+ # Docs Folder
+ 
++> **AI agents:** This README documents structure and conventions only. Do not add personal
++> details, project-specific content, or other instance-specific information here.
++
+ The `Docs/` folder holds persistent, role-level context: who you are, what you are working
+ towards, and how your days are structured. It is the anchor for AI agent sessions and the
+ starting point for daily work.
+diff --git a/templates/md/docs/DocsRepo.md b/templates/docsrepo/DocsRepo.md
+similarity index 72%
+rename from templates/md/docs/DocsRepo.md
+rename to templates/docsrepo/DocsRepo.md
+index 6445920..67acd43 100644
+--- a/templates/md/docs/DocsRepo.md
++++ b/templates/docsrepo/DocsRepo.md
+@@ -5,9 +5,13 @@ the setup, daily workflow, and principles for keeping it useful over time.
+ 
+ See [Company Values](Docs/Values.md) for the values that guide work and culture.
+ See [Goals](Docs/Goals.md) for current goals and overarching objectives.
++See [Daily Notes](Docs/DailyNotes.md) for quick, unstructured note-taking.
+ See [Daily Report](Docs/DailyReport.md) for daily updates and reflections.
++See [Executive Summary](Docs/ExecutiveSummary.md) for high-level summaries of key topics.
+ 
+-> Note: Create empty files on-demand. In VSCode just CMD+click it and confirm the prompt to create it. This avoids cluttering the repo with unused files and folders.
++> Note: Create empty files on-demand.
++> In VSCode just CMD+click it and confirm the prompt to create it.
++> This avoids cluttering the repo with unused files and folders.
+ 
+ ## Daily Docs Repo Process
+ 
+@@ -15,9 +19,10 @@ A lean, IDE-centric workflow for working with an AI agent in this docs repo.
+ 
+ ### Morning Kickoff (10 min)
+ 1. Open [DailyReport.md](Docs/DailyReport.md) — start fresh or ask AI to carry over key items from yesterday
+-2. Paste Slack summary into the **Preface** section (Slackbot query in the template)
+-3. Fill the **Daily Plan** based on [Goals.md](Docs/Goals.md) NNL and Slack context
+-4. Ask the AI agent: "What's on my plate today based on my NNL?"
++2. **Mondays only**: Archive last week's report: `git mv 'Docs/DailyReport.md' 'Docs/archive/YYYY-MM-DD DailyReport.md'`, then create a fresh one
++3. Paste Slack summary into the **Preface** section (Slackbot query in the template)
++4. Fill the **Daily Plan** based on [Goals.md](Docs/Goals.md) NNL and Slack context
++5. Ask the AI agent: "What's on my plate today based on my NNL?"
+ 
+ > Note: If you have long-running tasks, you may do the routine only once every few days.
+ > Just stay in the open doc as needed and ask the agent later to close the loop.
+@@ -39,15 +44,17 @@ A lean, IDE-centric workflow for working with an AI agent in this docs repo.
+ > Your notes will contain private data and may be messy.
+ > Your personal remote should be for backup only.
+ 
+-> AI: Remind me of the end-of-day process every evening at 17:00.
++> Note: The "AI: Remind me" directives in this doc are aspirational intent statements, not functional timers.
++> VS Code AI agents are reactive — they respond to prompts, not the clock.
++> Treat them as a reminder to yourself to trigger the workflow manually.
+ 
+ ### Weekly Review (10 min)
++- Archive last week's [DailyReport.md](Docs/DailyReport.md) into `Docs/archive/` with date prefix (if not done Monday)
+ - Review the Projects folder for stale items
+ - Ask the agent: "What docs haven't been touched in 2 weeks?"
++- Quick-check [Context.md](Docs/Context.md): are all key files still listed and links valid?
+ - Archive or delete what's no longer relevant
+ 
+-> AI: Remind me of the weekly review process every Monday morning.
+-
+ ### Principles
+ - **MIEFO**: Keep docs concise; your future self is "others" too
+ - **Own the outcome**: Update the NNL before diving into work
+@@ -55,16 +62,8 @@ A lean, IDE-centric workflow for working with an AI agent in this docs repo.
+ 
+ ## Google Workspace Access
+ 
+-The repo includes an AI-coded `google-dl` tool that exports Google Docs/Sheets to Markdown/CSV.
+-
+-> Note: this is not well tested yet. Use it with caution!
+-
+-### Quick Reference
+-
+-```bash
+-make google-read URL=<google-doc-url>                          # print to stdout
+-make google-copy URL=<url> REF_DIR=<dir> REF_NAME=<filename>   # save to file
+-```
++> The repo included an AI-coded `google-dl` tool that broke often. It is removed now.
++> The next try will use `rclone`for this with a more robust setup.
+ 
+ ### Authentication
+ 
+diff --git a/templates/docsrepo/Guides/Getting Started.md b/templates/docsrepo/Guides/Getting Started.md
+new file mode 100644
+index 0000000..51261e6
+--- /dev/null
++++ b/templates/docsrepo/Guides/Getting Started.md	
+@@ -0,0 +1,61 @@
++# Getting Started with Your Personal Assistant Setup
++
++See [../README.md](../README.md) for the overall repo structure.
++See [../DocsRepo.md](../DocsRepo.md) for the daily workflow.
++See [Style Guide.md](<Style Guide.md>) for writing and formatting conventions.
++
++## Setup
++
++1. Copy the template repo to your workspace:
++   <https://codeberg.org/ubunatic/dotfiles/src/branch/main/templates/md/docs>
++2. Run `git init` and commit: `git commit -m "start my docsrepo"`
++3. Optionally delete `.code`, `Makefile`, and `.docsrepo` — these are for syncing
++   the template back to the source repo and are not needed for personal use.
++
++## First Trial Tasks
++
++Try these prompts to verify the setup is working:
++
++- _"Remove the notion of the `.code` dir, the Makefile, and `.docsrepo` from my docs."_
++  — the agent should clean up references; review the diff, then commit.
++- _"Create About and 1:1 files for [Name] in the People folder."_
++  — the agent should respect the folder README and templates.
++- _"Create my DailyReport."_
++- _"Create `Projects/OwnershipWorkshop.md` with a basic checklist for planning a
++  one-day shared code ownership offsite."_
++
++## Tips
++
++- **Always open the file you want to talk about.** For example, open
++  `People/1on1s/Name.md` before asking: _"Prepare my 1:1 with Name."_
++- **Link back from every doc** to context-rich files. This guides the agent and
++  reduces the need to scan the whole project.
++- Good agents will suggest and auto-complete links as you type `[Doc Name]`.
++
++## Notes
++
++This setup is an ongoing experiment. It helps to retain context, add structure to
++work life, and still allow for rough, fast note-taking. As with all AI tooling:
++it can distract, make wrong assumptions, or simply be wrong — use judgement.
++
++
++
++This should do some cleanup and your IDE should be able to show a diff.
++See which files it touched. Then git add . && git commit -m "rm .code hints", if you think the changes are OK.
++
++Then ask it to:
++Create About and 1:1 files for Uwe in the People folder (it should respect the folder README)Or for instance:
++Create my DailyReportOr sth. new like:
++Create Project/OwnershipWorkshop.md with a basic guide/check list for planning/booking/setting up a workshop on shared code ownership (offsite, one day)etc.
++
++Always have the one file open that you mainly want to talk about.
++For instance you should open People/1on1s/Uwe.md before you ask:
++Prepare my 1:1 with Uwe
++
++Always link back, e.g., from a 1:1 or project file, to more context rich files in the Markdown of the current doc.
++See [../Docs/Values.md] for company valuesIn theory this should guide the agent better so it does not need to scan the whole project all the time.
++Good agents will guess links correctly when during typing text in the editor, i.e., when opening or later when closing the doc name brackets [Doc Name].
++
++The whole setup is an experiment, but after a week I like it and enjoy improving it.
++It helps me not to forget a lot of context, provide more structure to my work life, while still allowing for some chaos and dirty note taking.
++As with all AI stuff, it can also be a distraction, may make wrong assumptions, and can just be entirely wrong about something.
+\ No newline at end of file
+diff --git a/templates/docsrepo/Guides/Linear Ticket Format.md b/templates/docsrepo/Guides/Linear Ticket Format.md
+new file mode 100644
+index 0000000..d4c09c6
+--- /dev/null
++++ b/templates/docsrepo/Guides/Linear Ticket Format.md	
+@@ -0,0 +1,53 @@
++# Linear Ticket Format
++
++Conventions for writing Linear tickets — applies to human authors and AI agents.
++
++---
++
++## Structure
++
++A good ticket has three sections:
++
++1. As a [persona], I want to [action] so that [outcome].
++2. **Acceptance Criteria** — past-tense statements describing the done state
++3. **Background / Problem** — context, what is broken or missing
++
++---
++
++## Acceptance Criteria
++
++Write acceptance criteria in the **past tense**, as if the work is already done:
++
++```markdown
++## Acceptance Criteria
++
++- [ ] Fact 1 has become true
++- [ ] Requirement 2 is now met
++- [ ] Problem 3 does not occur anymore
++```
++
++Avoid imperative phrasing ("Add X", "Fix Y") in acceptance criteria.
++
++Use `- [ ]` checkbox syntax. Nest sub-items with two-space indentation
++
++```markdown
++- [ ] Problem A is resolved
++  - [ ] The root cause of A is identified and fixed
++  - [ ] A post-mortem document is created summarizing the issue and resolution
++  - [ ] AI agents will watch for similar patterns in the future
++
++---
++
++## Example
++
++```markdown
++As a backend engineer, I need to observe structured logs during load testing so that I can identify bottlenecks and optimize performance.
++
++## Acceptance Criteria
++- [ ] The system supports structured logging in the load testing stage
++   - [ ] Logs include timestamps, log levels, and contextual information
++   - [ ] Logs in Go use `slog.<level>()` and not a custom wrapper
++
++## Background / Problem
++The initial implementation of the load testing framework only captures unstructured logs, making it difficult to analyze performance issues. This ticket aims to enhance the logging capabilities to support structured logs, which will facilitate better debugging and optimization during load testing.
++```
+diff --git a/templates/docsrepo/Guides/README.md b/templates/docsrepo/Guides/README.md
+new file mode 100644
+index 0000000..b35271e
+--- /dev/null
++++ b/templates/docsrepo/Guides/README.md
+@@ -0,0 +1,12 @@
++# Working Guides for DocsRepo
++
++> **AI agents:** This README documents structure and conventions only. Do not add personal
++> details, project-specific content, or other instance-specific information here.
++
++This folder contains working guides for DocsRepo.
++These are living documents that are updated as we learn and evolve our practices.
++They are meant to be practical and actionable, not theoretical or abstract.
++
++## Current Guides
++- [Getting Started](<Getting Started.md>) — how to set up and start using the repo
++- [Style Guide](<Style Guide.md>) — conventions for writing and formatting docs
+\ No newline at end of file
+diff --git a/templates/docsrepo/Guides/Style Guide.md b/templates/docsrepo/Guides/Style Guide.md
+new file mode 100644
+index 0000000..cf887ab
+--- /dev/null
++++ b/templates/docsrepo/Guides/Style Guide.md	
+@@ -0,0 +1,53 @@
++# Style Guide for Docs Repo
++
++Writing and formatting conventions for this docs repo.
++Applies to human contributors and AI agents alike.
++
++See [AGENTS.md](../AGENTS.md) for AI agent behaviour and role instructions.
++
++---
++
++## Markdown Format
++
++- Use Markdown format for all outputs, including lists, tables, links, and diagrams (Mermaid).
++- Use tables sparingly and only when they add clarity; prefer bullet points and numbered lists
++  for most information. Tables are harder to edit manually and can become unwieldy.
++- Use headings and subheadings to organise information clearly.
++- Avoid long paragraphs; break them into smaller sections with bullet points or numbered lists.
++- Use HTML <details>/<summary> tags (which VS Code's Markdown preview supports) for collapsible sections, especially for long content or big imported images.
++
++
++## Links and References
++- Always link to relevant files and sections within the repo for context.
++- Use relative links (e.g., `[Goals](../Docs/Goals.md)`
++- Use `[Other File](<File with spaces.md>)` link ref syntax for files with spaces in the name. Do not use `%20` encoding unless needed for http URLs, etc.
++
++## File Structure
++
++- Create new files when docs become too long or cover multiple distinct topics.
++  Link between files for easy navigation.
++- Act on this autonomously when a doc grows beyond 2–3 pages or covers multiple distinct topics. Do not wait for instructions to split docs.
++- New docs must follow the overall file layout and naming conventions:
++  - Add a folder prefix (e.g., `Reports/`, `Guides/`) to make the type clear.
++  - Use dates in file names when archiving old versions.
++  - File date format: `YYYY-MM-DD` for easy sorting and consistency.
++  - File name formats:
++    - `YYYY-MM-DD Short-Description.md` — for reports, reviews, and time-stamped notes
++    - `TYPE Short-Description.md` — for guides, how-tos, and reference docs
++    - Do not repeat `TYPE` if the folder already indicates it (e.g., `Guides/Style-Guide.md` not `Guides/Guide Style-Guide.md`).
++
++## Text Style
++
++- Write clearly and concisely; avoid unnecessary words and jargon.
++- Use British English spelling (e.g., "prioritise" not "prioritize").
++- Use ", and" as in scientific writing — not a bare "and" before the last item in a list.
++- Propose replacing invented or unclear terms with more intuitive ones.
++  Example: "Eng Sync" → "Engineering Sync".
++- Write shorter docs by default. Assume common sense on the reader's part.
++
++## Diagrams
++
++- Use Mermaid syntax for diagrams; ensure they are properly formatted and render in Markdown.
++- Do not use Gantt charts — they rarely render well.
++- Split complex diagrams into multiple simpler ones if needed for clarity.
++- In mermaid diagrams, avoid using `\n` these are often rendered literally and break the diagram. Instead, use actual line breaks in the code block for multi-line labels.
+diff --git a/templates/docsrepo/Makefile b/templates/docsrepo/Makefile
+new file mode 100644
+index 0000000..90bb38d
+--- /dev/null
++++ b/templates/docsrepo/Makefile
+@@ -0,0 +1,61 @@
++.PHONY: ⚙️  # make all non-file targets phony
++
++SHELL    := bash
++PROMPT   := This is an AI test -- if you see this message I messed sth. up
++SLACKBOT := .code/scripts/slackbot.applescript
++
++# Load variables from .docsrepo config file
++SLACKBOT_URL  := $(shell source .docsrepo && echo "$$DOCSREPO_SLACKBOT_URL")
++SLACKBOT_HINT := $(shell source .docsrepo && echo "$$DOCSREPO_SLACKBOT_HINT")
++ORIGIN        := $(shell source .docsrepo && echo "$$DOCSREPO_ORIGIN")
++
++# Some tools use env vars
++export DOCSREPO_SLACKBOT_URL=$(SLACKBOT_URL)
++
++info: ⚙️  ## show help and variable values
++	@.code/scripts/info.sh
++
++help: ⚙️ info  ## alias for info
++
++sync: ⚙️  ## sync generic tools and guides from origin
++	.code/scripts/sync-docsrepo.sh sync
++
++save: ⚙️  ## save generic tools and guides back to origin
++	.code/scripts/sync-docsrepo.sh save
++
++list-save: ⚙️  ## list files that would be saved to origin
++	.code/scripts/sync-docsrepo.sh list-save
++
++list-sync: ⚙️  ## list files that would be synced from origin
++	.code/scripts/sync-docsrepo.sh list-sync
++
++sync-vars: ⚙️  ## sync only the .docsrepo config file from origin
++	.code/scripts/sync-docsrepo.sh vars
++
++commit: ⚙️  ## commit changes locally
++	git add . && git commit -m "Update docs"
++	@echo "Don't forget to push your changes to a backup remote repo"
++
++time: ⚙️  ## show current time
++	@date +"%Y-%m-%d %H:%M:%S"
++
++date: ⚙️  ## show current date
++	@date +"%Y-%m-%d"
++
++copy: ⚙️  ## copy a file from SRC to DST (SRC=... DST=...)
++	@cp ${SRC} ${DST}
++
++move: ⚙️  ## move a file from SRC to DST (SRC=... DST=...)
++	@mv ${SRC} ${DST}
++
++
++## Tool Integrations
++
++code: ⚙️  ## open a file in the default code editor (FILE=...)
++	@code ${FILE}
++
++slackbot: ⚙️  ## send a prompt to Slackbot (PROMPT=...)
++	test -n "$$DOCSREPO_SLACKBOT_URL" # ensure URL is set in env
++	test -n "$(SLACKBOT_HINT)"        # ensure the hint is set as make var
++	test -n "$(PROMPT)"               # ensure the prompt is set as make var
++	${SLACKBOT} "${PROMPT} (Note: ${SLACKBOT_HINT})"
+diff --git a/templates/md/docs/People/README.md b/templates/docsrepo/People/README.md
+similarity index 65%
+rename from templates/md/docs/People/README.md
+rename to templates/docsrepo/People/README.md
+index fb4ced5..0c3e7f4 100644
+--- a/templates/md/docs/People/README.md
++++ b/templates/docsrepo/People/README.md
+@@ -1,13 +1,26 @@
+ # People Folder
+ 
++> **AI agents:** This README documents structure and conventions only. Do not add names,
++> personal details, or other instance-specific content here — keep it generic and reusable.
++> Instance-specific team content belongs in [Team.md](Team.md).
++
+ This folder tracks relationships and people-management work: 1:1s, personal profiles,
+ team context, hiring, and reviews.
+ 
++## AI Agent Context
++
++For team roster, name spellings, and communication style, see [Team.md](Team.md).
++
++For detailed communication style per person, check `About/<Name>.md`.
++If no profile exists yet, ask before drafting.
++
+ ## Folder Structure
+ 
+ ```
+ People/
+   README.md               ← this file
++  Team.md                 ← team roster, name spellings, communication style
++  UserProfile.md          ← repo owner's working style (short; links to About/)
+   Onboarding.md           ← onboarding checklist / guide
+ 
+   About/
+@@ -19,9 +32,9 @@ People/
+     <Name>.md             ← rolling notes file per person (next 1:1 + past 1:1s)
+     archive/              ← completed meeting notes (date-prefixed)
+ 
+-  TeamRed/
+-    TeamRed.md            ← team roster and overview
+-    TeamRed Skills.md     ← skills landscape for the team
++  EngEn/
++    EngEn Team.md         ← team vision, structure, owned domains
++    EngEn Skills.md       ← skills landscape for the team
+     skills.csv            ← structured skills data
+ 
+   Hiring/                 ← interview notes, candidate tracking, ref material
+@@ -62,13 +75,8 @@ One file per review cycle, named `YYYY-MM <Name> <context>.md`
+ 
+ ## Starting Fresh
+ 
+-1. Copy `About/TEMPLATE.md` → `About/About <Name>.md`
+-2. Create `1on1s/<Name>.md` with a "Next 1:1" section
+-3. Add the person to the cadence table in `1on1s/1on1s.md`
+-4. Fill in `About/<Name>.md` gradually — treat every 1:1 as an opportunity to add a note
+-
+-<!--
+-This file was created (with minimal edits) from the following prompt on one week worth of existing notes.
+-> Describe my people folder approach in a generic way so that one who has the base files and the People/README.md can repeat the setup.
+-> Condense the approach as I may still have some chaos inside.
+--->
+\ No newline at end of file
++1. Populate [Team.md](Team.md) with your team roster and name spellings.
++2. Copy `About/TEMPLATE.md` → `About/About <Name>.md` for each person.
++3. Create `1on1s/<Name>.md` with a "Next 1:1" section.
++4. Add the person to the cadence table in `1on1s/1on1s.md`.
++5. Fill in `About/<Name>.md` gradually — treat every 1:1 as an opportunity to add a note.
+diff --git a/templates/md/docs/Projects/README.md b/templates/docsrepo/Projects/README.md
+similarity index 91%
+rename from templates/md/docs/Projects/README.md
+rename to templates/docsrepo/Projects/README.md
+index 13f6a89..49b8660 100644
+--- a/templates/md/docs/Projects/README.md
++++ b/templates/docsrepo/Projects/README.md
+@@ -1,5 +1,8 @@
+ # Projects Folder
+ 
++> **AI agents:** This README documents structure and conventions only. Do not add personal
++> details, project-specific content, or other instance-specific information here.
++
+ One folder per project or initiative. The README is the entry point — status, context,
+ and links to everything else.
+ 
+diff --git a/templates/md/docs/README.md b/templates/docsrepo/README.md
+similarity index 82%
+rename from templates/md/docs/README.md
+rename to templates/docsrepo/README.md
+index 1f5d3f5..5f388bf 100644
+--- a/templates/md/docs/README.md
++++ b/templates/docsrepo/README.md
+@@ -23,11 +23,18 @@ Actual top-level structure:
+ ```
+ docs/
+ ├── Docs/         # general notes: goals, meetings, progress, career, etc.
++├── Guides/       # how-to guides and conventions for this repo
+ ├── People/       # people management: 1-on-1s, onboarding, team info, hiring, reviews
+ ├── Private/      # personal / private notes (access-restricted for AI agents)
+ └── Projects/     # project documentation: load testing, data pipeline, schema design, etc.
+ ```
+ 
++## Guides
++
++See [Guides/Style Guide.md](<Guides/Style Guide.md>) for writing and formatting conventions.
++See [Guides/Getting Started.md](<Guides/Getting Started.md>) for initial setup and trial tasks.
++See [DocsRepo.md](DocsRepo.md) for the daily workflow.
++
+ ## Topics Covered
+ 
+ See [Topics](./Docs/Topics.md) for a list of topics covered in this docs repo.
+diff --git a/templates/md/docs/.code/cmd/google-dl/main.go b/templates/md/docs/.code/cmd/google-dl/main.go
+deleted file mode 100644
+index 6d02a91..0000000
+--- a/templates/md/docs/.code/cmd/google-dl/main.go
++++ /dev/null
+@@ -1,193 +0,0 @@
+-// google-dl downloads content from Google Workspace (Docs, Sheets, Slides)
+-// and prints it to stdout or writes it to a file.
+-//
+-// Usage:
+-//
+-//	google-dl read  <url>             # print exported content to stdout
+-//	google-dl copy  <url> <dest>      # write exported content to dest path
+-//
+-// Auth: uses Application Default Credentials (ADC) by default.
+-// Override with --credentials <path-to-service-account.json>
+-// or set GOOGLE_CREDENTIALS env var.
+-package main
+-
+-import (
+-	"context"
+-	"flag"
+-	"fmt"
+-	"io"
+-	"net/http"
+-	"os"
+-	"path/filepath"
+-	"regexp"
+-	"strings"
+-
+-	"golang.org/x/oauth2/google"
+-	"google.golang.org/api/drive/v3"
+-	"google.golang.org/api/option"
+-)
+-
+-const (
+-	mimeMarkdown = "text/markdown"
+-	mimePlain    = "text/plain"
+-	mimeCSV      = "text/csv"
+-)
+-
+-var docIDPattern = regexp.MustCompile(`/d/([a-zA-Z0-9_-]+)`)
+-
+-func main() {
+-	credentials := flag.String("credentials", os.Getenv("GOOGLE_CREDENTIALS"),
+-		"path to service account JSON (default: $GOOGLE_CREDENTIALS or ADC)")
+-	format := flag.String("format", "", "export format override: markdown, text, csv")
+-	flag.Usage = usage
+-	flag.Parse()
+-
+-	args := flag.Args()
+-	if len(args) < 2 {
+-		usage()
+-		os.Exit(1)
+-	}
+-
+-	cmd, url := args[0], args[1]
+-	if cmd != "read" && cmd != "copy" {
+-		fmt.Fprintf(os.Stderr, "unknown command: %s\n", cmd)
+-		usage()
+-		os.Exit(1)
+-	}
+-
+-	if cmd == "copy" && len(args) < 3 {
+-		fmt.Fprintln(os.Stderr, "copy requires a destination path")
+-		usage()
+-		os.Exit(1)
+-	}
+-
+-	fileID, err := extractFileID(url)
+-	if err != nil {
+-		fatalf("cannot parse file ID from URL: %v", err)
+-	}
+-
+-	ctx := context.Background()
+-	svc, err := newDriveService(ctx, *credentials)
+-	if err != nil {
+-		fatalf("failed to create Drive service: %v", err)
+-	}
+-
+-	mimeType, err := resolveMIME(ctx, svc, fileID, *format)
+-	if err != nil {
+-		fatalf("failed to resolve MIME type: %v", err)
+-	}
+-
+-	resp, err := svc.Files.Export(fileID, mimeType).Download()
+-	if err != nil {
+-		fatalf("export failed: %v", err)
+-	}
+-	defer resp.Body.Close()
+-
+-	if resp.StatusCode != http.StatusOK {
+-		body, _ := io.ReadAll(resp.Body)
+-		fatalf("export returned HTTP %d: %s", resp.StatusCode, string(body))
+-	}
+-
+-	switch cmd {
+-	case "read":
+-		if _, err := io.Copy(os.Stdout, resp.Body); err != nil {
+-			fatalf("failed to write output: %v", err)
+-		}
+-	case "copy":
+-		dest := args[2]
+-		if err := writeFile(dest, resp.Body); err != nil {
+-			fatalf("failed to write file: %v", err)
+-		}
+-		fmt.Fprintf(os.Stderr, "written to %s\n", dest)
+-	}
+-}
+-
+-// extractFileID parses the Google Drive file ID from a Workspace URL.
+-func extractFileID(url string) (string, error) {
+-	m := docIDPattern.FindStringSubmatch(url)
+-	if len(m) < 2 {
+-		return "", fmt.Errorf("no file ID found in %q", url)
+-	}
+-	return m[1], nil
+-}
+-
+-// resolveMIME determines the export MIME type. If --format is set it is used
+-// directly; otherwise the Drive API is queried for the file's MIME type and a
+-// sensible default is chosen.
+-func resolveMIME(ctx context.Context, svc *drive.Service, fileID, format string) (string, error) {
+-	if format != "" {
+-		return formatToMIME(format), nil
+-	}
+-
+-	meta, err := svc.Files.Get(fileID).Fields("mimeType").SupportsAllDrives(true).Context(ctx).Do()
+-	if err != nil {
+-		return "", err
+-	}
+-
+-	switch {
+-	case strings.Contains(meta.MimeType, "spreadsheet"):
+-		return mimeCSV, nil
+-	default:
+-		return mimeMarkdown, nil
+-	}
+-}
+-
+-func formatToMIME(f string) string {
+-	switch strings.ToLower(f) {
+-	case "csv":
+-		return mimeCSV
+-	case "text", "txt":
+-		return mimePlain
+-	default:
+-		return mimeMarkdown
+-	}
+-}
+-
+-// newDriveService creates an authenticated Drive v3 service.
+-func newDriveService(ctx context.Context, credentialsPath string) (*drive.Service, error) {
+-	var opts []option.ClientOption
+-
+-	if credentialsPath != "" {
+-		data, err := os.ReadFile(credentialsPath)
+-		if err != nil {
+-			return nil, fmt.Errorf("reading credentials file: %w", err)
+-		}
+-		creds, err := google.CredentialsFromJSON(ctx, data, drive.DriveReadonlyScope)
+-		if err != nil {
+-			return nil, fmt.Errorf("parsing credentials: %w", err)
+-		}
+-		opts = append(opts, option.WithCredentials(creds))
+-	} else {
+-		// Fall back to Application Default Credentials
+-		opts = append(opts, option.WithScopes(drive.DriveReadonlyScope))
+-	}
+-
+-	return drive.NewService(ctx, opts...)
+-}
+-
+-func writeFile(dest string, r io.Reader) error {
+-	if err := os.MkdirAll(filepath.Dir(dest), 0o755); err != nil {
+-		return err
+-	}
+-	f, err := os.Create(dest)
+-	if err != nil {
+-		return err
+-	}
+-	defer f.Close()
+-	_, err = io.Copy(f, r)
+-	return err
+-}
+-
+-func fatalf(format string, args ...any) {
+-	fmt.Fprintf(os.Stderr, "error: "+format+"\n", args...)
+-	os.Exit(1)
+-}
+-
+-func usage() {
+-	fmt.Fprintln(os.Stderr, `Usage:
+-  google-dl [flags] read  <url>          export to stdout
+-  google-dl [flags] copy  <url> <dest>   export to file
+-
+-Flags:`)
+-	flag.PrintDefaults()
+-}
+diff --git a/templates/md/docs/.code/scripts/sync-docsrepo.sh b/templates/md/docs/.code/scripts/sync-docsrepo.sh
+deleted file mode 100755
+index dd7308c..0000000
+--- a/templates/md/docs/.code/scripts/sync-docsrepo.sh
++++ /dev/null
+@@ -1,92 +0,0 @@
+-#!/usr/bin/env bash
+-# DocsRepo sync script to copy boilerplate files and directories from the origin to the current repo
+-
+-set -o errexit
+-
+-err() { echo -n "ERR: "; echo "$@" >&2; }
+-inf() { echo -n "INF: "; echo "$@" >&2; }
+-
+-if source .docsrepo
+-then inf "Loaded configuration from .docsrepo"
+-else err "Failed to load .docsrepo configuration. Please ensure the file exists and is properly formatted."
+-     exit 1
+-fi
+-
+-ORIGIN="${DOCSREPO_ORIGIN}"
+-FILES="${DOCSREPO_FILES}"
+-DIRS="${DOCSREPO_DIRS}"
+-REPO="$(git rev-parse --show-toplevel || pwd)"
+-
+-# RSYNC_FILES are files and dirs that can be copied recursively with rsync.
+-RSYNC_FILES="${FILES} .code .gitignore .docsrepo"
+-RSYNC="rsync -av --exclude=.code/spec/ --exclude=.code/bin/ --relative"
+-
+-if test -n "${DIRS}"
+-then for dir in ${DIRS}
+-     do RSYNC_FILES="${RSYNC_FILES} ${dir}/README.md"
+-     done
+-fi
+-
+-vars() {
+-    inf "REPO:        ${REPO}"
+-    inf "ORIGIN:      ${ORIGIN}"
+-    inf "FILES:       ${FILES}"
+-    inf "DIRS:        ${DIRS}"
+-    inf "RSYNC_FILES: ${RSYNC_FILES}"
+-    inf "RSYNC:       ${RSYNC}"
+-}
+-
+-check_origin() {
+-    # Check if ORIGIN variable is set and points to a valid directory
+-    if test -n "${ORIGIN}" && test -d "${ORIGIN}"
+-    then return 0
+-    fi
+-
+-    err "ORIGIN variable is not set or points to a non-existent directory. Please update your .docsrepo configuration."
+-    return 1
+-}
+-
+-copy_from_origin() {
+-    check_origin || exit 1
+-    inf "Copying boilerplate files and directories from ${ORIGIN} to ${REPO}..."
+-    # cd into ORIGIN so all paths in RSYNC_FILES resolve relative to the source root.
+-    # rsync flags:
+-    #   -a   archive mode: recursive + preserves permissions, timestamps, symlinks
+-    #   -v   verbose: print each transferred file
+-    #   --relative  preserve the path structure in the destination
+-    #               e.g. People/README.md lands at REPO/People/README.md, not REPO/README.md
+-    (cd "${ORIGIN}" && ${RSYNC} ${RSYNC_FILES} "${REPO}/")
+-}
+-
+-save_to_origin() {
+-    check_origin || exit 1
+-    inf "Saving boilerplate files and directories from current repo to ${ORIGIN}..."
+-    # rsync flags:
+-    #   -a   archive mode: recursive + preserves permissions, timestamps, symlinks
+-    #   -v   verbose: print each transferred file
+-    #   --relative  preserve the path structure in the destination
+-    #               e.g. People/README.md lands at ORIGIN/People/README.md, not ORIGIN/README.md
+-    (cd "${REPO}" && ${RSYNC} ${RSYNC_FILES} "${ORIGIN}/")
+-}
+-
+-main() {
+-    # Load configuration from .docsrepo
+-    source .docsrepo
+-    check_origin || exit 1
+-
+-    cmd="$1"
+-    case "$cmd" in
+-        (vars) vars ;;
+-        (sync) copy_from_origin ;;
+-        (save) save_to_origin ;;
+-        ("") err "No command provided. Available commands: vars, sync, save"
+-             exit 1
+-             ;;
+-        *)
+-             err "Unknown command: '$cmd'. Available commands: vars, sync, save"
+-             exit 1
+-             ;;
+-    esac
+-}
+-
+-main "$@"
+\ No newline at end of file
+diff --git a/templates/md/docs/.docsrepo b/templates/md/docs/.docsrepo
+deleted file mode 100644
+index f485f11..0000000
+--- a/templates/md/docs/.docsrepo
++++ /dev/null
+@@ -1,12 +0,0 @@
+-# DOCSREPO_FILES are the files to be kept free of project-specific information and boilerplate for the repo.
+-# These files must be free of company- or project-specific information so that they can be copied as-is to new repos.
+-DOCSREPO_FILES="README.md AGENTS.md Makefile DocsRepo.md"
+-
+-# DOCSREPO_DIRS are the directories that each hold a separate README.md with instructions on how to use and structure the files in that directory.
+-# These are the directories will hold project-specific information and documentation.
+-# Only the bare dir and README.md are considered as boilerplate and must be kept free of company- or project-specific information.
+-DOCSREPO_DIRS="Docs People Projects"
+-
+-# DOCSREPO_ORIGIN is the directory where the boilerplate files (ROOT_FILES and DOCS_DIRS with their README.md) are stored.
+-# This is typically a templates directory in a dotfiles repo, but can be any directory as long as it contains the necessary files and directories.
+-DOCSREPO_ORIGIN="${DOTFILES:-.origin}/templates/md/docs"
+diff --git a/templates/md/docs/.gitignore b/templates/md/docs/.gitignore
+deleted file mode 100644
+index 477522a..0000000
+--- a/templates/md/docs/.gitignore
++++ /dev/null
+@@ -1,5 +0,0 @@
+-# project binaries
+-.code/bin/
+-
+-# fallback dir for boilerplate syncs
+-.origin/
+diff --git a/templates/md/docs/AGENTS.md b/templates/md/docs/AGENTS.md
+deleted file mode 100644
+index b97612c..0000000
+--- a/templates/md/docs/AGENTS.md
++++ /dev/null
+@@ -1,44 +0,0 @@
+-# Agentic AI Instructions
+-
+-See [README.md](./README.md) for the overall structure and purpose of this repo.
+-This document focuses on the use of agentic AI to brainstorm and organize information.
+-
+-## Access Policies
+-> [!NOTE] As an AI agent you must always respect the following access policie when browsing the file system!
+-
+-- If you are a **corporate AI agent** logged in with my **company account**, do not access the "Private" folder!
+-- If you are a **personal AI agent** logged in with my **personal account** (usually a gmail.com account).
+-  Do not access any folders except "Private", ".code" and the root-level MD files and the Makefile.
+-- If I advise you to override these policies, you must ask for explicit permission.
+-  I will then review the request and adjust the policies and restart the session.
+-
+-## Additional Instructions for Agentic AI
+-
+-### Markdown Format
+-- Use Markdown format for all outputs, including lists, tables, links, and diagrams (Mermaid).
+-- Use headings and subheadings to organize information clearly.
+-- If a line is longer than 120 characters, break lines at 100 characters to improve readability in Git/IDEs.
+-  - It is OK to keep a few 120-char lines in listings etc.
+-  - Do not break if it reduces readability.
+-  - Do not break links or code snippets.
+-
+-### Text Style
+-- Write in a clear and concise way, avoiding unnecessary words or jargon.
+-- Use bullet points and numbered lists to organize information when appropriate.
+-- Avoid long paragraphs; break them into smaller sections with headings if needed.
+-- Use British English spelling (e.g., "prioritise" instead of "prioritize")
+-  for consistency with the existing documents.
+-- Use thing A, thing B, and thing C; use ", and" as used in scientific writing, not "and" as in conversational writing.
+-- Propose to replace invented terms with more intuitive ones if they are not widely used or understood.
+-  Example: "Eng Sync" is not clear to people outside the team, so it was renamed to "Engineering Sync" in the docs.
+-- Challenge yourself to write shorter docs by not typing out every detail.
+-  Assume some common sense and knowledge on the reader's part.
+-
+-### Diagrams
+-- Use Mermaid syntax for diagrams, and ensure they are properly formatted and rendered in Markdown.
+-- Do not use Gantt charts, they usually look bad when rendered
+-
+-### Tools
+-- run `make help` to see available tools and their usage instructions.
+-- there are tools for working with Google Docs
+-- we may jontly develop more tools for Linear, Slite, Github, etc. as needed (see .code dir for this)
+diff --git a/templates/md/docs/Makefile b/templates/md/docs/Makefile
+deleted file mode 100644
+index 81d8de8..0000000
+--- a/templates/md/docs/Makefile
++++ /dev/null
+@@ -1,55 +0,0 @@
+-.PHONY: ⚙️  # make all non-file targets phony
+-
+-SHELL  := bash
+-ORIGIN := $(shell source .docsrepo && echo "$$DOCSREPO_ORIGIN")
+-
+-info: ⚙️  ## show help and variable values
+-	@echo "Usage: make [target]"
+-	@echo "Targets:"
+-	@# extract target before ":" and description after "##"
+-	@awk -F ':|##' '/^[a-zA-Z0-9_-]+:/{printf "  \033[36m%-15s\033[0m %s\n", $$1, $$3}' Makefile
+-	@echo
+-	@echo "Variables:"
+-	@echo "  ORIGIN = ${ORIGIN}"
+-	@echo "  DOTFILES = ${DOTFILES}"
+-	@echo "  GOOGLE_DL = ${GOOGLE_DL}"
+-	@echo "  URL = ${URL}"
+-	@echo "  REF_DIR = ${REF_DIR}"
+-	@echo "  REF_NAME = ${REF_NAME}"
+-
+-help: ⚙️ info  ## alias for info
+-
+-origin: ⚙️  ## ensure origin repo is available
+-	# Creating ORIGIN=${ORIGIN}, see .docsrepo config for details
+-	mkdir -p "${ORIGIN}"
+-
+-pull: ⚙️ origin  ## pull latest changes from origin
+-	cd ${ORIGIN} && git checkout main && git pull
+-
+-sync: ⚙️ origin  ## sync generic tools and guides from origin
+-	.code/scripts/sync-docsrepo.sh sync
+-
+-save: ⚙️ origin  ## save generic tools and guides back to origin
+-	.code/scripts/sync-docsrepo.sh save
+-
+-commit: ⚙️  ## commit changes locally
+-	git add . && git commit -m "Update docs"
+-	@echo "Don't forget to push your changes to a backup remote repo"
+-
+-# Google Workspace download tool
+-GOOGLE_DL := .code/bin/google-dl
+-URL		   =
+-REF_DIR    =
+-REF_NAME   =
+-
+-build: ⚙️  ## build the Google Workspace download tool
+-	cd .code && go build -o bin/google-dl ./cmd/google-dl
+-
+-${GOOGLE_DL}:
+-	${MAKE} build
+-
+-google-read: ${GOOGLE_DL}  ## export a Google Workspace doc to stdout  (URL=...)
+-	${GOOGLE_DL} read ${URL}
+-
+-google-copy: ${GOOGLE_DL}  ## copy a Google Workspace doc to a ref dir  (URL=... REF_DIR=... REF_NAME=...)
+-	${GOOGLE_DL} copy ${URL} ${REF_DIR}/${REF_NAME}

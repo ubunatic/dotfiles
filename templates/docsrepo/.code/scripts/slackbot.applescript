@@ -1,15 +1,17 @@
 #!/usr/bin/osascript
+-- Based on apps/macos/slackbot.applescript in the ubunatic/dotfiles repo.
+-- If you have dotfiles installed, consider using that script directly instead.
 on run argv
     if (count of argv) is not 1 then
         error "Usage: osascript slackbot.applescript <message>"
     end if
     set theMessage to item 1 of argv
 
-    -- safely read env var: DOCSREPO_SLACKBOT_URL
-    set slackbotURL to do shell script "echo \"$DOCSREPO_SLACKBOT_URL\""
+    -- read DOCSREPO_SLACKBOT_URL, falling back to SLACKBOT_URL (e.g. set via dotfiles)
+    set slackbotURL to do shell script "echo \"${DOCSREPO_SLACKBOT_URL:-$SLACKBOT_URL}\""
 
     if slackbotURL is "" then
-        error "Environment variable DOCSREPO_SLACKBOT_URL is not set. Please set it to the URL to open a chat with Slackbot in the Slack app."
+        error "No Slackbot URL set. Define DOCSREPO_SLACKBOT_URL or SLACKBOT_URL in your environment (e.g. ~/.userrc)."
     end if
 
     -- use 'open URL' to open the Slackbot chat in the Slack app

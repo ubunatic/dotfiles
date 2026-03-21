@@ -17,8 +17,10 @@ DOCSREPO_TREES="Guides .claude/agents"
 # This is typically a templates directory in a dotfiles repo, but can be any directory as long as it contains the necessary files and directories.
 DOCSREPO_ORIGIN="${DOTFILES:-.origin}/templates/docsrepo"
 
-# DOCSREPO_SLACKBOT_URL is the URL to open a chat with Slackbot in the Slack app. This is used by the Makefile to send prompts to Slackbot.
-DOCSREPO_SLACKBOT_URL="slack://user?team=T6BG7DYVC&id=USLACKBOT"
+# DOCSREPO_SLACKBOT_URL is the URL to open a chat with Slackbot in the Slack app.
+# Falls back to SLACKBOT_URL if set (e.g. via dotfiles ~/.userrc).
+# To set it directly: export DOCSREPO_SLACKBOT_URL="slack://user?team=<YOUR_TEAM_ID>&id=USLACKBOT"
+DOCSREPO_SLACKBOT_URL="${DOCSREPO_SLACKBOT_URL:-${SLACKBOT_URL:-}}"
 
 # DOCSREPO_SLACKBOT_HINT is the hint to be used by Slackbot when sending prompts. This is used by the Makefile to provide context to Slackbot.
 DOCSREPO_SLACKBOT_HINT="Output Format: CODE section with Markdown code using heading-level 3+, do not use :<emoji>: but pure unicode"
