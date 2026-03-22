@@ -30,3 +30,15 @@ make google-copy URL=<url> REF_DIR=<dir> REF_NAME=<filename>
 ```
 
 See [GOOGLE_SETUP.md](./GOOGLE_SETUP.md) for one-time authentication setup.
+
+### himalaya (Gmail)
+
+CLI access to Gmail inbox via IMAP. Used via root `Makefile` targets:
+
+```bash
+make mail                    # list inbox
+make mail-read ID=<id>       # read a message
+make mail-search QUERY=<q>   # search
+```
+
+See [GMAIL_SETUP.md](./GMAIL_SETUP.md) for one-time authentication setup.

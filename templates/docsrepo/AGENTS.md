@@ -1,6 +1,7 @@
 # Agentic AI Instructions
 
 See [README.md](./README.md) for the overall structure and purpose of this repo.
+See [PROJECT.md](./PROJECT.md) for the overall project context.
 
 ---
 
@@ -14,6 +15,17 @@ This repo uses two background agents that run alongside the main conversation:
 |---|---|---|---|
 | `personal-assistant` | Active watcher — steps in with advice, focus checks, coaching | Read-only + Agent | Auto-start on first message |
 | `note-taker` | Passive worker — captures summaries, files notes, keeps repo tidy | Read + Write + Edit | Background, after substantive exchanges |
+| `ollama-vision` | Local vision worker — OCR and image analysis via Ollama | Bash + Read | **First taker** for any image task |
+
+### Image Processing
+
+**Any request involving an image file must go to `ollama-vision` first.** This includes:
+- Scans (invoices, receipts, letters, contracts)
+- Screenshots shared by the user
+- Diagrams, charts, or handwritten notes
+- Any file path ending in `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`
+
+The main session and all other agents must delegate image tasks to `ollama-vision` as a subagent rather than attempting to process images directly.
 
 ### Session Start
 
@@ -33,10 +45,18 @@ Show the result before addressing anything else.
 After each **substantive exchange** (decisions, action items, voice input):
 - Invoke the `note-taker` in the background with a 2–3 sentence summary + any action items.
 
+### Inbox Processing
+
+The `Inbox/` folder is a landing zone for raw, unprocessed input.
+
+- When the user says **"process my inbox"**, **"file what's in Inbox"**, or similar: invoke the `note-taker` to read each file, file it in the right folder, and delete it from Inbox.
+- At **session start**, check if `Inbox/` has any files (excluding `README.md`). If so, mention it in the status report so the user can decide whether to process now.
+- The `note-taker` should infer destination from content — `Docs/`, `Projects/`, `People/`, etc. — and apply the standard folder structure.
+
 ### Session End
 
 When the user says "done", "bye", "wrap up", "end of day", or "summarise":
-- Invoke `note-taker`: "End of session. Summarise changes and write a daily summary to DailyReport.md. Flag any open items."
+- Invoke `note-taker`: "End of session. Write a session summary to `Sessions/YYYY-MM-DD.md` (use today's date). Sections: Done, Decisions, Open/Next. Also update DailyReport.md with a brief entry. Flag any open items."
 
 ---
 
@@ -61,9 +81,11 @@ Run `make help` for the full list. Key commands:
 - `gh` — GitHub CLI
 
 **Rules:**
-- Prefer `make` commands over direct CLI commands
-- Do not `source` scripts or run `osascript` or `open` directly
-- **Linear MCP**: never assign tickets — leave assignee blank
+- Always use `make` targets — never call scripts directly via `python3` or `bash`. If no target exists, add one to the Makefile first.
+- Never run bare `python3 -c` or inline scripts in the main session — use `make` targets or escalate to the developer agent.
+- `himalaya` commands always require `dangerouslyDisableSandbox: true` — the email server is blocked by the default sandbox.
+- Do not `source` scripts or run `osascript` or `open` directly.
+- **Linear MCP**: never assign tickets — leave assignee blank.
 
 ---
 

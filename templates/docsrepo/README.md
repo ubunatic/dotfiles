@@ -24,6 +24,7 @@ Actual top-level structure:
 docs/
 ├── Docs/         # general notes: goals, meetings, progress, career, etc.
 ├── Guides/       # how-to guides and conventions for this repo
+├── Inbox/        # landing zone for unprocessed input — agents file and clear it
 ├── People/       # people management: 1-on-1s, onboarding, team info, hiring, reviews
 ├── Private/      # personal / private notes (access-restricted for AI agents)
 └── Projects/     # project documentation: load testing, data pipeline, schema design, etc.

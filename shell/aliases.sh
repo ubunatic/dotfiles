@@ -40,6 +40,7 @@ alias gs="git status --short"
 alias gco="git checkout"
 alias goc="git checkout"
 alias main="git checkout main"
+alias gst="git-status-tree"
 
 alias gaa="git add --all"
 alias ga="git add"

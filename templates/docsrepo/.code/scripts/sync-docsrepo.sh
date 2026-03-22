@@ -40,7 +40,7 @@ source_docsrepo() {
     # RSYNC_FILES are files and dirs that can be copied recursively with rsync.
     # Use a bash array so filenames with spaces are handled correctly.
     RSYNC_FILES=( "${FILES[@]}" .code .gitignore .docsrepo )
-    RSYNC="rsync -av --exclude=.code/spec/ --exclude=.code/bin/ --relative"
+    RSYNC="rsync -av --exclude=.code/spec/ --exclude=.code/bin/ --exclude=.code/venv/ --relative"
 
     # DIRS: only the README.md of each dir is boilerplate
     if test -n "${DIRS}"

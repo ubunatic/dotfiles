@@ -111,6 +111,10 @@ gitmail_switch() {
     gitmail
 }
 
+git-status-tree() {
+    git status -s | cut -c4- | tree --fromfile .
+}
+
 gitfiles_changed() {
     local pattern="$1"
     if test -z "$pattern"
