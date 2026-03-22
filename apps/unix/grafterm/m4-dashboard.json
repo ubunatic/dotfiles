@@ -1,0 +1,83 @@
+{
+  "version": "v1",
+  "datasources": {
+    "prometheus": {
+      "prometheus": {
+        "address": "http://localhost:9090"
+      }
+    }
+  },
+  "dashboard": {
+    "grid": { "maxWidth": 100 },
+    "widgets": [
+      {
+        "title": "E-Core Usage (%)",
+        "gridpos": { "x": 0, "y": 0, "w": 33, "h": 10 },
+        "graph": {
+          "queries": [
+            { "datasourceID": "prometheus", "expr": "apple_cpu_ecpu_usage_ratio * 100", "legend": "e-core" }
+          ]
+        }
+      },
+      {
+        "title": "P-Core Usage (%)",
+        "gridpos": { "x": 33, "y": 0, "w": 34, "h": 10 },
+        "graph": {
+          "queries": [
+            { "datasourceID": "prometheus", "expr": "apple_cpu_pcpu_usage_ratio * 100", "legend": "p-core" }
+          ]
+        }
+      },
+      {
+        "title": "GPU Usage (%)",
+        "gridpos": { "x": 67, "y": 0, "w": 33, "h": 10 },
+        "graph": {
+          "queries": [
+            { "datasourceID": "prometheus", "expr": "apple_gpu_usage_ratio * 100", "legend": "gpu" }
+          ]
+        }
+      },
+      {
+        "title": "Power (W)",
+        "gridpos": { "x": 0, "y": 10, "w": 50, "h": 10 },
+        "graph": {
+          "queries": [
+            { "datasourceID": "prometheus", "expr": "apple_cpu_power_watts", "legend": "cpu" },
+            { "datasourceID": "prometheus", "expr": "apple_gpu_power_watts", "legend": "gpu" },
+            { "datasourceID": "prometheus", "expr": "apple_ane_power_watts", "legend": "ane" },
+            { "datasourceID": "prometheus", "expr": "apple_sys_power_watts", "legend": "system" }
+          ]
+        }
+      },
+      {
+        "title": "Temperature (°C)",
+        "gridpos": { "x": 50, "y": 10, "w": 50, "h": 10 },
+        "graph": {
+          "queries": [
+            { "datasourceID": "prometheus", "expr": "apple_cpu_temp_celsius", "legend": "cpu" },
+            { "datasourceID": "prometheus", "expr": "apple_gpu_temp_celsius", "legend": "gpu" }
+          ]
+        }
+      },
+      {
+        "title": "RAM Used (GB)",
+        "gridpos": { "x": 0, "y": 20, "w": 50, "h": 10 },
+        "graph": {
+          "queries": [
+            { "datasourceID": "prometheus", "expr": "apple_ram_used_bytes / 1e9", "legend": "used" },
+            { "datasourceID": "prometheus", "expr": "apple_ram_total_bytes / 1e9", "legend": "total" }
+          ]
+        }
+      },
+      {
+        "title": "Swap Used (GB)",
+        "gridpos": { "x": 50, "y": 20, "w": 50, "h": 10 },
+        "graph": {
+          "queries": [
+            { "datasourceID": "prometheus", "expr": "apple_swap_used_bytes / 1e9", "legend": "swap" }
+          ]
+        }
+      }
+    ]
+  }
+}

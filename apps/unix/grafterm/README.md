@@ -1,4 +1,4 @@
-# grafterm dashboard for rpi-exporter
+# grafterm dashboards
 
 Terminal Prometheus dashboard using [grafterm](https://github.com/slok/grafterm).
 
@@ -8,23 +8,28 @@ Terminal Prometheus dashboard using [grafterm](https://github.com/slok/grafterm)
 go install github.com/slok/grafterm/cmd/grafterm@latest
 ```
 
-## Usage
+## Dashboards
 
-Assumes Prometheus scrapes rpi-exporter at `localhost:9101` and is reachable at `localhost:9090`.
+### Raspberry Pi (`dashboard.json`)
 
-```bash
-grafterm -c dashboard.yaml
-```
-
-To point at a remote Prometheus instance:
+Assumes Prometheus scrapes rpi-exporter at `localhost:9101`.
 
 ```bash
-grafterm -c dashboard.yaml --datasource-url http://rpi:9090
+grafterm -c dashboard.json
 ```
 
-## Metrics shown
+Metrics: `rpi_temperature_celsius`, `rpi_clock_frequency_hertz`, `rpi_voltage_volts`, `rpi_throttled`
 
-- `rpi_temperature_celsius` — SoC temperature
-- `rpi_clock_frequency_hertz` — ARM and core clock frequencies
-- `rpi_voltage_volts` — core and SDRAM voltages
-- `rpi_throttled` — throttling conditions (now)
+### M4 Mac (`m4-dashboard.json`)
+
+Requires macmon exporter running on `localhost:9102`. Start it with:
+
+```bash
+make macmon-exporter   # in the fv repo
+```
+
+```bash
+grafterm -c m4-dashboard.json
+```
+
+Metrics: E-core/P-core/GPU usage %, CPU/GPU/ANE/system power (W), CPU/GPU temperature (°C), RAM/swap used
