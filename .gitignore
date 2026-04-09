@@ -25,3 +25,4 @@ apps/macos/appcloser/appcloser
 test-report.xml
 .aider*
 **/.claude/*.json
+.debug
