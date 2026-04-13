@@ -32,7 +32,8 @@ for source_file in \
     completions.sh \
     test.sh \
     assert.sh \
-    tmux.sh
+    tmux.sh \
+    security.sh
 do
     if source "$DOTFILES/shell/$source_file"
     then dbg "sourced $source_file ✅"

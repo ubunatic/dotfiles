@@ -87,6 +87,15 @@ alias ssh-agent="eval \$(ssh-agent -s) && ssh-add ~/.ssh/id_ed25519"
 alias lzd='lazydocker'
 alias lg='lazygit'
 alias k='kubectl'
+alias t='task'
+alias tl='task -l'
+
+# Homeserver aliases
+alias h='homeserver'
+alias hs='homeserver'
+alias hss='homeserver services'
+alias hsq='homeserver quadlets'
+alias hsc='homeserver config'
 
 # Vim cmd as terminal cmd
 alias q="exit 1"
